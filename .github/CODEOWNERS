@@ -1,0 +1,18 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence, they will 
+# be requested for review when someone opens a pull request.
+* @kjanat
+
+# Specific file/directory ownership examples:
+# /parser/ @parsing-expert
+# /exporters/ @export-specialist
+# *.go @go-reviewer
+
+# Documentation files
+/README.md @kjanat
+/docs/ @kjanat
+
+# Configuration files
+/.github/ @kjanat
+/go.mod @kjanat
+/go.sum @kjanat

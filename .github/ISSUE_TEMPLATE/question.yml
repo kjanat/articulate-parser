@@ -1,0 +1,57 @@
+name: Question
+description: Ask a question about the project
+title: "[QUESTION] "
+labels: ["question", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your question! Please check the README and existing issues first.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: How do I...?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      description: What is your question about?
+      options:
+        - Installation/Setup
+        - Usage/How-to
+        - Supported Content Types
+        - Output Formats
+        - Troubleshooting
+        - Contributing
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: |
+        Provide any additional context that might help us answer your question:
+        - What you're trying to achieve
+        - What you've already tried
+        - Any error messages
+        - Your environment details
+      placeholder: I'm trying to...
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Please confirm you have done the following
+      options:
+        - label: I have read the README
+          required: true
+        - label: I have searched existing issues
+          required: true
