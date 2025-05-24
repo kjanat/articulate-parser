@@ -29,3 +29,4 @@ go.work
 # Local test files
 output/
 articulate-sample.json
+test-output.*

@@ -1,0 +1,67 @@
+# Configuration for probot-stale - https://github.com/probot/stale
+
+# Number of days of inactivity before an issue becomes stale
+daysUntilStale: 60
+
+# Number of days of inactivity before a stale issue is closed
+daysUntilClose: 14
+
+# Issues with these labels will never be considered stale
+exemptLabels:
+  - pinned
+  - security
+  - bug
+  - enhancement
+  - documentation
+  - "in progress"
+
+# Label to use when marking an issue as stale
+staleLabel: stale
+
+# Comment to post when marking an issue as stale
+markComment: >
+  This issue has been automatically marked as stale because it has not had
+  recent activity. It will be closed in 14 days if no further activity occurs.
+  Thank you for your contributions to Articulate Rise Parser!
+
+# Comment to post when closing a stale issue
+closeComment: >
+  This issue has been automatically closed due to inactivity.
+  Feel free to reopen if this is still relevant.
+
+# Limit to only specific repos (optional)
+# only:
+#   - repo1
+#   - repo2
+
+# Limit the number of actions per hour, from 1-30. Default is 30
+limitPerRun: 30
+
+# Set to true to ignore issues in a project (defaults to false)
+exemptProjects: false
+
+# Set to true to ignore issues in a milestone (defaults to false)
+exemptMilestones: true
+
+# Set to true to ignore issues with an assignee (defaults to false)
+exemptAssignees: true
+
+# Label to use when marking a pull request as stale
+stalePrLabel: stale-pr
+
+# Comment to post when marking a pull request as stale
+markPrComment: >
+  This pull request has been automatically marked as stale because it has not had
+  recent activity. It will be closed in 14 days if no further activity occurs.
+  Thank you for your contributions to Articulate Rise Parser!
+
+# Comment to post when closing a stale pull request
+closePrComment: >
+  This pull request has been automatically closed due to inactivity.
+  Feel free to reopen if you want to continue working on this.
+
+# Limit to only `issues` or `pulls` (optional)
+# only: issues
+
+# Set to true to ignore PRs with the WIP label or title prefix (defaults to false)
+exemptWIP: true

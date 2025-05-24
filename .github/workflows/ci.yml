@@ -2,12 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [master, develop]
+    branches: [  "master", "develop" ]
+    tags:
+      - "v*.*.*"
   pull_request:
-    branches: [master, develop]
+    branches: [ "master", "develop" ]
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,11 +52,73 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: Go ${{ matrix.go }}
           slug: kjanat/articulate-parser
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
         with:
+          flags: Go ${{ matrix.go }}
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: 'Dependency Review'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: always
+
+          # # Use comma-separated names to pass list arguments:
+          # deny-licenses: LGPL-2.0, BSD-2-Clause
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    permissions:
+      contents: write
+    needs: [ "test" ]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          check-latest: true
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build binaries
+        run: |
+          # Build for different platforms
+          OS = ["darwin", "freebsd", "linux", "windows"]
+          ARCH = ["amd64", "arm64"]
+
+          for os in OS:
+            for arch in ARCH:
+              GOOS=$os GOARCH=$arch go build -o articulate-parser-$os-$arch main.go
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: articulate-parser-*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

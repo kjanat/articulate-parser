@@ -138,7 +138,7 @@ func NewArticulateParser() *ArticulateParser {
 }
 
 func (p *ArticulateParser) ExtractShareID(uri string) (string, error) {
-	// Extract share ID from URI like: https://rise.articulate.com/share/rcIndCUPTdBfKAShckA5XSz3YSHpi5al#/
+	// Extract share ID from URI like: https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/
 	re := regexp.MustCompile(`/share/([a-zA-Z0-9_-]+)`)
 	matches := re.FindStringSubmatch(uri)
 	if len(matches) < 2 {

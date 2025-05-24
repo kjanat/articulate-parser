@@ -3,8 +3,8 @@
 A Go-based parser that converts Articulate Rise e-learning content to various formats including Markdown and Word documents.
 
 [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?logo=Go&logoColor=white)][gomod]
-<!-- [![Go Doc](https://godoc.org/github.com/kjanat/articulate-parser?status.svg)][Package documentation] -->
-<!-- [![Go Report Card](https://goreportcard.com/badge/github.com/kjanat/articulate-parser)][Go report] -->
+[![Go Doc](https://godoc.org/github.com/kjanat/articulate-parser?status.svg)][Package documentation]
+[![Go Report Card](https://goreportcard.com/badge/github.com/kjanat/articulate-parser)][Go report]
 [![Tag](https://img.shields.io/github/v/tag/kjanat/articulate-parser?sort=semver&label=Tag)][Tags]
 [![Release Date](https://img.shields.io/github/release-date/kjanat/articulate-parser?label=Release%20date)][Latest release]
 [![License](https://img.shields.io/github/license/kjanat/articulate-parser?label=License)](LICENSE)
@@ -63,7 +63,7 @@ go run main.go <input_uri_or_file> <output_format> [output_path]
 1.  **Parse from URL and export to Markdown:**
 
 ```bash
-go run main.go "https://rise.articulate.com/share/rcIndCUPTdBfKAShckA5XSz3YSHpi5al#/" md
+go run main.go "https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/" md
 ```
 
 2.  **Parse from local file and export to Word:**
@@ -139,8 +139,8 @@ The parser works with the standard Articulate Rise JSON format which includes:
 
 The parser automatically extracts share IDs from Articulate Rise URLs:
 
--   Input: `https://rise.articulate.com/share/rcIndCUPTdBfKAShckA5XSz3YSHpi5al#/`
--   API URL: `https://rise.articulate.com/api/rise-runtime/boot/share/rcIndCUPTdBfKAShckA5XSz3YSHpi5al`
+-   Input: `https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/`
+-   API URL: `https://rise.articulate.com/api/rise-runtime/boot/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO`
 
 ## Error Handling
 
