@@ -42,6 +42,6 @@ jobs:
             articulate-parser-darwin-arm64
           generate_release_notes: true
           draft: false
-          prerelease: false
+          prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
