@@ -2,6 +2,18 @@
 
 A Go-based parser that converts Articulate Rise e-learning content to various formats including Markdown and Word documents.
 
+[![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?logo=Go&logoColor=white)][gomod]
+<!-- [![Go Doc](https://godoc.org/github.com/kjanat/articulate-parser?status.svg)][Package documentation] -->
+<!-- [![Go Report Card](https://goreportcard.com/badge/github.com/kjanat/articulate-parser)][Go report] -->
+[![Tag](https://img.shields.io/github/v/tag/kjanat/articulate-parser?sort=semver&label=Tag)][Tags]
+[![Release Date](https://img.shields.io/github/release-date/kjanat/articulate-parser?label=Release%20date)][Latest release]
+[![License](https://img.shields.io/github/license/kjanat/articulate-parser?label=License)](LICENSE)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/kjanat/articulate-parser?label=Commit%20activity)][Commits]
+[![Last commit](https://img.shields.io/github/last-commit/kjanat/articulate-parser?label=Last%20commit)][Commits]
+[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/kjanat/articulate-parser?label=Issues)][Issues]
+[![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
+[![Codecov](https://img.shields.io/codecov/c/gh/kjanat/articulate-parser?token=eHhaHY8nut&logo=codecov&logoColor=%23F01F7A&label=Codecov)][Codecov]
+
 ## Features
 
 -   Parse Articulate Rise JSON data from URLs or local files
@@ -140,6 +152,14 @@ The parser includes error handling for:
 -   File I/O errors
 -   Unsupported content types
 
+<!-- ## Code coverage
+
+![Sunburst](https://codecov.io/gh/kjanat/articulate-parser/graphs/tree.svg?token=eHhaHY8nut)
+
+![Grid](https://codecov.io/gh/kjanat/articulate-parser/graphs/tree.svg?token=eHhaHY8nut)
+
+![Icicle](https://codecov.io/gh/kjanat/articulate-parser/graphs/icicle.svg?token=eHhaHY8nut) -->
+
 ## Limitations
 
 -   Media files (videos, images) are referenced but not downloaded
@@ -161,3 +181,13 @@ Potential improvements could include:
 ## License
 
 This is a utility tool for educational content conversion. Please ensure you have appropriate rights to the Articulate Rise content you're parsing.
+
+[Build]: https://github.com/kjanat/articulate-parser/actions/workflows/ci.yml
+[Codecov]: https://codecov.io/gh/kjanat/articulate-parser
+[Commits]: https://github.com/kjanat/articulate-parser/commits/master/
+[Go report]: https://goreportcard.com/report/github.com/kjanat/articulate-parser
+[gomod]: go.mod
+[Issues]: https://github.com/kjanat/articulate-parser/issues
+[Latest release]: https://github.com/kjanat/articulate-parser/releases/latest
+[Package documentation]: https://godoc.org/github.com/kjanat/articulate-parser
+[Tags]: https://github.com/kjanat/articulate-parser/tags

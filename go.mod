@@ -1,4 +1,4 @@
-module articulate-parser
+module github.com/kjanat/articulate-parser
 
 go 1.21
 
