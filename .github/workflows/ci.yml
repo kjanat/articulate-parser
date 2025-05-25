@@ -12,6 +12,8 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         go: [1.21.x, 1.22.x, 1.23.x, 1.24.x]
@@ -105,18 +107,37 @@ jobs:
 
       - name: Build binaries
         run: |
-          # Build for different platforms
-          OS = ["darwin", "freebsd", "linux", "windows"]
-          ARCH = ["amd64", "arm64"]
+          # Set the build time environment variable
+          BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
-          for os in OS:
-            for arch in ARCH:
-              GOOS=$os GOARCH=$arch go build -o articulate-parser-$os-$arch main.go
+          # Add run permissions to the build script
+          chmod +x ./scripts/build.sh
+
+          # Display help information for the build script
+          ./scripts/build.sh --help
+
+          # Build for all platforms
+          ./scripts/build.sh \
+            --verbose \
+            -ldflags "-s -w -X github.com/kjanat/articulate-parser/internal/version.Version=${{ github.ref_name }} -X github.com/kjanat/articulate-parser/internal/version.BuildTime=$BUILD_TIME -X github.com/kjanat/articulate-parser/internal/version.GitCommit=${{ github.sha }}"
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          # Artifact name
+          name: build-artifacts # optional, default is artifact
+          # A file, directory or wildcard pattern that describes what to upload
+          path: build/
+          if-no-files-found: ignore
+          retention-days: 1
+          compression-level: 9
+          overwrite: true
+          include-hidden-files: true
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: articulate-parser-*
+          files: build/*
           generate_release_notes: true
           draft: false
           prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}

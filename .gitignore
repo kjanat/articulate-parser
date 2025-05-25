@@ -30,3 +30,7 @@ go.work
 output/
 articulate-sample.json
 test-output.*
+go-os-arch-matrix.csv
+
+# Build artifacts
+build/

@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/unidoc/unioffice/document"
+
+	"github.com/kjanat/articulate-parser/internal/version"
 )
 
 // Core data structures based on the Articulate Rise JSON format
@@ -547,8 +549,17 @@ func (p *ArticulateParser) processItemToDocx(doc *document.Document, item Item) 
 }
 
 func main() {
+	// Handle version flag
+	if len(os.Args) > 1 && (os.Args[1] == "-v" || os.Args[1] == "--version") {
+		fmt.Printf("articulate-parser %s\n", version.Version)
+		fmt.Printf("Build time: %s\n", version.BuildTime)
+		fmt.Printf("Commit: %s\n", version.GitCommit)
+		os.Exit(0)
+	}
+
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: articulate-parser <input_uri_or_file> <output_format> [output_path]")
+		fmt.Println("       articulate-parser -v|--version")
 		fmt.Println("  input_uri_or_file: Articulate Rise URI or local JSON file path")
 		fmt.Println("  output_format: md (Markdown) or docx (Word Document)")
 		fmt.Println("  output_path: Optional output file path")
