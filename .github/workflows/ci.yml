@@ -105,6 +105,11 @@ jobs:
       - name: Run tests
         run: go test -v ./...
 
+      - name: Install UPX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y upx
+
       - name: Build binaries
         run: |
           # Set the build time environment variable
@@ -120,6 +125,32 @@ jobs:
           ./scripts/build.sh \
             --verbose \
             -ldflags "-s -w -X github.com/kjanat/articulate-parser/internal/version.Version=${{ github.ref_name }} -X github.com/kjanat/articulate-parser/internal/version.BuildTime=$BUILD_TIME -X github.com/kjanat/articulate-parser/internal/version.GitCommit=${{ github.sha }}"
+
+      - name: Compress binaries with UPX
+        run: |
+          echo "Compressing binaries with UPX..."
+          cd build/
+          
+          # Get original sizes
+          echo "Original sizes:"
+          ls -lah
+          echo ""
+          
+          # Compress all binaries except Darwin (macOS) binaries as UPX doesn't work well with recent macOS versions
+          for binary in articulate-parser-*; do
+            if [[ "$binary" == *"darwin"* ]]; then
+              echo "Skipping UPX compression for $binary (macOS compatibility)"
+            else
+              echo "Compressing $binary..."
+              upx --best --lzma "$binary" || {
+                echo "Warning: UPX compression failed for $binary, keeping original"
+              }
+            fi
+          done
+          
+          echo ""
+          echo "Final sizes:"
+          ls -lah
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.6.2

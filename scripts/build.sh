@@ -315,7 +315,7 @@ for idx in "${!TARGETS[@]}"; do
         fi
         build_cmd+=("${GO_BUILD_FLAGS_ARRAY[@]}" -o "$OUTDIR/$BIN" "$ENTRYPOINT")
 
-        if GOOS="$os" GOARCH="$arch" "${build_cmd[@]}" 2>"$OUTDIR/$BIN.log"; then
+        if CGO_ENABLED=1 GOOS="$os" GOARCH="$arch" "${build_cmd[@]}" 2>"$OUTDIR/$BIN.log"; then
             update_status $((idx + 1)) '✔' "$BIN done"
             rm -f "$OUTDIR/$BIN.log"
         else
