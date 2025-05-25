@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
 	"time"
@@ -112,6 +113,17 @@ func (p *ArticulateParser) LoadCourseFromFile(filePath string) (*models.Course, 
 //   - The share ID string if found
 //   - An error if the share ID can't be extracted from the URI
 func (p *ArticulateParser) extractShareID(uri string) (string, error) {
+	// Parse the URL to validate the domain
+	parsedURL, err := url.Parse(uri)
+	if err != nil {
+		return "", fmt.Errorf("invalid URI: %s", uri)
+	}
+
+	// Validate that it's an Articulate Rise domain
+	if parsedURL.Host != "rise.articulate.com" {
+		return "", fmt.Errorf("invalid domain for Articulate Rise URI: %s", parsedURL.Host)
+	}
+
 	re := regexp.MustCompile(`/share/([a-zA-Z0-9_-]+)`)
 	matches := re.FindStringSubmatch(uri)
 	if len(matches) < 2 {

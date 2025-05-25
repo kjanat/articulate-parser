@@ -65,13 +65,15 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	buf.WriteString("\n---\n\n")
 
 	// Process lessons
-	for i, lesson := range course.Course.Lessons {
+	lessonCounter := 0
+	for _, lesson := range course.Course.Lessons {
 		if lesson.Type == "section" {
 			buf.WriteString(fmt.Sprintf("# %s\n\n", lesson.Title))
 			continue
 		}
 
-		buf.WriteString(fmt.Sprintf("## Lesson %d: %s\n\n", i+1, lesson.Title))
+		lessonCounter++
+		buf.WriteString(fmt.Sprintf("## Lesson %d: %s\n\n", lessonCounter, lesson.Title))
 
 		if lesson.Description != "" {
 			buf.WriteString(fmt.Sprintf("%s\n\n", e.htmlCleaner.CleanHTML(lesson.Description)))
@@ -110,116 +112,178 @@ func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.
 
 	switch item.Type {
 	case "text":
-		for _, subItem := range item.Items {
-			if subItem.Heading != "" {
-				heading := e.htmlCleaner.CleanHTML(subItem.Heading)
-				if heading != "" {
-					buf.WriteString(fmt.Sprintf("%s %s\n\n", headingPrefix, heading))
-				}
-			}
-			if subItem.Paragraph != "" {
-				paragraph := e.htmlCleaner.CleanHTML(subItem.Paragraph)
-				if paragraph != "" {
-					buf.WriteString(fmt.Sprintf("%s\n\n", paragraph))
-				}
-			}
-		}
-
+		e.processTextItem(buf, item, headingPrefix)
 	case "list":
-		for _, subItem := range item.Items {
-			if subItem.Paragraph != "" {
-				paragraph := e.htmlCleaner.CleanHTML(subItem.Paragraph)
-				if paragraph != "" {
-					buf.WriteString(fmt.Sprintf("- %s\n", paragraph))
-				}
-			}
-		}
-		buf.WriteString("\n")
-
+		e.processListItem(buf, item)
 	case "multimedia":
-		buf.WriteString(fmt.Sprintf("%s Media Content\n\n", headingPrefix))
-		for _, subItem := range item.Items {
-			if subItem.Media != nil {
-				if subItem.Media.Video != nil {
-					buf.WriteString(fmt.Sprintf("**Video**: %s\n", subItem.Media.Video.OriginalUrl))
-					if subItem.Media.Video.Duration > 0 {
-						buf.WriteString(fmt.Sprintf("**Duration**: %d seconds\n", subItem.Media.Video.Duration))
-					}
-				}
-				if subItem.Media.Image != nil {
-					buf.WriteString(fmt.Sprintf("**Image**: %s\n", subItem.Media.Image.OriginalUrl))
-				}
-			}
-			if subItem.Caption != "" {
-				caption := e.htmlCleaner.CleanHTML(subItem.Caption)
-				buf.WriteString(fmt.Sprintf("*%s*\n", caption))
-			}
-		}
-		buf.WriteString("\n")
-
+		e.processMultimediaItem(buf, item, headingPrefix)
 	case "image":
-		buf.WriteString(fmt.Sprintf("%s Image\n\n", headingPrefix))
-		for _, subItem := range item.Items {
-			if subItem.Media != nil && subItem.Media.Image != nil {
-				buf.WriteString(fmt.Sprintf("**Image**: %s\n", subItem.Media.Image.OriginalUrl))
-			}
-			if subItem.Caption != "" {
-				caption := e.htmlCleaner.CleanHTML(subItem.Caption)
-				buf.WriteString(fmt.Sprintf("*%s*\n", caption))
-			}
-		}
-		buf.WriteString("\n")
-
+		e.processImageItem(buf, item, headingPrefix)
 	case "knowledgeCheck":
-		buf.WriteString(fmt.Sprintf("%s Knowledge Check\n\n", headingPrefix))
-		for _, subItem := range item.Items {
-			if subItem.Title != "" {
-				title := e.htmlCleaner.CleanHTML(subItem.Title)
-				buf.WriteString(fmt.Sprintf("**Question**: %s\n\n", title))
-			}
-
-			buf.WriteString("**Answers**:\n")
-			for i, answer := range subItem.Answers {
-				correctMark := ""
-				if answer.Correct {
-					correctMark = " ✓"
-				}
-				buf.WriteString(fmt.Sprintf("%d. %s%s\n", i+1, answer.Title, correctMark))
-			}
-
-			if subItem.Feedback != "" {
-				feedback := e.htmlCleaner.CleanHTML(subItem.Feedback)
-				buf.WriteString(fmt.Sprintf("\n**Feedback**: %s\n", feedback))
-			}
-		}
-		buf.WriteString("\n")
-
+		e.processKnowledgeCheckItem(buf, item, headingPrefix)
 	case "interactive":
-		buf.WriteString(fmt.Sprintf("%s Interactive Content\n\n", headingPrefix))
-		for _, subItem := range item.Items {
-			if subItem.Title != "" {
-				title := e.htmlCleaner.CleanHTML(subItem.Title)
-				buf.WriteString(fmt.Sprintf("**%s**\n\n", title))
-			}
-		}
-
+		e.processInteractiveItem(buf, item, headingPrefix)
 	case "divider":
-		buf.WriteString("---\n\n")
-
+		e.processDividerItem(buf)
 	default:
-		// Handle unknown types
-		if len(item.Items) > 0 {
-			buf.WriteString(fmt.Sprintf("%s %s Content\n\n", headingPrefix, strings.Title(item.Type)))
-			for _, subItem := range item.Items {
-				if subItem.Title != "" {
-					title := e.htmlCleaner.CleanHTML(subItem.Title)
-					buf.WriteString(fmt.Sprintf("**%s**\n\n", title))
-				}
-				if subItem.Paragraph != "" {
-					paragraph := e.htmlCleaner.CleanHTML(subItem.Paragraph)
-					buf.WriteString(fmt.Sprintf("%s\n\n", paragraph))
-				}
+		e.processUnknownItem(buf, item, headingPrefix)
+	}
+}
+
+// processTextItem handles text content with headings and paragraphs
+func (e *MarkdownExporter) processTextItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
+	for _, subItem := range item.Items {
+		if subItem.Heading != "" {
+			heading := e.htmlCleaner.CleanHTML(subItem.Heading)
+			if heading != "" {
+				buf.WriteString(fmt.Sprintf("%s %s\n\n", headingPrefix, heading))
 			}
 		}
+		if subItem.Paragraph != "" {
+			paragraph := e.htmlCleaner.CleanHTML(subItem.Paragraph)
+			if paragraph != "" {
+				buf.WriteString(fmt.Sprintf("%s\n\n", paragraph))
+			}
+		}
+	}
+}
+
+// processListItem handles list items with bullet points
+func (e *MarkdownExporter) processListItem(buf *bytes.Buffer, item models.Item) {
+	for _, subItem := range item.Items {
+		if subItem.Paragraph != "" {
+			paragraph := e.htmlCleaner.CleanHTML(subItem.Paragraph)
+			if paragraph != "" {
+				buf.WriteString(fmt.Sprintf("- %s\n", paragraph))
+			}
+		}
+	}
+	buf.WriteString("\n")
+}
+
+// processMultimediaItem handles multimedia content including videos and images
+func (e *MarkdownExporter) processMultimediaItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
+	buf.WriteString(fmt.Sprintf("%s Media Content\n\n", headingPrefix))
+	for _, subItem := range item.Items {
+		e.processMediaSubItem(buf, subItem)
+	}
+	buf.WriteString("\n")
+}
+
+// processMediaSubItem processes individual media items (video/image)
+func (e *MarkdownExporter) processMediaSubItem(buf *bytes.Buffer, subItem models.SubItem) {
+	if subItem.Media != nil {
+		e.processVideoMedia(buf, subItem.Media)
+		e.processImageMedia(buf, subItem.Media)
+	}
+	if subItem.Caption != "" {
+		caption := e.htmlCleaner.CleanHTML(subItem.Caption)
+		buf.WriteString(fmt.Sprintf("*%s*\n", caption))
+	}
+}
+
+// processVideoMedia processes video media content
+func (e *MarkdownExporter) processVideoMedia(buf *bytes.Buffer, media *models.Media) {
+	if media.Video != nil {
+		buf.WriteString(fmt.Sprintf("**Video**: %s\n", media.Video.OriginalUrl))
+		if media.Video.Duration > 0 {
+			buf.WriteString(fmt.Sprintf("**Duration**: %d seconds\n", media.Video.Duration))
+		}
+	}
+}
+
+// processImageMedia processes image media content
+func (e *MarkdownExporter) processImageMedia(buf *bytes.Buffer, media *models.Media) {
+	if media.Image != nil {
+		buf.WriteString(fmt.Sprintf("**Image**: %s\n", media.Image.OriginalUrl))
+	}
+}
+
+// processImageItem handles standalone image items
+func (e *MarkdownExporter) processImageItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
+	buf.WriteString(fmt.Sprintf("%s Image\n\n", headingPrefix))
+	for _, subItem := range item.Items {
+		if subItem.Media != nil && subItem.Media.Image != nil {
+			buf.WriteString(fmt.Sprintf("**Image**: %s\n", subItem.Media.Image.OriginalUrl))
+		}
+		if subItem.Caption != "" {
+			caption := e.htmlCleaner.CleanHTML(subItem.Caption)
+			buf.WriteString(fmt.Sprintf("*%s*\n", caption))
+		}
+	}
+	buf.WriteString("\n")
+}
+
+// processKnowledgeCheckItem handles quiz questions and knowledge checks
+func (e *MarkdownExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
+	buf.WriteString(fmt.Sprintf("%s Knowledge Check\n\n", headingPrefix))
+	for _, subItem := range item.Items {
+		e.processQuestionSubItem(buf, subItem)
+	}
+	buf.WriteString("\n")
+}
+
+// processQuestionSubItem processes individual question items
+func (e *MarkdownExporter) processQuestionSubItem(buf *bytes.Buffer, subItem models.SubItem) {
+	if subItem.Title != "" {
+		title := e.htmlCleaner.CleanHTML(subItem.Title)
+		buf.WriteString(fmt.Sprintf("**Question**: %s\n\n", title))
+	}
+
+	e.processAnswers(buf, subItem.Answers)
+
+	if subItem.Feedback != "" {
+		feedback := e.htmlCleaner.CleanHTML(subItem.Feedback)
+		buf.WriteString(fmt.Sprintf("\n**Feedback**: %s\n", feedback))
+	}
+}
+
+// processAnswers processes answer choices for quiz questions
+func (e *MarkdownExporter) processAnswers(buf *bytes.Buffer, answers []models.Answer) {
+	buf.WriteString("**Answers**:\n")
+	for i, answer := range answers {
+		correctMark := ""
+		if answer.Correct {
+			correctMark = " ✓"
+		}
+		buf.WriteString(fmt.Sprintf("%d. %s%s\n", i+1, answer.Title, correctMark))
+	}
+}
+
+// processInteractiveItem handles interactive content
+func (e *MarkdownExporter) processInteractiveItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
+	buf.WriteString(fmt.Sprintf("%s Interactive Content\n\n", headingPrefix))
+	for _, subItem := range item.Items {
+		if subItem.Title != "" {
+			title := e.htmlCleaner.CleanHTML(subItem.Title)
+			buf.WriteString(fmt.Sprintf("**%s**\n\n", title))
+		}
+	}
+}
+
+// processDividerItem handles divider elements
+func (e *MarkdownExporter) processDividerItem(buf *bytes.Buffer) {
+	buf.WriteString("---\n\n")
+}
+
+// processUnknownItem handles unknown or unsupported item types
+func (e *MarkdownExporter) processUnknownItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
+	if len(item.Items) > 0 {
+		buf.WriteString(fmt.Sprintf("%s %s Content\n\n", headingPrefix, strings.Title(item.Type)))
+		for _, subItem := range item.Items {
+			e.processGenericSubItem(buf, subItem)
+		}
+	}
+}
+
+// processGenericSubItem processes sub-items for unknown types
+func (e *MarkdownExporter) processGenericSubItem(buf *bytes.Buffer, subItem models.SubItem) {
+	if subItem.Title != "" {
+		title := e.htmlCleaner.CleanHTML(subItem.Title)
+		buf.WriteString(fmt.Sprintf("**%s**\n\n", title))
+	}
+	if subItem.Paragraph != "" {
+		paragraph := e.htmlCleaner.CleanHTML(subItem.Paragraph)
+		buf.WriteString(fmt.Sprintf("%s\n\n", paragraph))
 	}
 }

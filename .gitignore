@@ -26,11 +26,37 @@ go.work
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
+# Shit
+.github/TODO
+
 # Local test files
 output/
 articulate-sample.json
 test-output.*
 go-os-arch-matrix.csv
+test_godocx.go
+test_input.json
 
 # Build artifacts
 build/
+
+# Old workflows
+.github/workflows/ci-old.yml
+.github/workflows/ci-enhanced.yml
+
+# Test coverage files
+coverage.out
+coverage.txt
+coverage
+*.cover
+*.coverprofile
+
+# Other common exclusions
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/tmp/

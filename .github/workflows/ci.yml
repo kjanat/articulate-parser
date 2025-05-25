@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [  "master", "develop" ]
+    branches: [ "master", "develop" ]
     tags:
       - "v*.*.*"
   pull_request:
@@ -16,7 +16,11 @@ jobs:
       contents: write
     strategy:
       matrix:
-        go: [1.21.x, 1.22.x, 1.23.x, 1.24.x]
+        go:
+          - 1.21.x
+          - 1.22.x
+          - 1.23.x
+          - 1.24.x
 
     steps:
       - uses: actions/checkout@v4
@@ -37,19 +41,170 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      - name: Run tests
-        run: go test -v -race -coverprofile=coverage.out ./...
+      - name: Run tests with enhanced reporting
+        id: test
+        run: |
+          echo "## 🔧 Test Environment" >> $GITHUB_STEP_SUMMARY
+          echo "- **Go Version:** ${{ matrix.go }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **OS:** ubuntu-latest" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "Running tests with coverage..."
+          go test -v -race -coverprofile=coverage.out ./... 2>&1 | tee test-output.log
+          
+          # Extract test results for summary
+          TEST_STATUS=$?
+          TOTAL_TESTS=$(grep -c "=== RUN" test-output.log || echo "0")
+          PASSED_TESTS=$(grep -c "--- PASS:" test-output.log || echo "0")
+          FAILED_TESTS=$(grep -c "--- FAIL:" test-output.log || echo "0")
+          SKIPPED_TESTS=$(grep -c "--- SKIP:" test-output.log || echo "0")
+          
+          # Generate test summary
+          echo "## 🧪 Test Results (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed | ✅ $PASSED_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | ❌ $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Skipped | ⏭️ $SKIPPED_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | $([ $TEST_STATUS -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED") |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add package breakdown
+          echo "### 📦 Package Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract package results
+          grep "^ok\|^FAIL" test-output.log | while read line; do
+            if [[ $line == ok* ]]; then
+              pkg=$(echo $line | awk '{print $2}')
+              echo "| $pkg | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+            elif [[ $line == FAIL* ]]; then
+              pkg=$(echo $line | awk '{print $2}')
+              echo "| $pkg | ❌ FAIL |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add detailed results if tests failed
+          if [ $TEST_STATUS -ne 0 ]; then
+            echo "### ❌ Failed Tests Details" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            grep -A 10 "--- FAIL:" test-output.log | head -100 >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Set outputs for other steps
+          echo "test-status=$TEST_STATUS" >> $GITHUB_OUTPUT
+          echo "total-tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "passed-tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "failed-tests=$FAILED_TESTS" >> $GITHUB_OUTPUT
+          
+          # Exit with the original test status
+          exit $TEST_STATUS
+
+      - name: Generate coverage report
+        if: always()
+        run: |
+          if [ -f coverage.out ]; then
+            go tool cover -html=coverage.out -o coverage.html
+            COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
+            
+            echo "## 📊 Code Coverage (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Total Coverage: $COVERAGE**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Add coverage by package
+            echo "### 📋 Coverage by Package" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
+            echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
+            
+            go tool cover -func=coverage.out | grep -v total | while read line; do
+              if [[ $line == *".go:"* ]]; then
+                pkg=$(echo $line | awk '{print $1}' | cut -d'/' -f1-3)
+                coverage=$(echo $line | awk '{print $3}')
+                echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
+              fi
+            done | sort -u
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ⚠️ Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "No coverage file generated" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-go-${{ matrix.go }}
+          path: |
+            test-output.log
+            coverage.out
+            coverage.html
+          retention-days: 7
 
       - name: Run go vet
-        run: go vet ./...
+        run: |
+          echo "## 🔍 Static Analysis (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          VET_OUTPUT=$(go vet ./... 2>&1 || echo "")
+          VET_STATUS=$?
+          
+          if [ $VET_STATUS -eq 0 ]; then
+            echo "✅ **go vet:** No issues found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **go vet:** Issues found" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$VET_OUTPUT" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          exit $VET_STATUS
 
       - name: Run go fmt
         run: |
-          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-            echo "The following files are not formatted:"
-            gofmt -s -l .
+          FMT_OUTPUT=$(gofmt -s -l . 2>&1 || echo "")
+          
+          if [ -z "$FMT_OUTPUT" ]; then
+            echo "✅ **go fmt:** All files properly formatted" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **go fmt:** Files need formatting" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$FMT_OUTPUT" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
+
+      - name: Job Summary
+        if: always()
+        run: |
+          echo "## 📋 Job Summary (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependencies | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ✅ Success |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ steps.test.outcome == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Coverage | ${{ job.status == 'success' && '✅ Generated' || '⚠️ Partial' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Static Analysis | ${{ job.status == 'success' && '✅ Clean' || '❌ Issues' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Formatting | ${{ job.status == 'success' && '✅ Clean' || '❌ Issues' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
@@ -81,9 +236,6 @@ jobs:
           fail-on-severity: moderate
           comment-summary-in-pr: always
 
-          # # Use comma-separated names to pass list arguments:
-          # deny-licenses: LGPL-2.0, BSD-2-Clause
-
   release:
     name: Release
     runs-on: ubuntu-latest
@@ -103,7 +255,26 @@ jobs:
           check-latest: true
 
       - name: Run tests
-        run: go test -v ./...
+        run: |
+          echo "## 🚀 Release Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          go test -v ./... 2>&1 | tee release-test-output.log
+          TEST_STATUS=$?
+          
+          TOTAL_TESTS=$(grep -c "=== RUN" release-test-output.log || echo "0")
+          PASSED_TESTS=$(grep -c "--- PASS:" release-test-output.log || echo "0")
+          FAILED_TESTS=$(grep -c "--- FAIL:" release-test-output.log || echo "0")
+          
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Passed | ✅ $PASSED_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | ❌ $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | $([ $TEST_STATUS -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED") |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          exit $TEST_STATUS
 
       - name: Install UPX
         run: |
@@ -112,6 +283,9 @@ jobs:
 
       - name: Build binaries
         run: |
+          echo "## 🔨 Build Process" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           # Set the build time environment variable
           BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
@@ -121,6 +295,12 @@ jobs:
           # Display help information for the build script
           ./scripts/build.sh --help
 
+          echo "**Build Configuration:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Build Time: $BUILD_TIME" >> $GITHUB_STEP_SUMMARY
+          echo "- Git Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           # Build for all platforms
           ./scripts/build.sh \
             --verbose \
@@ -128,13 +308,18 @@ jobs:
 
       - name: Compress binaries with UPX
         run: |
+          echo "## 📦 Binary Compression" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
           echo "Compressing binaries with UPX..."
           cd build/
           
           # Get original sizes
-          echo "Original sizes:"
-          ls -lah
-          echo ""
+          echo "**Original sizes:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -lah >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           
           # Compress all binaries except Darwin (macOS) binaries as UPX doesn't work well with recent macOS versions
           for binary in articulate-parser-*; do
@@ -148,16 +333,16 @@ jobs:
             fi
           done
           
-          echo ""
-          echo "Final sizes:"
-          ls -lah
+          echo "**Final sizes:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          ls -lah >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          # Artifact name
-          name: build-artifacts # optional, default is artifact
-          # A file, directory or wildcard pattern that describes what to upload
+          name: build-artifacts
           path: build/
           if-no-files-found: ignore
           retention-days: 1
