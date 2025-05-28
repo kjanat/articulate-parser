@@ -217,6 +217,14 @@ if [ "$SHOW_TARGETS" = true ]; then
     exit 0
 fi
 
+# Validate Go installation
+if ! command -v go >/dev/null 2>&1; then
+    echo "Error: Go is not installed or not in PATH"
+    echo "Please install Go from https://golang.org/dl/"
+    echo "Or if running on Windows, use the PowerShell script: scripts\\build.ps1"
+    exit 1
+fi
+
 # Validate entry point exists
 if [ ! -f "$ENTRYPOINT" ]; then
     echo "Error: Entry point file '$ENTRYPOINT' does not exist"
@@ -315,7 +323,7 @@ for idx in "${!TARGETS[@]}"; do
         fi
         build_cmd+=("${GO_BUILD_FLAGS_ARRAY[@]}" -o "$OUTDIR/$BIN" "$ENTRYPOINT")
 
-        if CGO_ENABLED=1 GOOS="$os" GOARCH="$arch" "${build_cmd[@]}" 2>"$OUTDIR/$BIN.log"; then
+        if CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" "${build_cmd[@]}" 2>"$OUTDIR/$BIN.log"; then
             update_status $((idx + 1)) '✔' "$BIN done"
             rm -f "$OUTDIR/$BIN.log"
         else
@@ -356,3 +364,6 @@ if [ "$VERBOSE" = true ]; then
     echo "  ────────────────────────────────────────────────"
     printf "  Total: %d/%d successful, %s total size\n" "$success_count" "${#TARGETS[@]}" "$(numfmt --to=iec-i --suffix=B $total_size 2>/dev/null || echo "${total_size} bytes")"
 fi
+
+# Clean up environment variables to avoid contaminating future builds
+unset GOOS GOARCH CGO_ENABLED

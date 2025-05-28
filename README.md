@@ -1,6 +1,78 @@
 # Articulate Rise Parser
 
-A Go-based parser that converts Articulate Rise e-learning content to various formats including Markdown and Word documents.
+A Go-based parser that converts Articulate Rise e-learning content to various formats including Markdown, HTML, and Word documents.
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    %% User Input
+    CLI[Command Line Interface<br/>main.go] --> APP{App Service<br/>services/app.go}
+    
+    %% Core Application Logic
+    APP --> |"ProcessCourseFromURI"| PARSER[Course Parser<br/>services/parser.go]
+    APP --> |"ProcessCourseFromFile"| PARSER
+    APP --> |"exportCourse"| FACTORY[Exporter Factory<br/>exporters/factory.go]
+    
+    %% Data Sources
+    PARSER --> |"FetchCourse"| API[Articulate Rise API<br/>rise.articulate.com]
+    PARSER --> |"LoadCourseFromFile"| FILE[Local JSON File<br/>*.json]
+    
+    %% Data Models
+    API --> MODELS[Data Models<br/>models/course.go]
+    FILE --> MODELS
+    MODELS --> |Course, Lesson, Item| APP
+    
+    %% Export Factory Pattern
+    FACTORY --> |"CreateExporter"| MARKDOWN[Markdown Exporter<br/>exporters/markdown.go]
+    FACTORY --> |"CreateExporter"| HTML[HTML Exporter<br/>exporters/html.go]
+    FACTORY --> |"CreateExporter"| DOCX[DOCX Exporter<br/>exporters/docx.go]
+    
+    %% HTML Cleaning Service
+    CLEANER[HTML Cleaner<br/>services/html_cleaner.go] --> MARKDOWN
+    CLEANER --> HTML
+    CLEANER --> DOCX
+    
+    %% Output Files
+    MARKDOWN --> |"Export"| MD_OUT[Markdown Files<br/>*.md]
+    HTML --> |"Export"| HTML_OUT[HTML Files<br/>*.html]
+    DOCX --> |"Export"| DOCX_OUT[Word Documents<br/>*.docx]
+    
+    %% Interfaces (Contracts)
+    IPARSER[CourseParser Interface<br/>interfaces/parser.go] -.-> PARSER
+    IEXPORTER[Exporter Interface<br/>interfaces/exporter.go] -.-> MARKDOWN
+    IEXPORTER -.-> HTML
+    IEXPORTER -.-> DOCX
+    IFACTORY[ExporterFactory Interface<br/>interfaces/exporter.go] -.-> FACTORY
+    
+    %% Styling
+    classDef userInput fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef coreLogic fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef dataSource fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef exporter fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef output fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef interface fill:#f1f8e9,stroke:#33691e,stroke-width:1px,stroke-dasharray: 5 5
+    classDef service fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    
+    class CLI userInput
+    class APP,FACTORY coreLogic
+    class API,FILE,MODELS dataSource
+    class MARKDOWN,HTML,DOCX exporter
+    class MD_OUT,HTML_OUT,DOCX_OUT output
+    class IPARSER,IEXPORTER,IFACTORY interface
+    class PARSER,CLEANER service
+```
+
+### Architecture Overview
+
+The system follows **Clean Architecture** principles with clear separation of concerns:
+
+-   **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
+-   **🏗️ Application Layer**: Core business logic with dependency injection
+-   **📋 Interface Layer**: Contracts defining behavior without implementation details  
+-   **🔧 Service Layer**: Concrete implementations of parsing and utility services
+-   **📤 Export Layer**: Factory pattern for format-specific exporters
+-   **📊 Data Layer**: Domain models representing course structure
 
 [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?logo=Go&logoColor=white)][gomod]
 [![Go Doc](https://godoc.org/github.com/kjanat/articulate-parser?status.svg)][Package documentation]
@@ -16,6 +88,7 @@ A Go-based parser that converts Articulate Rise e-learning content to various fo
 
 -   Parse Articulate Rise JSON data from URLs or local files
 -   Export to Markdown (.md) format
+-   Export to HTML (.html) format with professional styling
 -   Export to Word Document (.docx) format
 -   Support for various content types:
     -   Text content with headings and paragraphs
@@ -85,7 +158,7 @@ go run main.go <input_uri_or_file> <output_format> [output_path]
 | Parameter           | Description                                                      | Default         |
 | ------------------- | ---------------------------------------------------------------- | --------------- |
 | `input_uri_or_file` | Either an Articulate Rise share URL or path to a local JSON file | None (required) |
-| `output_format`     | `md` for Markdown or `docx` for Word Document                    | None (required) |
+| `output_format`     | `md` for Markdown, `html` for HTML, or `docx` for Word Document  | None (required) |
 | `output_path`       | Path where output file will be saved.                            | `./output/`     |
 
 #### Examples
@@ -102,7 +175,13 @@ go run main.go "https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviD
 go run main.go "articulate-sample.json" docx "my-course.docx"
 ```
 
-3.  **Parse from local file and export to Markdown:**
+3.  **Parse from local file and export to HTML:**
+
+```bash
+go run main.go "articulate-sample.json" html "output.html"
+```
+
+4.  **Parse from local file and export to Markdown:**
 
 ```bash
 go run main.go "articulate-sample.json" md "output.md"
@@ -152,6 +231,15 @@ The project maintains high code quality standards:
 -   Quiz questions with correct answers marked
 -   Media references included
 -   Course metadata at the top
+
+### HTML (`.html`)
+
+-   Professional styling with embedded CSS
+-   Interactive and visually appealing layout
+-   Proper HTML structure with semantic elements
+-   Responsive design for different screen sizes
+-   All content types beautifully formatted
+-   Maintains course hierarchy and organization
 
 ### Word Document (`.docx`)
 
@@ -230,7 +318,7 @@ Potential improvements could include:
 
 -   PDF export support
 -   Media file downloading
--   HTML export with preserved styling
+-   ~~HTML export with preserved styling~~ ✅ **Completed**
 -   SCORM package support
 -   Batch processing capabilities
 -   Custom template support

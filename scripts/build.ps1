@@ -531,6 +531,11 @@ try {
 	if ($Failed -gt 0) {
 		exit 1
 	}
+
+	# Clean up environment variables to avoid contaminating future builds
+	Remove-Item Env:GOOS -ErrorAction SilentlyContinue
+	Remove-Item Env:GOARCH -ErrorAction SilentlyContinue
+	Remove-Item Env:CGO_ENABLED -ErrorAction SilentlyContinue
 } finally {
 	Pop-Location
 }
