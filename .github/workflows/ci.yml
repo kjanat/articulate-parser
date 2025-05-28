@@ -38,19 +38,6 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           check-latest: true
-          # Disable built-in cache to use our custom cache
-          cache: false
-
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('**/go.sum', '**/go.mod') }}-v1
-          restore-keys: |
-            ${{ runner.os }}-go-${{ matrix.go }}-
-        continue-on-error: true
 
       - name: Download dependencies with retry
         run: |
@@ -61,10 +48,10 @@ jobs:
           download_with_retry() {
             local attempt=1
             local max_attempts=3
-            
+
             while [ $attempt -le $max_attempts ]; do
               echo "Attempt $attempt of $max_attempts"
-              
+
               if go mod download; then
                 echo "Download successful on attempt $attempt"
                 return 0
@@ -79,7 +66,7 @@ jobs:
                 attempt=$((attempt + 1))
               fi
             done
-            
+
             echo "All download attempts failed"
             return 1
           }
@@ -184,7 +171,7 @@ jobs:
 
             # Create temporary file for package coverage aggregation
             temp_coverage=$(mktemp)
-            
+
             # Extract package-level coverage data
             go tool cover -func=coverage.out | grep -v total | while read line; do
               if [[ $line == *".go:"* ]]; then
@@ -192,28 +179,28 @@ jobs:
                 filepath=$(echo "$line" | awk '{print $1}')
                 pkg_path=$(dirname "$filepath" | sed 's|github.com/kjanat/articulate-parser/||' | sed 's|^\./||')
                 coverage=$(echo "$line" | awk '{print $3}' | sed 's/%//')
-                
+
                 # Use root package if no subdirectory
                 if [[ "$pkg_path" == "." || "$pkg_path" == "" ]]; then
                   pkg_path="root"
                 fi
-                
+
                 echo "$pkg_path $coverage" >> "$temp_coverage"
               fi
             done
-            
+
             # Aggregate coverage by package (average)
             awk '{
-              packages[$1] += $2; 
+              packages[$1] += $2;
               counts[$1]++
-            } 
+            }
             END {
               for (pkg in packages) {
                 avg = packages[pkg] / counts[pkg]
                 printf "| %s | %.1f%% |\n", pkg, avg
               }
             }' $temp_coverage | sort >> $GITHUB_STEP_SUMMARY
-            
+
             rm -f $temp_coverage
 
             echo "</details>" >> $GITHUB_STEP_SUMMARY
@@ -507,8 +494,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -517,11 +507,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
