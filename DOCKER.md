@@ -10,10 +10,16 @@ A powerful command-line tool for parsing and processing articulate data files, n
 docker pull ghcr.io/kjanat/articulate-parser:latest
 ```
 
+### Run with Articulate Rise URL
+
+```bash
+docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/ markdown /data/output.md
+```
+
 ### Run with local files
 
 ```bash
-docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/input.txt
+docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/input.json markdown /data/output.md
 ```
 
 ## Usage
@@ -21,11 +27,14 @@ docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/in
 ### Basic File Processing
 
 ```bash
-# Process a single file
-docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/document.txt
+# Process from Articulate Rise URL
+docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/ markdown /data/output.md
 
-# Process with output redirection
-docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/input.txt > output.json
+# Process a local JSON file
+docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/document.json markdown /data/output.md
+
+# Process with specific format and output
+docker run --rm -v $(pwd):/data ghcr.io/kjanat/articulate-parser:latest /data/input.json docx /data/output.docx
 ```
 
 ### Display Help and Version

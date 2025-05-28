@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/kjanat/articulate-parser/internal/exporters"
 	"github.com/kjanat/articulate-parser/internal/services"
@@ -82,29 +83,6 @@ func isURI(str string) bool {
 	return len(str) > 7 && (str[:7] == "http://" || str[:8] == "https://")
 }
 
-// joinStrings concatenates a slice of strings using the specified separator.
-//
-// Parameters:
-//   - strs: The slice of strings to join
-//   - sep: The separator to insert between each string
-//
-// Returns:
-//   - A single string with all elements joined by the separator
-func joinStrings(strs []string, sep string) string {
-	if len(strs) == 0 {
-		return ""
-	}
-	if len(strs) == 1 {
-		return strs[0]
-	}
-
-	result := strs[0]
-	for i := 1; i < len(strs); i++ {
-		result += sep + strs[i]
-	}
-	return result
-}
-
 // printUsage prints the command-line usage information.
 //
 // Parameters:
@@ -113,7 +91,7 @@ func joinStrings(strs []string, sep string) string {
 func printUsage(programName string, supportedFormats []string) {
 	fmt.Printf("Usage: %s <source> <format> <output>\n", programName)
 	fmt.Printf("  source: URI or file path to the course\n")
-	fmt.Printf("  format: export format (%s)\n", joinStrings(supportedFormats, ", "))
+	fmt.Printf("  format: export format (%s)\n", strings.Join(supportedFormats, ", "))
 	fmt.Printf("  output: output file path\n")
 	fmt.Println("\nExample:")
 	fmt.Printf("  %s articulate-sample.json markdown output.md\n", programName)
