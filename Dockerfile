@@ -50,7 +50,7 @@ CMD ["--help"]
 
 # Add labels for metadata
 LABEL org.opencontainers.image.title="Articulate Parser"
-LABEL org.opencontainers.image.description="A tool to parse Articulate Rise courses and export them to various formats"
+LABEL org.opencontainers.image.description="A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats (Markdown, HTML, DOCX). Supports media extraction, content cleaning, and batch processing for educational content conversion."
 LABEL org.opencontainers.image.vendor="kjanat"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/kjanat/articulate-parser"
