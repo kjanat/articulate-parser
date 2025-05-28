@@ -11,7 +11,7 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - 'dependencies'
-      - 'github-actions'
+      - 'dependencies/github-actions'
     commit-message:
       prefix: 'ci'
       include: 'scope'
@@ -27,7 +27,7 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - 'dependencies'
-      - 'docker'
+      - 'dependencies/docker'
     commit-message:
       prefix: 'docker'
       include: 'scope'
@@ -50,7 +50,7 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - 'dependencies'
-      - 'docker-compose'
+      - 'dependencies/docker-compose'
     commit-message:
       prefix: 'docker'
       include: 'scope'
@@ -73,7 +73,7 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - 'dependencies'
-      - 'go'
+      - 'dependencies/go'
     commit-message:
       prefix: 'deps'
       include: 'scope'
