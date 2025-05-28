@@ -180,13 +180,11 @@ jobs:
 
             go tool cover -func=coverage.out | grep -v total | while read line; do
               if [[ $line == *".go:"* ]]; then
-                pkg=$(echo $line | awk '{print $1}' | sed 's|github.com/kjanat/articulate-parser/||' | cut -d'/' -f1)
+                pkg=$(echo $line | awk '{print $1}' | sed 's|github.com/kjanat/articulate-parser/||')
                 coverage=$(echo $line | awk '{print $3}')
-                echo "$pkg $coverage"
+                echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
               fi
-            done | sort -k1,1 -u | while read pkg coverage; do
-              echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
-            done
+            done | sort -u
 
             echo "</details>" >> $GITHUB_STEP_SUMMARY
 
@@ -514,6 +512,9 @@ jobs:
             GIT_COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats (Markdown, HTML, DOCX). Supports media extraction, content cleaning, and batch processing for educational content conversion.
+          sbom: true
+          provenance: true
 
       - name: Generate Docker summary
         run: |
@@ -526,7 +527,12 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "**Features:**" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "- **Multi-arch image description:** ✅ Enabled" >> $GITHUB_STEP_SUMMARY
+          echo "- **SBOM (Software Bill of Materials):** ✅ Generated" >> $GITHUB_STEP_SUMMARY
+          echo "- **Provenance attestation:** ✅ Generated" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security scanning:** Ready for vulnerability analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Usage:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
