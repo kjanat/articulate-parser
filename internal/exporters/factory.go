@@ -48,6 +48,8 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 		return NewMarkdownExporter(f.htmlCleaner), nil
 	case "docx", "word":
 		return NewDocxExporter(f.htmlCleaner), nil
+	case "html", "htm":
+		return NewHTMLExporter(f.htmlCleaner), nil
 	default:
 		return nil, fmt.Errorf("unsupported export format: %s", format)
 	}
@@ -59,5 +61,5 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 // Returns:
 //   - A string slice containing all supported format names
 func (f *Factory) GetSupportedFormats() []string {
-	return []string{"markdown", "md", "docx", "word"}
+	return []string{"markdown", "md", "docx", "word", "html", "htm"}
 }

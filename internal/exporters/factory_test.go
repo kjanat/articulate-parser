@@ -71,6 +71,20 @@ func TestFactory_CreateExporter(t *testing.T) {
 			shouldError:    false,
 		},
 		{
+			name:           "html format",
+			format:         "html",
+			expectedType:   "*exporters.HTMLExporter",
+			expectedFormat: "html",
+			shouldError:    false,
+		},
+		{
+			name:           "htm format alias",
+			format:         "htm",
+			expectedType:   "*exporters.HTMLExporter",
+			expectedFormat: "html",
+			shouldError:    false,
+		},
+		{
 			name:        "unsupported format",
 			format:      "pdf",
 			shouldError: true,
@@ -139,6 +153,12 @@ func TestFactory_CreateExporter_CaseInsensitive(t *testing.T) {
 		{"WORD", "docx"},
 		{"Word", "docx"},
 		{"WoRd", "docx"},
+		{"HTML", "html"},
+		{"Html", "html"},
+		{"HtMl", "html"},
+		{"HTM", "html"},
+		{"Htm", "html"},
+		{"HtM", "html"},
 	}
 
 	for _, tc := range testCases {
@@ -168,7 +188,6 @@ func TestFactory_CreateExporter_ErrorMessages(t *testing.T) {
 
 	testCases := []string{
 		"pdf",
-		"html",
 		"txt",
 		"json",
 		"xml",
@@ -213,7 +232,7 @@ func TestFactory_GetSupportedFormats(t *testing.T) {
 		t.Fatal("GetSupportedFormats() returned nil")
 	}
 
-	expected := []string{"markdown", "md", "docx", "word"}
+	expected := []string{"markdown", "md", "docx", "word", "html", "htm"}
 
 	// Sort both slices for comparison
 	sort.Strings(formats)
@@ -320,6 +339,21 @@ func TestFactory_HTMLCleanerPropagation(t *testing.T) {
 
 	if docxImpl.htmlCleaner == nil {
 		t.Error("HTMLCleaner should be propagated to DocxExporter")
+	}
+
+	// Test with html exporter
+	htmlExporter, err := factory.CreateExporter("html")
+	if err != nil {
+		t.Fatalf("Failed to create html exporter: %v", err)
+	}
+
+	htmlImpl, ok := htmlExporter.(*HTMLExporter)
+	if !ok {
+		t.Fatal("Failed to cast to HTMLExporter")
+	}
+
+	if htmlImpl.htmlCleaner == nil {
+		t.Error("HTMLCleaner should be propagated to HTMLExporter")
 	}
 }
 
