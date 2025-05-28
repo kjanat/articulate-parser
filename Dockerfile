@@ -2,7 +2,7 @@
 FROM golang:1.23-alpine AS builder
 
 # Install git and ca-certificates (needed for fetching dependencies and HTTPS)
-RUN apk add --no-cache git ca-certificates tzdata
+RUN apk add --no-cache git ca-certificates tzdata file
 
 # Create a non-root user for the final stage
 RUN adduser -D -u 1000 appuser

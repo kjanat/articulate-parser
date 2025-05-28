@@ -315,6 +315,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Capture build date
+        run: echo "BUILD_TIME=$(git log -1 --format=%cd --date=iso-strict)" >> $GITHUB_ENV
+
       - name: Build Docker image (test)
         uses: docker/build-push-action@v6
         with:
@@ -324,7 +327,7 @@ jobs:
           tags: test:latest
           build-args: |
             VERSION=test
-            BUILD_TIME=$(git log -1 --format=%cd --date=iso-strict)
+            BUILD_TIME=${{ env.BUILD_TIME }}
             GIT_COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -487,6 +490,7 @@ jobs:
           files: build/*
           generate_release_notes: true
           draft: false
+          # Mark v0.x.x releases as prerelease (pre-1.0 versions are considered unstable)
           prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
