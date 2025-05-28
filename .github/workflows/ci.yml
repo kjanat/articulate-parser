@@ -12,6 +12,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Test
@@ -178,13 +182,39 @@ jobs:
             echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
             echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
 
+            # Create temporary file for package coverage aggregation
+            temp_coverage=$(mktemp)
+            
+            # Extract package-level coverage data
             go tool cover -func=coverage.out | grep -v total | while read line; do
               if [[ $line == *".go:"* ]]; then
-                pkg=$(echo $line | awk '{print $1}' | sed 's|github.com/kjanat/articulate-parser/||')
-                coverage=$(echo $line | awk '{print $3}')
-                echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
+                # Extract package path from file path (everything before the filename)
+                filepath=$(echo "$line" | awk '{print $1}')
+                pkg_path=$(dirname "$filepath" | sed 's|github.com/kjanat/articulate-parser/||' | sed 's|^\./||')
+                coverage=$(echo "$line" | awk '{print $3}' | sed 's/%//')
+                
+                # Use root package if no subdirectory
+                if [[ "$pkg_path" == "." || "$pkg_path" == "" ]]; then
+                  pkg_path="root"
+                fi
+                
+                echo "$pkg_path $coverage" >> "$temp_coverage"
               fi
-            done | sort -u
+            done
+            
+            # Aggregate coverage by package (average)
+            awk '{
+              packages[$1] += $2; 
+              counts[$1]++
+            } 
+            END {
+              for (pkg in packages) {
+                avg = packages[pkg] / counts[pkg]
+                printf "| %s | %.1f%% |\n", pkg, avg
+              }
+            }' $temp_coverage | sort >> $GITHUB_STEP_SUMMARY
+            
+            rm -f $temp_coverage
 
             echo "</details>" >> $GITHUB_STEP_SUMMARY
 
@@ -496,7 +526,7 @@ jobs:
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.url=https://github.com/${{ github.repository }}
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/master/README.md
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/master/DOCKER.md
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

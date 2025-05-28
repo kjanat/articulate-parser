@@ -60,4 +60,4 @@ LABEL org.opencontainers.image.description="A powerful CLI tool to parse Articul
 LABEL org.opencontainers.image.vendor="kjanat"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/kjanat/articulate-parser"
-LABEL org.opencontainers.image.documentation="https://github.com/kjanat/articulate-parser/blob/master/README.md"
+LABEL org.opencontainers.image.documentation="https://github.com/kjanat/articulate-parser/blob/master/DOCKER.md"
