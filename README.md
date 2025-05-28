@@ -9,10 +9,9 @@ A Go-based parser that converts Articulate Rise e-learning content to various fo
 [![License](https://img.shields.io/github/license/kjanat/articulate-parser?label=License)][MIT License] <!-- [![Commit activity](https://img.shields.io/github/commit-activity/m/kjanat/articulate-parser?label=Commit%20activity)][Commits] -->
 [![Last commit](https://img.shields.io/github/last-commit/kjanat/articulate-parser?label=Last%20commit)][Commits]
 [![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/kjanat/articulate-parser?label=Issues)][Issues]
-[![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker&logoColor=white)][Docker image] <!-- [![Docker Size](https://img.shields.io/docker/image-size/kjanat/articulate-parser?logo=docker&label=Image%20Size)][Docker image] -->
 [![Docker](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/docker.yml?logo=docker&label=Docker)][Docker workflow]
-[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker&logoColor=white)][Docker image]
-[![Docker Size](https://img.shields.io/docker/image-size/kjanat/articulate-parser?logo=docker&label=Image%20Size)][Docker image]
+[![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
 [![Codecov](https://img.shields.io/codecov/c/gh/kjanat/articulate-parser?token=eHhaHY8nut&logo=codecov&logoColor=%23F01F7A&label=Codecov)][Codecov]
 
 ## System Architecture
