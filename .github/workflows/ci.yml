@@ -2,11 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ "master", "develop", "feature/docker*" ]
+    branches: ['master', 'develop', 'feature/docker*']
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
   pull_request:
-    branches: [ "master", "develop" ]
+    branches: ['master', 'develop']
 
 env:
   REGISTRY: ghcr.io
@@ -34,7 +34,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           check-latest: true
-          cache-dependency-path: "**/*.sum"
+          cache-dependency-path: '**/*.sum'
 
       - name: Download dependencies
         run: go mod download && echo "Download successful" || go mod tidy && echo "Tidy successful" || return 1
@@ -53,17 +53,17 @@ jobs:
           echo "- **OS:** ubuntu-latest" >> $GITHUB_STEP_SUMMARY
           echo "- **Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "Running tests with coverage..."
           go test -v -race -coverprofile=coverage.out ./... 2>&1 | tee test-output.log
-          
+
           # Extract test results for summary
           TEST_STATUS=$?
           TOTAL_TESTS=$(grep -c "=== RUN" test-output.log || echo "0")
           PASSED_TESTS=$(grep -c "--- PASS:" test-output.log || echo "0")
           FAILED_TESTS=$(grep -c "--- FAIL:" test-output.log || echo "0")
           SKIPPED_TESTS=$(grep -c "--- SKIP:" test-output.log || echo "0")
-          
+
           # Generate test summary
           echo "## 🧪 Test Results (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -75,13 +75,13 @@ jobs:
           echo "| Skipped | ⏭️ $SKIPPED_TESTS |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | $([ $TEST_STATUS -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED") |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Add package breakdown
           echo "### 📦 Package Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
-          
+
           # Extract package results
           grep "^ok\|^FAIL" test-output.log | while read line; do
             if [[ $line == ok* ]]; then
@@ -92,9 +92,9 @@ jobs:
               echo "| $pkg | ❌ FAIL |" >> $GITHUB_STEP_SUMMARY
             fi
           done
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Add detailed results if tests failed
           if [ $TEST_STATUS -ne 0 ]; then
             echo "### ❌ Failed Tests Details" >> $GITHUB_STEP_SUMMARY
@@ -104,13 +104,13 @@ jobs:
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           # Set outputs for other steps
           echo "test-status=$TEST_STATUS" >> $GITHUB_OUTPUT
           echo "total-tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
           echo "passed-tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
           echo "failed-tests=$FAILED_TESTS" >> $GITHUB_OUTPUT
-          
+
           # Exit with the original test status
           exit $TEST_STATUS
 
@@ -120,26 +120,30 @@ jobs:
           if [ -f coverage.out ]; then
             go tool cover -html=coverage.out -o coverage.html
             COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
-            
+
             echo "## 📊 Code Coverage (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Total Coverage: $COVERAGE**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            
+
             # Add coverage by package
+            echo "<details>" >> $GITHUB_STEP_SUMMARY
+            echo "<summary>Click to expand package coverage details</summary>" >> $GITHUB_STEP_SUMMARY
             echo "### 📋 Coverage by Package" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
             echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
-            
+
             go tool cover -func=coverage.out | grep -v total | while read line; do
               if [[ $line == *".go:"* ]]; then
-                pkg=$(echo $line | awk '{print $1}' | cut -d'/' -f1-3)
+                pkg=$(echo $line | awk '{print $1}') # | cut -d'/' -f1-3
                 coverage=$(echo $line | awk '{print $3}')
                 echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
               fi
             done | sort -u
-            
+
+            echo "</details>" >> $GITHUB_STEP_SUMMARY
+
             echo "" >> $GITHUB_STEP_SUMMARY
           else
             echo "## ⚠️ Coverage Report" >> $GITHUB_STEP_SUMMARY
@@ -162,10 +166,10 @@ jobs:
         run: |
           echo "## 🔍 Static Analysis (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           VET_OUTPUT=$(go vet ./... 2>&1 || echo "")
           VET_STATUS=$?
-          
+
           if [ $VET_STATUS -eq 0 ]; then
             echo "✅ **go vet:** No issues found" >> $GITHUB_STEP_SUMMARY
           else
@@ -176,13 +180,13 @@ jobs:
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           exit $VET_STATUS
 
       - name: Run go fmt
         run: |
           FMT_OUTPUT=$(gofmt -s -l . 2>&1 || echo "")
-          
+
           if [ -z "$FMT_OUTPUT" ]; then
             echo "✅ **go fmt:** All files properly formatted" >> $GITHUB_STEP_SUMMARY
           else
@@ -255,14 +259,14 @@ jobs:
         run: |
           echo "## 🧪 Docker Image Tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Test that the image runs and shows help
           echo "**Testing help command:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           docker run --rm test:latest --help >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Test image size
           IMAGE_SIZE=$(docker image inspect test:latest --format='{{.Size}}' | numfmt --to=iec-i --suffix=B)
           echo "**Image size:** $IMAGE_SIZE" >> $GITHUB_STEP_SUMMARY
@@ -290,7 +294,7 @@ jobs:
     if: github.ref_type == 'tag'
     permissions:
       contents: write
-    needs: [ "test" ]
+    needs: ['test']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -306,14 +310,14 @@ jobs:
         run: |
           echo "## 🚀 Release Tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           go test -v ./... 2>&1 | tee release-test-output.log
           TEST_STATUS=$?
-          
+
           TOTAL_TESTS=$(grep -c "=== RUN" release-test-output.log || echo "0")
           PASSED_TESTS=$(grep -c "--- PASS:" release-test-output.log || echo "0")
           FAILED_TESTS=$(grep -c "--- FAIL:" release-test-output.log || echo "0")
-          
+
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
@@ -321,7 +325,7 @@ jobs:
           echo "| Failed | ❌ $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
           echo "| Status | $([ $TEST_STATUS -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED") |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           exit $TEST_STATUS
 
       - name: Install UPX
@@ -333,7 +337,7 @@ jobs:
         run: |
           echo "## 🔨 Build Process" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Set the build time environment variable
           BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
@@ -358,17 +362,17 @@ jobs:
         run: |
           echo "## 📦 Binary Compression" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           echo "Compressing binaries with UPX..."
           cd build/
-          
+
           # Get original sizes
           echo "**Original sizes:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           ls -lah >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Compress all binaries except Darwin (macOS) binaries as UPX doesn't work well with recent macOS versions
           for binary in articulate-parser-*; do
             if [[ "$binary" == *"darwin"* ]]; then
@@ -380,7 +384,7 @@ jobs:
               }
             fi
           done
-          
+
           echo "**Final sizes:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           ls -lah >> $GITHUB_STEP_SUMMARY
@@ -414,7 +418,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [ "test" ]
+    needs: ['test']
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/feature/docker'))
     steps:
       - name: Checkout repository
