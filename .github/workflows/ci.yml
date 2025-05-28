@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ['master', 'develop', 'feature/docker*']
+    branches: ['master', 'develop']
     tags:
       - 'v*.*.*'
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       matrix:
         go:
           - 1.21.x
-          # - 1.22.x
+          - 1.22.x
           - 1.23.x
           - 1.24.x
 
@@ -595,3 +595,13 @@ jobs:
           echo "docker run --rm -v \$(pwd):/workspace ghcr.io/${{ github.repository }}:latest /workspace/input.json markdown /workspace/output.md" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+
+  # Security and quality analysis workflows
+  codeql-analysis:
+    name: CodeQL Analysis
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read

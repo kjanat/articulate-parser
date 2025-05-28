@@ -10,6 +10,7 @@ import (
 
 	"github.com/kjanat/articulate-parser/internal/exporters"
 	"github.com/kjanat/articulate-parser/internal/services"
+	"github.com/kjanat/articulate-parser/internal/version"
 )
 
 // main is the entry point of the application.
@@ -28,27 +29,23 @@ func run(args []string) int {
 	exporterFactory := exporters.NewFactory(htmlCleaner)
 	app := services.NewApp(parser, exporterFactory)
 
+	// Check for version flag
+	if len(args) > 1 && (args[1] == "--version" || args[1] == "-v") {
+		fmt.Printf("%s version %s\n", args[0], version.Version)
+		fmt.Printf("Build time: %s\n", version.BuildTime)
+		fmt.Printf("Git commit: %s\n", version.GitCommit)
+		return 0
+	}
+
 	// Check for help flag
 	if len(args) > 1 && (args[1] == "--help" || args[1] == "-h" || args[1] == "help") {
-		fmt.Printf("Usage: %s <source> <format> <output>\n", args[0])
-		fmt.Printf("  source: URI or file path to the course\n")
-		fmt.Printf("  format: export format (%s)\n", joinStrings(app.GetSupportedFormats(), ", "))
-		fmt.Printf("  output: output file path\n")
-		fmt.Println("\nExample:")
-		fmt.Printf("  %s articulate-sample.json markdown output.md\n", args[0])
-		fmt.Printf("  %s https://rise.articulate.com/share/xyz docx output.docx\n", args[0])
+		printUsage(args[0], app.GetSupportedFormats())
 		return 0
 	}
 
 	// Check for required command-line arguments
 	if len(args) < 4 {
-		fmt.Printf("Usage: %s <source> <format> <output>\n", args[0])
-		fmt.Printf("  source: URI or file path to the course\n")
-		fmt.Printf("  format: export format (%s)\n", joinStrings(app.GetSupportedFormats(), ", "))
-		fmt.Printf("  output: output file path\n")
-		fmt.Println("\nExample:")
-		fmt.Printf("  %s articulate-sample.json markdown output.md\n", args[0])
-		fmt.Printf("  %s https://rise.articulate.com/share/xyz docx output.docx\n", args[0])
+		printUsage(args[0], app.GetSupportedFormats())
 		return 1
 	}
 
@@ -106,4 +103,19 @@ func joinStrings(strs []string, sep string) string {
 		result += sep + strs[i]
 	}
 	return result
+}
+
+// printUsage prints the command-line usage information.
+//
+// Parameters:
+//   - programName: The name of the program (args[0])
+//   - supportedFormats: Slice of supported export formats
+func printUsage(programName string, supportedFormats []string) {
+	fmt.Printf("Usage: %s <source> <format> <output>\n", programName)
+	fmt.Printf("  source: URI or file path to the course\n")
+	fmt.Printf("  format: export format (%s)\n", joinStrings(supportedFormats, ", "))
+	fmt.Printf("  output: output file path\n")
+	fmt.Println("\nExample:")
+	fmt.Printf("  %s articulate-sample.json markdown output.md\n", programName)
+	fmt.Printf("  %s https://rise.articulate.com/share/xyz docx output.docx\n", programName)
 }

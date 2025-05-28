@@ -11,13 +11,17 @@
 #
 name: "CodeQL"
 
+# This workflow is configured to be called by other workflows for more controlled execution
+# This allows integration with the main CI pipeline and avoids redundant runs
+# To enable automatic execution, uncomment the triggers below:
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  workflow_call:
   schedule:
     - cron: '44 16 * * 6'
+  # push:
+  #   branches: [ "master" ]
+  # pull_request:
+  #   branches: [ "master" ]
 
 jobs:
   analyze:

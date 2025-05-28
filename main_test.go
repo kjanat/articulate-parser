@@ -285,6 +285,51 @@ func TestRunWithHelpFlags(t *testing.T) {
 	}
 }
 
+// TestRunWithVersionFlags tests the run function with version flag arguments.
+func TestRunWithVersionFlags(t *testing.T) {
+	versionFlags := []string{"--version", "-v"}
+
+	for _, flag := range versionFlags {
+		t.Run("version_flag_"+flag, func(t *testing.T) {
+			// Capture stdout
+			oldStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			// Run with version flag
+			args := []string{"articulate-parser", flag}
+			exitCode := run(args)
+
+			// Restore stdout
+			w.Close()
+			os.Stdout = oldStdout
+
+			// Read captured output
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			output := buf.String()
+
+			// Verify exit code is 0 (success)
+			if exitCode != 0 {
+				t.Errorf("Expected exit code 0 for version flag %s, got %d", flag, exitCode)
+			}
+
+			// Verify version content is displayed
+			expectedContent := []string{
+				"articulate-parser version",
+				"Build time:",
+				"Git commit:",
+			}
+
+			for _, expected := range expectedContent {
+				if !strings.Contains(output, expected) {
+					t.Errorf("Expected version output to contain %q when using flag %s, got: %s", expected, flag, output)
+				}
+			}
+		})
+	}
+}
+
 // TestRunWithInvalidFile tests the run function with a non-existent file.
 func TestRunWithInvalidFile(t *testing.T) {
 	// Capture stdout and stderr
