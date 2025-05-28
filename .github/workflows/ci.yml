@@ -34,13 +34,58 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           check-latest: true
-          cache-dependency-path: '**/*.sum'
+          # Disable built-in cache to use our custom cache
+          cache: false
 
-      - name: Download dependencies
-        run: go mod download && echo "Download successful" || go mod tidy && echo "Tidy successful" || return 1
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('**/go.sum', '**/go.mod') }}-v1
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go }}-
+        continue-on-error: true
 
-      - name: Verify dependencies
-        run: go mod verify
+      - name: Download dependencies with retry
+        run: |
+          set -e
+          echo "Downloading Go dependencies..."
+          
+          # Function to download with retry
+          download_with_retry() {
+            local attempt=1
+            local max_attempts=3
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt of $max_attempts"
+              
+              if go mod download; then
+                echo "Download successful on attempt $attempt"
+                return 0
+              else
+                echo "Download failed on attempt $attempt"
+                if [ $attempt -lt $max_attempts ]; then
+                  echo "Cleaning cache and retrying..."
+                  go clean -modcache
+                  go clean -cache
+                  sleep 2
+                fi
+                attempt=$((attempt + 1))
+              fi
+            done
+            
+            echo "All download attempts failed"
+            return 1
+          }
+          
+          # Try download with retry logic
+          download_with_retry
+          
+          echo "Verifying module dependencies..."
+          go mod verify
+          echo "Dependencies verified successfully"
 
       - name: Build
         run: go build -v ./...
@@ -128,19 +173,20 @@ jobs:
 
             # Add coverage by package
             echo "<details>" >> $GITHUB_STEP_SUMMARY
-            echo "<summary>Click to expand package coverage details</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "### 📋 Coverage by Package" >> $GITHUB_STEP_SUMMARY
+            echo "<summary>Click to expand 📋 Coverage by Package details</summary>" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
             echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
 
             go tool cover -func=coverage.out | grep -v total | while read line; do
               if [[ $line == *".go:"* ]]; then
-                pkg=$(echo $line | awk '{print $1}') # | cut -d'/' -f1-3
+                pkg=$(echo $line | awk '{print $1}' | sed 's|github.com/kjanat/articulate-parser/||' | cut -d'/' -f1)
                 coverage=$(echo $line | awk '{print $3}')
-                echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
+                echo "$pkg $coverage"
               fi
-            done | sort -u
+            done | sort -k1,1 -u | while read pkg coverage; do
+              echo "| $pkg | $coverage |" >> $GITHUB_STEP_SUMMARY
+            done
 
             echo "</details>" >> $GITHUB_STEP_SUMMARY
 
