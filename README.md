@@ -2,6 +2,16 @@
 
 A Go-based parser that converts Articulate Rise e-learning content to various formats including Markdown, HTML, and Word documents.
 
+[![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?logo=Go&logoColor=white)][gomod]
+[![Go Doc](https://godoc.org/github.com/kjanat/articulate-parser?status.svg)][Package documentation]
+[![Go Report Card](https://goreportcard.com/badge/github.com/kjanat/articulate-parser)][Go report]
+[![Tag](https://img.shields.io/github/v/tag/kjanat/articulate-parser?sort=semver&label=Tag)][Tags] <!-- [![Release Date](https://img.shields.io/github/release-date/kjanat/articulate-parser?label=Release%20date)][Latest release] -->
+[![License](https://img.shields.io/github/license/kjanat/articulate-parser?label=License)][MIT License] <!-- [![Commit activity](https://img.shields.io/github/commit-activity/m/kjanat/articulate-parser?label=Commit%20activity)][Commits] -->
+[![Last commit](https://img.shields.io/github/last-commit/kjanat/articulate-parser?label=Last%20commit)][Commits]
+[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/kjanat/articulate-parser?label=Issues)][Issues]
+[![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
+[![Codecov](https://img.shields.io/codecov/c/gh/kjanat/articulate-parser?token=eHhaHY8nut&logo=codecov&logoColor=%23F01F7A&label=Codecov)][Codecov]
+
 ## System Architecture
 
 ```mermaid
@@ -72,16 +82,6 @@ The system follows **Clean Architecture** principles with clear separation of co
 -   **🔧 Service Layer**: Concrete implementations of parsing and utility services
 -   **📤 Export Layer**: Factory pattern for format-specific exporters
 -   **📊 Data Layer**: Domain models representing course structure
-
-[![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?logo=Go&logoColor=white)][gomod]
-[![Go Doc](https://godoc.org/github.com/kjanat/articulate-parser?status.svg)][Package documentation]
-[![Go Report Card](https://goreportcard.com/badge/github.com/kjanat/articulate-parser)][Go report]
-[![Tag](https://img.shields.io/github/v/tag/kjanat/articulate-parser?sort=semver&label=Tag)][Tags] <!-- [![Release Date](https://img.shields.io/github/release-date/kjanat/articulate-parser?label=Release%20date)][Latest release] -->
-[![License](https://img.shields.io/github/license/kjanat/articulate-parser?label=License)][MIT License] <!-- [![Commit activity](https://img.shields.io/github/commit-activity/m/kjanat/articulate-parser?label=Commit%20activity)][Commits] -->
-[![Last commit](https://img.shields.io/github/last-commit/kjanat/articulate-parser?label=Last%20commit)][Commits]
-[![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/kjanat/articulate-parser?label=Issues)][Issues]
-[![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
-[![Codecov](https://img.shields.io/codecov/c/gh/kjanat/articulate-parser?token=eHhaHY8nut&logo=codecov&logoColor=%23F01F7A&label=Codecov)][Codecov]
 
 ## Features
 
@@ -291,7 +291,7 @@ The parser includes error handling for:
 
 <!-- ## Code coverage
 
-![Sunburst](https://codecov.io/gh/kjanat/articulate-parser/graphs/tree.svg?token=eHhaHY8nut)
+![Sunburst](https://codecov.io/gh/kjanat/articulate-parser/graphs/sunburst.svg?token=eHhaHY8nut)
 
 ![Grid](https://codecov.io/gh/kjanat/articulate-parser/graphs/tree.svg?token=eHhaHY8nut)
 
@@ -315,12 +315,12 @@ The parser includes error handling for:
 
 Potential improvements could include:
 
--   PDF export support
--   Media file downloading
--   ~~HTML export with preserved styling~~ ✅ **Completed**
--   SCORM package support
--   Batch processing capabilities
--   Custom template support
+-   [ ]  PDF export support
+-   [ ]  Media file downloading
+-   [x]  ~~HTML export with preserved styling~~
+-   [ ]  SCORM package support
+-   [ ]  Batch processing capabilities
+-   [ ]  Custom template support
 
 ## License
 

@@ -16,6 +16,12 @@ import (
 // It handles command-line arguments, sets up dependencies,
 // and coordinates the parsing and exporting of courses.
 func main() {
+	os.Exit(run(os.Args))
+}
+
+// run contains the main application logic and returns an exit code.
+// This function is testable as it doesn't call os.Exit directly.
+func run(args []string) int {
 	// Dependency injection setup
 	htmlCleaner := services.NewHTMLCleaner()
 	parser := services.NewArticulateParser()
@@ -23,20 +29,20 @@ func main() {
 	app := services.NewApp(parser, exporterFactory)
 
 	// Check for required command-line arguments
-	if len(os.Args) < 4 {
-		fmt.Printf("Usage: %s <source> <format> <output>\n", os.Args[0])
+	if len(args) < 4 {
+		fmt.Printf("Usage: %s <source> <format> <output>\n", args[0])
 		fmt.Printf("  source: URI or file path to the course\n")
 		fmt.Printf("  format: export format (%s)\n", joinStrings(app.GetSupportedFormats(), ", "))
 		fmt.Printf("  output: output file path\n")
 		fmt.Println("\nExample:")
-		fmt.Printf("  %s articulate-sample.json markdown output.md\n", os.Args[0])
-		fmt.Printf("  %s https://rise.articulate.com/share/xyz docx output.docx\n", os.Args[0])
-		os.Exit(1)
+		fmt.Printf("  %s articulate-sample.json markdown output.md\n", args[0])
+		fmt.Printf("  %s https://rise.articulate.com/share/xyz docx output.docx\n", args[0])
+		return 1
 	}
 
-	source := os.Args[1]
-	format := os.Args[2]
-	output := os.Args[3]
+	source := args[1]
+	format := args[2]
+	output := args[3]
 
 	var err error
 
@@ -48,10 +54,12 @@ func main() {
 	}
 
 	if err != nil {
-		log.Fatalf("Error processing course: %v", err)
+		log.Printf("Error processing course: %v", err)
+		return 1
 	}
 
 	fmt.Printf("Successfully exported course to %s\n", output)
+	return 0
 }
 
 // isURI checks if a string is a URI by looking for http:// or https:// prefixes.

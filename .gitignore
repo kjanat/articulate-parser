@@ -48,9 +48,12 @@ build/
 # Test coverage files
 coverage.out
 coverage.txt
+coverage.html
+coverage.*
 coverage
 *.cover
 *.coverprofile
+main_coverage
 
 # Other common exclusions
 *.exe
