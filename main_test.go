@@ -239,7 +239,7 @@ func TestRunWithInsufficientArgs(t *testing.T) {
 // TestRunWithHelpFlags tests the run function with help flag arguments.
 func TestRunWithHelpFlags(t *testing.T) {
 	helpFlags := []string{"--help", "-h", "help"}
-	
+
 	for _, flag := range helpFlags {
 		t.Run("help_flag_"+flag, func(t *testing.T) {
 			// Capture stdout
