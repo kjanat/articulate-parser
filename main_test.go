@@ -241,10 +241,10 @@ func TestRunWithInvalidFile(t *testing.T) {
 	// Capture stdout and stderr
 	oldStdout := os.Stdout
 	oldStderr := os.Stderr
-	
+
 	stdoutR, stdoutW, _ := os.Pipe()
 	stderrR, stderrW, _ := os.Pipe()
-	
+
 	os.Stdout = stdoutW
 	os.Stderr = stderrW
 
@@ -267,7 +267,7 @@ func TestRunWithInvalidFile(t *testing.T) {
 	var stdoutBuf, stderrBuf bytes.Buffer
 	io.Copy(&stdoutBuf, stdoutR)
 	io.Copy(&stderrBuf, stderrR)
-	
+
 	stdoutR.Close()
 	stderrR.Close()
 
@@ -288,10 +288,10 @@ func TestRunWithInvalidURI(t *testing.T) {
 	// Capture stdout and stderr
 	oldStdout := os.Stdout
 	oldStderr := os.Stderr
-	
+
 	stdoutR, stdoutW, _ := os.Pipe()
 	stderrR, stderrW, _ := os.Pipe()
-	
+
 	os.Stdout = stdoutW
 	os.Stderr = stderrW
 
@@ -314,7 +314,7 @@ func TestRunWithInvalidURI(t *testing.T) {
 	var stdoutBuf, stderrBuf bytes.Buffer
 	io.Copy(&stdoutBuf, stdoutR)
 	io.Copy(&stderrBuf, stderrR)
-	
+
 	stdoutR.Close()
 	stderrR.Close()
 
