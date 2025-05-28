@@ -28,6 +28,18 @@ func run(args []string) int {
 	exporterFactory := exporters.NewFactory(htmlCleaner)
 	app := services.NewApp(parser, exporterFactory)
 
+	// Check for help flag
+	if len(args) > 1 && (args[1] == "--help" || args[1] == "-h" || args[1] == "help") {
+		fmt.Printf("Usage: %s <source> <format> <output>\n", args[0])
+		fmt.Printf("  source: URI or file path to the course\n")
+		fmt.Printf("  format: export format (%s)\n", joinStrings(app.GetSupportedFormats(), ", "))
+		fmt.Printf("  output: output file path\n")
+		fmt.Println("\nExample:")
+		fmt.Printf("  %s articulate-sample.json markdown output.md\n", args[0])
+		fmt.Printf("  %s https://rise.articulate.com/share/xyz docx output.docx\n", args[0])
+		return 0
+	}
+
 	// Check for required command-line arguments
 	if len(args) < 4 {
 		fmt.Printf("Usage: %s <source> <format> <output>\n", args[0])

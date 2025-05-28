@@ -10,6 +10,8 @@ A Go-based parser that converts Articulate Rise e-learning content to various fo
 [![Last commit](https://img.shields.io/github/last-commit/kjanat/articulate-parser?label=Last%20commit)][Commits]
 [![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/kjanat/articulate-parser?label=Issues)][Issues]
 [![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
+[![Docker](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/docker.yml?logo=docker&label=Docker)][Docker workflow]
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker&logoColor=white)][Docker image]
 [![Codecov](https://img.shields.io/codecov/c/gh/kjanat/articulate-parser?token=eHhaHY8nut&logo=codecov&logoColor=%23F01F7A&label=Codecov)][Codecov]
 
 ## System Architecture
@@ -101,7 +103,7 @@ The system follows **Clean Architecture** principles with clear separation of co
 
 ### Prerequisites
 
--   Go, I don't know the version, but I use go1.24.2 right now, and it works, see the [CI][Build] workflow where it is tested.
+-   Go, I don't know the version, but I have [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?label=)][gomod] configured right now, and it works, see the [CI][Build] workflow where it is tested.
 
 ### Install from source
 
@@ -198,6 +200,84 @@ Then run:
 
 ```bash
 ./articulate-parser input.json md output.md
+```
+
+## Docker
+
+The application is available as a Docker image from GitHub Container Registry.
+
+### Quick Start
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/kjanat/articulate-parser:latest
+
+# Show help
+docker run --rm ghcr.io/kjanat/articulate-parser:latest --help
+```
+
+### Usage Examples
+
+#### Process a local file
+
+```bash
+# Mount current directory and process a local JSON file
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/kjanat/articulate-parser:latest \
+  /workspace/input.json markdown /workspace/output.md
+```
+
+#### Process from URL
+
+```bash
+# Mount output directory and process from Articulate Rise URL
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/kjanat/articulate-parser:latest \
+  "https://rise.articulate.com/share/xyz" docx /workspace/output.docx
+```
+
+#### Export to different formats
+
+```bash
+# Export to HTML
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/kjanat/articulate-parser:latest \
+  /workspace/course.json html /workspace/course.html
+
+# Export to Word Document
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/kjanat/articulate-parser:latest \
+  /workspace/course.json docx /workspace/course.docx
+```
+
+### Available Tags
+
+- `latest` - Latest stable release from master branch
+- `edge` - Latest development build from master branch  
+- `v1.x.x` - Specific version releases
+- `develop` - Development branch builds
+- `feature/docker-ghcr` - Feature branch builds (temporary)
+
+### Docker Compose
+
+For local development, you can use the provided `docker-compose.yml`:
+
+```bash
+# Build and run with default help command
+docker-compose up articulate-parser
+
+# Process files using mounted volumes
+docker-compose up parser-with-files
+```
+
+### Building Locally
+
+```bash
+# Build the Docker image locally
+docker build -t articulate-parser:local .
+
+# Run the local image
+docker run --rm articulate-parser:local --help
 ```
 
 ## Development
@@ -329,6 +409,8 @@ This is a utility tool for educational content conversion. Please ensure you hav
 [Build]: https://github.com/kjanat/articulate-parser/actions/workflows/ci.yml
 [Codecov]: https://codecov.io/gh/kjanat/articulate-parser
 [Commits]: https://github.com/kjanat/articulate-parser/commits/master/
+[Docker workflow]: https://github.com/kjanat/articulate-parser/actions/workflows/docker.yml
+[Docker image]: https://github.com/kjanat/articulate-parser/pkgs/container/articulate-parser
 [Go report]: https://goreportcard.com/report/github.com/kjanat/articulate-parser
 [gomod]: go.mod
 [Issues]: https://github.com/kjanat/articulate-parser/issues

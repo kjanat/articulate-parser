@@ -1,0 +1,68 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.codecov.yml
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Build artifacts
+build/
+dist/
+*.exe
+*.tar.gz
+*.zip
+
+# Test files
+*_test.go
+test_*.go
+test/
+coverage.out
+coverage.html
+*.log
+
+# Development
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Output and temporary files
+output/
+tmp/
+temp/
+
+# Node.js (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python (if any)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Scripts (build scripts not needed in container)
+scripts/
+
+# Sample files
+articulate-sample.json
+test_input.json
+
+# License
+LICENSE
