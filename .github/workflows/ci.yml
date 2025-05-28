@@ -535,12 +535,12 @@ jobs:
           # Multi-architecture build - Docker automatically provides TARGETOS, TARGETARCH, etc.
           # Based on Go's supported platforms from 'go tool dist list'
           platforms: |
-            linux/amd64     # Intel/AMD 64-bit (most servers, desktops)  
-            linux/arm64     # ARM 64-bit (Apple Silicon, AWS Graviton, modern ARM)
-            linux/arm/v7    # ARM 32-bit (Raspberry Pi, older ARM devices)
-            linux/386       # Intel 32-bit (legacy x86 systems)
-            linux/ppc64le   # PowerPC 64-bit LE (IBM Power systems)
-            linux/s390x     # IBM System z (mainframes)
+            linux/amd64
+            linux/arm64
+            linux/arm/v7
+            linux/386
+            linux/ppc64le
+            linux/s390x
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
