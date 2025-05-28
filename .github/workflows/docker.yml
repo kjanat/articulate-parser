@@ -38,6 +38,7 @@ jobs:
         with:
           context: .
           push: false
+          load: true
           tags: test:latest
           build-args: |
             VERSION=test
@@ -99,9 +100,12 @@ jobs:
             type=raw,value=edge,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.title=Articulate Parser
-            org.opencontainers.image.description=A tool to parse Articulate Rise courses and export them to various formats
+            org.opencontainers.image.description=A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats (Markdown, HTML, DOCX). Supports media extraction, content cleaning, and batch processing for educational content conversion.
             org.opencontainers.image.vendor=kjanat
             org.opencontainers.image.licenses=MIT
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/master/README.md
 
       - name: Build and push Docker image
         id: build

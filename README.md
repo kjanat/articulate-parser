@@ -12,6 +12,7 @@ A Go-based parser that converts Articulate Rise e-learning content to various fo
 [![CI](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/ci.yml?logo=github&label=CI)][Build]
 [![Docker](https://img.shields.io/github/actions/workflow/status/kjanat/articulate-parser/docker.yml?logo=docker&label=Docker)][Docker workflow]
 [![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker&logoColor=white)][Docker image]
+[![Docker Size](https://img.shields.io/docker/image-size/kjanat/articulate-parser?logo=docker&label=Image%20Size)][Docker image]
 [![Codecov](https://img.shields.io/codecov/c/gh/kjanat/articulate-parser?token=eHhaHY8nut&logo=codecov&logoColor=%23F01F7A&label=Codecov)][Codecov]
 
 ## System Architecture
@@ -206,6 +207,13 @@ Then run:
 
 The application is available as a Docker image from GitHub Container Registry.
 
+### 🐳 Docker Image Information
+
+- **Registry**: `ghcr.io/kjanat/articulate-parser`
+- **Platforms**: linux/amd64, linux/arm64
+- **Base Image**: Scratch (minimal footprint)
+- **Size**: ~15-20MB compressed
+
 ### Quick Start
 
 ```bash
@@ -215,6 +223,17 @@ docker pull ghcr.io/kjanat/articulate-parser:latest
 # Show help
 docker run --rm ghcr.io/kjanat/articulate-parser:latest --help
 ```
+
+### Available Tags
+
+| Tag | Description | Use Case |
+|-----|-------------|----------|
+| `latest` | Latest stable release from master branch | Production use |
+| `edge` | Latest development build from master branch | Testing new features |
+| `v1.x.x` | Specific version releases | Production pinning |
+| `develop` | Development branch builds | Development/testing |
+| `feature/docker-ghcr` | Feature branch builds | Feature testing |
+| `master` | Latest master branch build | Continuous integration |
 
 ### Usage Examples
 
@@ -248,15 +267,23 @@ docker run --rm -v $(pwd):/workspace \
 docker run --rm -v $(pwd):/workspace \
   ghcr.io/kjanat/articulate-parser:latest \
   /workspace/course.json docx /workspace/course.docx
+
+# Export to Markdown
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/kjanat/articulate-parser:latest \
+  /workspace/course.json md /workspace/course.md
 ```
 
-### Available Tags
+#### Batch Processing
 
-- `latest` - Latest stable release from master branch
-- `edge` - Latest development build from master branch  
-- `v1.x.x` - Specific version releases
-- `develop` - Development branch builds
-- `feature/docker-ghcr` - Feature branch builds (temporary)
+```bash
+# Process multiple files in a directory
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/kjanat/articulate-parser:latest \
+  bash -c "for file in /workspace/*.json; do
+    /articulate-parser \"\$file\" md \"\${file%.json}.md\"
+  done"
+```
 
 ### Docker Compose
 
@@ -278,7 +305,27 @@ docker build -t articulate-parser:local .
 
 # Run the local image
 docker run --rm articulate-parser:local --help
+
+# Build with specific version
+docker build --build-arg VERSION=local --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) -t articulate-parser:local .
 ```
+
+### Environment Variables
+
+The Docker image supports the following build-time arguments:
+
+| Argument | Description | Default |
+|----------|-------------|---------|
+| `VERSION` | Version string embedded in the binary | `dev` |
+| `BUILD_TIME` | Build timestamp | Current time |
+| `GIT_COMMIT` | Git commit hash | Current commit |
+
+### Docker Security
+
+- **Non-root execution**: The application runs as a non-privileged user
+- **Minimal attack surface**: Built from scratch base image
+- **No shell access**: Only the application binary is available
+- **Read-only filesystem**: Container filesystem is read-only except for mounted volumes
 
 ## Development
 
