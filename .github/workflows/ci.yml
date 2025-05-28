@@ -56,7 +56,7 @@ jobs:
         run: |
           set -e
           echo "Downloading Go dependencies..."
-          
+
           # Function to download with retry
           download_with_retry() {
             local attempt=1
@@ -83,10 +83,10 @@ jobs:
             echo "All download attempts failed"
             return 1
           }
-          
+
           # Try download with retry logic
           download_with_retry
-          
+
           echo "Verifying module dependencies..."
           go mod verify
           echo "Dependencies verified successfully"
@@ -521,7 +521,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.title=Articulate Parser
-            org.opencontainers.image.description=A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats (Markdown, HTML, DOCX). Supports media extraction, content cleaning, and batch processing for educational content conversion.
+            org.opencontainers.image.description=A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats including Markdown HTML and DOCX. Supports media extraction content cleaning and batch processing for educational content conversion.
             org.opencontainers.image.vendor=kjanat
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.url=https://github.com/${{ github.repository }}
@@ -536,13 +536,14 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.labels }}
           build-args: |
             VERSION=${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
             BUILD_TIME=${{ github.event.head_commit.timestamp }}
             GIT_COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats (Markdown, HTML, DOCX). Supports media extraction, content cleaning, and batch processing for educational content conversion.
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.description=A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats including Markdown HTML and DOCX. Supports media extraction content cleaning and batch processing for educational content conversion.
           sbom: true
           provenance: true
 
