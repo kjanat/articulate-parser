@@ -1,5 +1,5 @@
 services:
-  articulate-parser:
+  articulate-parser: &articulate-parser
     build:
       context: .
       dockerfile: Dockerfile
@@ -19,7 +19,7 @@ services:
 
   # Service for processing files with volume mounts
   parser-with-files:
-    extends: articulate-parser
+    <<: *articulate-parser
     volumes:
       - ./input:/input:ro
       - ./output:/output
@@ -27,7 +27,13 @@ services:
 
   # Service for development - with shell access
   parser-dev:
-    extends: articulate-parser
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: articulate-parser:dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
     entrypoint: ["/bin/sh"]
     command: ["-c", "while true; do sleep 30; done"]
-    # This won't work with scratch image, but useful for debugging builds
+    # Uses Dockerfile.dev with Alpine base instead of scratch for shell access

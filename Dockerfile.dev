@@ -1,10 +1,13 @@
-# Build stage
+# Development Dockerfile with shell access
+# Uses Alpine instead of scratch for debugging
+
+# Build stage - same as production
 FROM golang:1.23-alpine AS builder
 
 # Install git and ca-certificates (needed for fetching dependencies and HTTPS)
 RUN apk add --no-cache git ca-certificates tzdata
 
-# Create a non-root user for the final stage
+# Create a non-root user
 RUN adduser -D -u 1000 appuser
 
 # Set the working directory
@@ -30,22 +33,19 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o articulate-parser \
     ./main.go
 
-# Final stage - minimal runtime image
-FROM scratch
+# Development stage - uses Alpine for shell access
+FROM alpine:3.19
 
-# Copy CA certificates for HTTPS requests
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
-# Copy timezone data
-COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
-
-# Add a minimal /etc/passwd file to support non-root user
-COPY --from=builder /etc/passwd /etc/passwd
+# Install minimal dependencies
+RUN apk add --no-cache ca-certificates tzdata
 
 # Copy the binary
 COPY --from=builder /app/articulate-parser /articulate-parser
 
-# Switch to non-root user (appuser with UID 1000)
+# Copy the non-root user configuration
+COPY --from=builder /etc/passwd /etc/passwd
+
+# Switch to non-root user
 USER appuser
 
 # Set the binary as entrypoint
@@ -55,8 +55,8 @@ ENTRYPOINT ["/articulate-parser"]
 CMD ["--help"]
 
 # Add labels for metadata
-LABEL org.opencontainers.image.title="Articulate Parser"
-LABEL org.opencontainers.image.description="A powerful CLI tool to parse Articulate Rise courses and export them to multiple formats (Markdown, HTML, DOCX). Supports media extraction, content cleaning, and batch processing for educational content conversion."
+LABEL org.opencontainers.image.title="Articulate Parser (Dev)"
+LABEL org.opencontainers.image.description="Development version of Articulate Parser with shell access"
 LABEL org.opencontainers.image.vendor="kjanat"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.source="https://github.com/kjanat/articulate-parser"
