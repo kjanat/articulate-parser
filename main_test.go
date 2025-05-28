@@ -236,6 +236,55 @@ func TestRunWithInsufficientArgs(t *testing.T) {
 	}
 }
 
+// TestRunWithHelpFlags tests the run function with help flag arguments.
+func TestRunWithHelpFlags(t *testing.T) {
+	helpFlags := []string{"--help", "-h", "help"}
+	
+	for _, flag := range helpFlags {
+		t.Run("help_flag_"+flag, func(t *testing.T) {
+			// Capture stdout
+			oldStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			// Run with help flag
+			args := []string{"articulate-parser", flag}
+			exitCode := run(args)
+
+			// Restore stdout
+			w.Close()
+			os.Stdout = oldStdout
+
+			// Read captured output
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			output := buf.String()
+
+			// Verify exit code is 0 (success)
+			if exitCode != 0 {
+				t.Errorf("Expected exit code 0 for help flag %s, got %d", flag, exitCode)
+			}
+
+			// Verify help content is displayed
+			expectedContent := []string{
+				"Usage:",
+				"source: URI or file path to the course",
+				"format: export format",
+				"output: output file path",
+				"Example:",
+				"articulate-sample.json markdown output.md",
+				"https://rise.articulate.com/share/xyz docx output.docx",
+			}
+
+			for _, expected := range expectedContent {
+				if !strings.Contains(output, expected) {
+					t.Errorf("Expected help output to contain %q when using flag %s, got: %s", expected, flag, output)
+				}
+			}
+		})
+	}
+}
+
 // TestRunWithInvalidFile tests the run function with a non-existent file.
 func TestRunWithInvalidFile(t *testing.T) {
 	// Capture stdout and stderr

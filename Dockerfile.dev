@@ -34,7 +34,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     ./main.go
 
 # Development stage - uses Alpine for shell access
-FROM alpine:3.19
+FROM alpine:3.21.3
 
 # Install minimal dependencies
 RUN apk add --no-cache ca-certificates tzdata
