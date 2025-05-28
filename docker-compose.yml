@@ -1,0 +1,39 @@
+services:
+  articulate-parser: &articulate-parser
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: "dev"
+        BUILD_TIME: "2024-01-01T00:00:00Z"
+        GIT_COMMIT: "dev"
+    image: articulate-parser:local
+    volumes:
+      # Mount current directory to /workspace for file access
+      - .:/workspace
+    working_dir: /workspace
+    # Override entrypoint for interactive use
+    entrypoint: ["/articulate-parser"]
+    # Default to showing help
+    command: ["--help"]
+
+  # Service for processing files with volume mounts
+  parser-with-files:
+    <<: *articulate-parser
+    volumes:
+      - ./input:/input:ro
+      - ./output:/output
+    command: ["/input/sample.json", "markdown", "/output/result.md"]
+
+  # Service for development - with shell access
+  parser-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: articulate-parser:dev
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "while true; do sleep 30; done"]
+    # Uses Dockerfile.dev with Alpine base instead of scratch for shell access

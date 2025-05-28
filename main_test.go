@@ -85,80 +85,6 @@ func TestIsURI(t *testing.T) {
 	}
 }
 
-// TestJoinStrings tests the joinStrings function with various input scenarios.
-func TestJoinStrings(t *testing.T) {
-	tests := []struct {
-		name      string
-		strs      []string
-		separator string
-		expected  string
-	}{
-		{
-			name:      "empty slice",
-			strs:      []string{},
-			separator: ", ",
-			expected:  "",
-		},
-		{
-			name:      "single string",
-			strs:      []string{"hello"},
-			separator: ", ",
-			expected:  "hello",
-		},
-		{
-			name:      "two strings with comma separator",
-			strs:      []string{"markdown", "docx"},
-			separator: ", ",
-			expected:  "markdown, docx",
-		},
-		{
-			name:      "three strings with comma separator",
-			strs:      []string{"markdown", "md", "docx"},
-			separator: ", ",
-			expected:  "markdown, md, docx",
-		},
-		{
-			name:      "multiple strings with pipe separator",
-			strs:      []string{"option1", "option2", "option3"},
-			separator: " | ",
-			expected:  "option1 | option2 | option3",
-		},
-		{
-			name:      "strings with no separator",
-			strs:      []string{"a", "b", "c"},
-			separator: "",
-			expected:  "abc",
-		},
-		{
-			name:      "strings with newline separator",
-			strs:      []string{"line1", "line2", "line3"},
-			separator: "\n",
-			expected:  "line1\nline2\nline3",
-		},
-		{
-			name:      "empty strings in slice",
-			strs:      []string{"", "middle", ""},
-			separator: "-",
-			expected:  "-middle-",
-		},
-		{
-			name:      "nil slice",
-			strs:      nil,
-			separator: ", ",
-			expected:  "",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := joinStrings(tt.strs, tt.separator)
-			if result != tt.expected {
-				t.Errorf("joinStrings(%v, %q) = %q, want %q", tt.strs, tt.separator, result, tt.expected)
-			}
-		})
-	}
-}
-
 // BenchmarkIsURI benchmarks the isURI function performance.
 func BenchmarkIsURI(b *testing.B) {
 	testStr := "https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/"
@@ -166,17 +92,6 @@ func BenchmarkIsURI(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		isURI(testStr)
-	}
-}
-
-// BenchmarkJoinStrings benchmarks the joinStrings function performance.
-func BenchmarkJoinStrings(b *testing.B) {
-	strs := []string{"markdown", "md", "docx", "word", "pdf", "html"}
-	separator := ", "
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		joinStrings(strs, separator)
 	}
 }
 
@@ -231,6 +146,100 @@ func TestRunWithInsufficientArgs(t *testing.T) {
 
 			if !strings.Contains(output, "export format") {
 				t.Errorf("Expected format information in output, got: %s", output)
+			}
+		})
+	}
+}
+
+// TestRunWithHelpFlags tests the run function with help flag arguments.
+func TestRunWithHelpFlags(t *testing.T) {
+	helpFlags := []string{"--help", "-h", "help"}
+
+	for _, flag := range helpFlags {
+		t.Run("help_flag_"+flag, func(t *testing.T) {
+			// Capture stdout
+			oldStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			// Run with help flag
+			args := []string{"articulate-parser", flag}
+			exitCode := run(args)
+
+			// Restore stdout
+			w.Close()
+			os.Stdout = oldStdout
+
+			// Read captured output
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			output := buf.String()
+
+			// Verify exit code is 0 (success)
+			if exitCode != 0 {
+				t.Errorf("Expected exit code 0 for help flag %s, got %d", flag, exitCode)
+			}
+
+			// Verify help content is displayed
+			expectedContent := []string{
+				"Usage:",
+				"source: URI or file path to the course",
+				"format: export format",
+				"output: output file path",
+				"Example:",
+				"articulate-sample.json markdown output.md",
+				"https://rise.articulate.com/share/xyz docx output.docx",
+			}
+
+			for _, expected := range expectedContent {
+				if !strings.Contains(output, expected) {
+					t.Errorf("Expected help output to contain %q when using flag %s, got: %s", expected, flag, output)
+				}
+			}
+		})
+	}
+}
+
+// TestRunWithVersionFlags tests the run function with version flag arguments.
+func TestRunWithVersionFlags(t *testing.T) {
+	versionFlags := []string{"--version", "-v"}
+
+	for _, flag := range versionFlags {
+		t.Run("version_flag_"+flag, func(t *testing.T) {
+			// Capture stdout
+			oldStdout := os.Stdout
+			r, w, _ := os.Pipe()
+			os.Stdout = w
+
+			// Run with version flag
+			args := []string{"articulate-parser", flag}
+			exitCode := run(args)
+
+			// Restore stdout
+			w.Close()
+			os.Stdout = oldStdout
+
+			// Read captured output
+			var buf bytes.Buffer
+			io.Copy(&buf, r)
+			output := buf.String()
+
+			// Verify exit code is 0 (success)
+			if exitCode != 0 {
+				t.Errorf("Expected exit code 0 for version flag %s, got %d", flag, exitCode)
+			}
+
+			// Verify version content is displayed
+			expectedContent := []string{
+				"articulate-parser version",
+				"Build time:",
+				"Git commit:",
+			}
+
+			for _, expected := range expectedContent {
+				if !strings.Contains(output, expected) {
+					t.Errorf("Expected version output to contain %q when using flag %s, got: %s", expected, flag, output)
+				}
 			}
 		})
 	}
