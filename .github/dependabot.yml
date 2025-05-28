@@ -31,6 +31,13 @@ updates:
     commit-message:
       prefix: 'docker'
       include: 'scope'
+    groups:
+      docker-images:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
 
   # Check for updates to Docker Compose
   - package-ecosystem: 'docker-compose'
@@ -47,6 +54,13 @@ updates:
     commit-message:
       prefix: 'docker'
       include: 'scope'
+    groups:
+      docker-compose:
+        patterns:
+          - '*'
+        update-types:
+          - 'minor'
+          - 'patch'
 
   # Check for updates to Go modules
   - package-ecosystem: 'gomod'

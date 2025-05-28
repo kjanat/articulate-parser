@@ -64,3 +64,4 @@ main_coverage
 *.test
 *.out
 /tmp/
+.github/copilot-instructions.md
