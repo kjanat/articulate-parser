@@ -26,7 +26,7 @@ jobs:
       matrix:
         go:
           - 1.21.x
-          - 1.22.x
+          # - 1.22.x
           - 1.23.x
           - 1.24.x
 
@@ -324,7 +324,7 @@ jobs:
           tags: test:latest
           build-args: |
             VERSION=test
-            BUILD_TIME=${{ github.event.head_commit.timestamp }}
+            BUILD_TIME=$(git log -1 --format=%cd --date=iso-strict)
             GIT_COMMIT=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -412,8 +412,8 @@ jobs:
           echo "## 🔨 Build Process" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Set the build time environment variable
-          BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          # Set the build time environment variable using git commit timestamp
+          BUILD_TIME=$(git log -1 --format=%cd --date=iso-strict)
 
           # Add run permissions to the build script
           chmod +x ./scripts/build.sh
@@ -449,14 +449,19 @@ jobs:
 
           # Compress all binaries except Darwin (macOS) binaries as UPX doesn't work well with recent macOS versions
           for binary in articulate-parser-*; do
-            if [[ "$binary" == *"darwin"* ]]; then
-              echo "Skipping UPX compression for $binary (macOS compatibility)"
-            else
-              echo "Compressing $binary..."
-              upx --best --lzma "$binary" || {
-                echo "Warning: UPX compression failed for $binary, keeping original"
-              }
-            fi
+            echo "Compressing $binary..."
+            upx --best "$binary" || {
+              echo "Warning: UPX compression failed for $binary, keeping original"
+            }
+
+            # if [[ "$binary" == *"darwin"* ]]; then
+            #   echo "Skipping UPX compression for $binary (macOS compatibility)"
+            # else
+            #   echo "Compressing $binary..."
+            #   upx --best "$binary" || { # removed `--lzma`
+            #     echo "Warning: UPX compression failed for $binary, keeping original"
+            #   }
+            # fi
           done
 
           echo "**Final sizes:**" >> $GITHUB_STEP_SUMMARY

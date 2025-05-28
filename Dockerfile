@@ -34,8 +34,8 @@ ARG TARGETVARIANT
 
 # Debug: Show build information
 RUN echo "Building for platform: $TARGETPLATFORM (OS: $TARGETOS, Arch: $TARGETARCH, Variant: $TARGETVARIANT)" \
-  && echo "Build platform: $BUILDPLATFORM" \
-  && echo "Go version: $(go version)"
+&& echo "Build platform: $BUILDPLATFORM" \
+&& echo "Go version: $(go version)"
 
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
 -ldflags="-s -w -X github.com/kjanat/articulate-parser/internal/version.Version=${VERSION} -X github.com/kjanat/articulate-parser/internal/version.BuildTime=${BUILD_TIME} -X github.com/kjanat/articulate-parser/internal/version.GitCommit=${GIT_COMMIT}" \
