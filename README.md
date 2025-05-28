@@ -44,15 +44,14 @@ flowchart TD
     IEXPORTER -.-> HTML
     IEXPORTER -.-> DOCX
     IFACTORY[ExporterFactory Interface<br/>interfaces/exporter.go] -.-> FACTORY
-    
-    %% Styling
-    classDef userInput fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef coreLogic fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef dataSource fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef exporter fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef output fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    classDef interface fill:#f1f8e9,stroke:#33691e,stroke-width:1px,stroke-dasharray: 5 5
-    classDef service fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+      %% Styling - Colors that work in both light and dark GitHub themes
+    classDef userInput fill:#dbeafe,stroke:#1e40af,stroke-width:2px,color:#1e40af
+    classDef coreLogic fill:#ede9fe,stroke:#6d28d9,stroke-width:2px,color:#6d28d9
+    classDef dataSource fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#059669
+    classDef exporter fill:#fed7aa,stroke:#ea580c,stroke-width:2px,color:#ea580c
+    classDef output fill:#fce7f3,stroke:#be185d,stroke-width:2px,color:#be185d
+    classDef interface fill:#ecfdf5,stroke:#16a34a,stroke-width:1px,stroke-dasharray: 5 5,color:#16a34a
+    classDef service fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#0891b2
     
     class CLI userInput
     class APP,FACTORY coreLogic
