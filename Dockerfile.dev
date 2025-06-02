@@ -49,7 +49,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
 RUN file /app/articulate-parser || echo "file command not available"
 
 # Development stage - uses Alpine for shell access
-FROM alpine:3.21.3
+FROM alpine:3.22.0
 
 # Install minimal dependencies
 RUN apk add --no-cache ca-certificates tzdata
