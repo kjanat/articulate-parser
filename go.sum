@@ -4,3 +4,5 @@ github.com/fumiama/imgsz v0.0.4 h1:Lsasu2hdSSFS+vnD+nvR1UkiRMK7hcpyYCC0FzgSMFI=
 github.com/fumiama/imgsz v0.0.4/go.mod h1:bISOQVTlw9sRytPwe8ir7tAaEmyz9hSNj9n8mXMBG0E=
 golang.org/x/image v0.27.0 h1:C8gA4oWU/tKkdCfYT6T2u4faJu3MeNS5O8UPWlPF61w=
 golang.org/x/image v0.27.0/go.mod h1:xbdrClrAUway1MUTEZDq9mz/UpRwYAkFFNUslZtcB+g=
+golang.org/x/image v0.32.0 h1:6lZQWq75h7L5IWNk0r+SCpUJ6tUVd3v4ZHnbRKLkUDQ=
+golang.org/x/image v0.32.0/go.mod h1:/R37rrQmKXtO6tYXAjtDLwQgFLHmhW+V6ayXlxzP2Pc=
