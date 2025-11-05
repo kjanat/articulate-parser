@@ -3,8 +3,6 @@ name: CI
 on:
   push:
     branches: ['master', 'develop']
-    tags:
-      - 'v*.*.*'
   pull_request:
     branches: ['master', 'develop', 'feature/*']
 
@@ -352,136 +350,6 @@ jobs:
           fail-on-severity: moderate
           comment-summary-in-pr: always
 
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: github.ref_type == 'tag'
-    permissions:
-      contents: write
-    needs: ['test']
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: 'go.mod'
-          check-latest: true
-
-      - name: Run tests
-        run: |
-          echo "## 🚀 Release Tests" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          go test -v ./... 2>&1 | tee release-test-output.log
-          TEST_STATUS=$?
-
-          TOTAL_TESTS=$(grep -c "=== RUN" release-test-output.log || echo "0")
-          PASSED_TESTS=$(grep -c "--- PASS:" release-test-output.log || echo "0")
-          FAILED_TESTS=$(grep -c "--- FAIL:" release-test-output.log || echo "0")
-
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Passed | ✅ $PASSED_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Failed | ❌ $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | $([ $TEST_STATUS -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED") |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          exit $TEST_STATUS
-
-      - name: Install UPX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y upx
-
-      - name: Build binaries
-        run: |
-          echo "## 🔨 Build Process" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Set the build time environment variable using git commit timestamp
-          BUILD_TIME=$(git log -1 --format=%cd --date=iso-strict)
-
-          # Add run permissions to the build script
-          chmod +x ./scripts/build.sh
-
-          # Display help information for the build script
-          ./scripts/build.sh --help
-
-          echo "**Build Configuration:**" >> $GITHUB_STEP_SUMMARY
-          echo "- Version: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Build Time: $BUILD_TIME" >> $GITHUB_STEP_SUMMARY
-          echo "- Git Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Build for all platforms
-          ./scripts/build.sh \
-            --verbose \
-            -ldflags "-s -w -X github.com/kjanat/articulate-parser/internal/version.Version=${{ github.ref_name }} -X github.com/kjanat/articulate-parser/internal/version.BuildTime=$BUILD_TIME -X github.com/kjanat/articulate-parser/internal/version.GitCommit=${{ github.sha }}"
-
-      - name: Compress binaries with UPX
-        run: |
-          echo "## 📦 Binary Compression" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "Compressing binaries with UPX..."
-          cd build/
-
-          # Get original sizes
-          echo "**Original sizes:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          ls -lah >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Compress all binaries except Darwin (macOS) binaries as UPX doesn't work well with recent macOS versions
-          for binary in articulate-parser-*; do
-            echo "Compressing $binary..."
-            upx --best "$binary" || {
-              echo "Warning: UPX compression failed for $binary, keeping original"
-            }
-
-            # if [[ "$binary" == *"darwin"* ]]; then
-            #   echo "Skipping UPX compression for $binary (macOS compatibility)"
-            # else
-            #   echo "Compressing $binary..."
-            #   upx --best "$binary" || { # removed `--lzma`
-            #     echo "Warning: UPX compression failed for $binary, keeping original"
-            #   }
-            # fi
-          done
-
-          echo "**Final sizes:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          ls -lah >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v5.6.2
-        with:
-          name: build-artifacts
-          path: build/
-          if-no-files-found: ignore
-          retention-days: 1
-          compression-level: 9
-          overwrite: true
-          include-hidden-files: true
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: build/*
-          generate_release_notes: true
-          draft: false
-          # Mark v0.x.x releases as prerelease (pre-1.0 versions are considered unstable)
-          prerelease: ${{ startsWith(github.ref, 'refs/tags/v0.') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   docker:
     name: Docker Build & Push
     runs-on: ubuntu-latest
@@ -489,7 +357,7 @@ jobs:
       contents: read
       packages: write
     needs: ['test']
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/feature/docker'))
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/docker'))
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
