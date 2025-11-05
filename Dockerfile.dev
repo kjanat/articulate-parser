@@ -2,7 +2,7 @@
 # Uses Alpine instead of scratch for debugging
 
 # Build stage - same as production
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install git and ca-certificates (needed for fetching dependencies and HTTPS)
 RUN apk add --no-cache git ca-certificates tzdata file
@@ -49,7 +49,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
 RUN file /app/articulate-parser || echo "file command not available"
 
 # Development stage - uses Alpine for shell access
-FROM alpine:3.21.3
+FROM alpine:3.22.1
 
 # Install minimal dependencies
 RUN apk add --no-cache ca-certificates tzdata

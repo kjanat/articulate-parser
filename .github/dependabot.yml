@@ -8,7 +8,7 @@ updates:
       day: 'monday'
       time: '07:00'
       timezone: 'Europe/Amsterdam'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
     labels:
       - 'dependencies'
       - 'dependencies/github-actions'
@@ -24,7 +24,7 @@ updates:
       day: 'monday'
       time: '07:00'
       timezone: 'Europe/Amsterdam'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
     labels:
       - 'dependencies'
       - 'dependencies/docker'
@@ -32,7 +32,7 @@ updates:
       prefix: 'docker'
       include: 'scope'
     groups:
-      docker-images:
+      docker:
         patterns:
           - '*'
         update-types:
@@ -47,7 +47,7 @@ updates:
       day: 'monday'
       time: '07:00'
       timezone: 'Europe/Amsterdam'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
     labels:
       - 'dependencies'
       - 'dependencies/docker-compose'
@@ -55,7 +55,7 @@ updates:
       prefix: 'docker'
       include: 'scope'
     groups:
-      docker-compose:
+      docker:
         patterns:
           - '*'
         update-types:
@@ -70,7 +70,7 @@ updates:
       day: 'monday'
       time: '07:00'
       timezone: 'Europe/Amsterdam'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 2
     labels:
       - 'dependencies'
       - 'dependencies/go'
