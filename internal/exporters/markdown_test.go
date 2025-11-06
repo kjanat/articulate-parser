@@ -661,8 +661,7 @@ func BenchmarkMarkdownExporter_Export(b *testing.B) {
 	// Create temporary directory
 	tempDir := b.TempDir()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		outputPath := filepath.Join(tempDir, "benchmark-course.md")
 		_ = exporter.Export(course, outputPath)
 		// Clean up for next iteration
@@ -685,8 +684,7 @@ func BenchmarkMarkdownExporter_ProcessTextItem(b *testing.B) {
 		},
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var buf bytes.Buffer
 		exporter.processTextItem(&buf, item, "###")
 	}

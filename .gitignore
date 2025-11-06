@@ -69,3 +69,5 @@ main_coverage
 # Editors
 .vscode/
 .idea/
+
+.task/

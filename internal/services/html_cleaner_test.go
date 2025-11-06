@@ -168,7 +168,7 @@ func TestHTMLCleaner_CleanHTML_LargeContent(t *testing.T) {
 	// Create a large HTML string
 	var builder strings.Builder
 	builder.WriteString("<html><body>")
-	for i := 0; i < 1000; i++ {
+	for i := range 1000 {
 		builder.WriteString("<p>Paragraph ")
 		builder.WriteString(string(rune('0' + i%10)))
 		builder.WriteString(" with some content &amp; entities.</p>")
@@ -299,8 +299,7 @@ func BenchmarkHTMLCleaner_CleanHTML(b *testing.B) {
 	cleaner := NewHTMLCleaner()
 	input := "<div class=\"content\"><h1>Course Title</h1><p>This is a <em>great</em> course about &amp; HTML entities like &nbsp; and &quot;quotes&quot;.</p><ul><li>Item 1</li><li>Item 2</li></ul></div>"
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		cleaner.CleanHTML(input)
 	}
 }
@@ -311,15 +310,14 @@ func BenchmarkHTMLCleaner_CleanHTML_Large(b *testing.B) {
 
 	// Create a large HTML string
 	var builder strings.Builder
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		builder.WriteString("<p>Paragraph ")
 		builder.WriteString(string(rune('0' + i%10)))
 		builder.WriteString(" with some content &amp; entities &lt;test&gt;.</p>")
 	}
 	input := builder.String()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		cleaner.CleanHTML(input)
 	}
 }

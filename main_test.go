@@ -89,8 +89,7 @@ func TestIsURI(t *testing.T) {
 func BenchmarkIsURI(b *testing.B) {
 	testStr := "https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/"
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		isURI(testStr)
 	}
 }

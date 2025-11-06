@@ -615,8 +615,7 @@ func BenchmarkDocxExporter_Export(b *testing.B) {
 	// Create temporary directory
 	tempDir := b.TempDir()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		outputPath := filepath.Join(tempDir, "benchmark-course.docx")
 		_ = exporter.Export(course, outputPath)
 		// Clean up for next iteration
@@ -641,7 +640,7 @@ func BenchmarkDocxExporter_ComplexCourse(b *testing.B) {
 	}
 
 	// Fill with test data
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		lesson := models.Lesson{
 			ID:    "lesson-" + string(rune(i)),
 			Title: "Lesson " + string(rune(i)),
@@ -649,13 +648,13 @@ func BenchmarkDocxExporter_ComplexCourse(b *testing.B) {
 			Items: make([]models.Item, 5), // 5 items per lesson
 		}
 
-		for j := 0; j < 5; j++ {
+		for j := range 5 {
 			item := models.Item{
 				Type:  "text",
 				Items: make([]models.SubItem, 3), // 3 sub-items per item
 			}
 
-			for k := 0; k < 3; k++ {
+			for k := range 3 {
 				item.Items[k] = models.SubItem{
 					Heading:   "<h3>Heading " + string(rune(k)) + "</h3>",
 					Paragraph: "<p>Paragraph content with <strong>formatting</strong> for performance testing.</p>",
@@ -670,8 +669,7 @@ func BenchmarkDocxExporter_ComplexCourse(b *testing.B) {
 
 	tempDir := b.TempDir()
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		outputPath := filepath.Join(tempDir, "benchmark-complex.docx")
 		_ = exporter.Export(course, outputPath)
 		os.Remove(outputPath)

@@ -133,7 +133,7 @@ func TestLesson_JSONMarshalUnmarshal(t *testing.T) {
 		Ready:       true,
 		CreatedAt:   "2023-06-01T12:00:00Z",
 		UpdatedAt:   "2023-06-01T13:00:00Z",
-		Position:    map[string]interface{}{"x": 1, "y": 2},
+		Position:    map[string]any{"x": 1, "y": 2},
 		Items: []Item{
 			{
 				ID:      "item-test",
@@ -154,8 +154,8 @@ func TestLesson_JSONMarshalUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				Settings: map[string]interface{}{"autoplay": false},
-				Data:     map[string]interface{}{"metadata": "test"},
+				Settings: map[string]any{"autoplay": false},
+				Data:     map[string]any{"metadata": "test"},
 			},
 		},
 	}
@@ -197,11 +197,11 @@ func TestItem_JSONMarshalUnmarshal(t *testing.T) {
 				Feedback: "Well done!",
 			},
 		},
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"allowRetry": true,
 			"showAnswer": true,
 		},
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"points": 10,
 			"weight": 1.5,
 		},
@@ -475,7 +475,7 @@ func TestLabelSet_JSONMarshalUnmarshal(t *testing.T) {
 func TestEmptyStructures(t *testing.T) {
 	testCases := []struct {
 		name string
-		data interface{}
+		data any
 	}{
 		{"Empty Course", Course{}},
 		{"Empty CourseInfo", CourseInfo{}},
@@ -626,8 +626,7 @@ func BenchmarkCourse_JSONMarshal(b *testing.B) {
 		},
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = json.Marshal(course)
 	}
 }
@@ -660,17 +659,16 @@ func BenchmarkCourse_JSONUnmarshal(b *testing.B) {
 
 	jsonData, _ := json.Marshal(course)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		var result Course
 		_ = json.Unmarshal(jsonData, &result)
 	}
 }
 
 // compareMaps compares two interface{} values that should be maps
-func compareMaps(original, unmarshaled interface{}) bool {
-	origMap, origOk := original.(map[string]interface{})
-	unMap, unOk := unmarshaled.(map[string]interface{})
+func compareMaps(original, unmarshaled any) bool {
+	origMap, origOk := original.(map[string]any)
+	unMap, unOk := unmarshaled.(map[string]any)
 
 	if !origOk || !unOk {
 		// If not maps, use deep equal

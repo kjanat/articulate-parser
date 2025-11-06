@@ -449,8 +449,7 @@ func BenchmarkFactory_CreateExporter(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
 	factory := NewFactory(htmlCleaner)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = factory.CreateExporter("markdown")
 	}
 }
@@ -460,8 +459,7 @@ func BenchmarkFactory_CreateExporter_Docx(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
 	factory := NewFactory(htmlCleaner)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = factory.CreateExporter("docx")
 	}
 }
@@ -471,8 +469,7 @@ func BenchmarkFactory_GetSupportedFormats(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
 	factory := NewFactory(htmlCleaner)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = factory.GetSupportedFormats()
 	}
 }

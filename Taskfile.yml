@@ -1,0 +1,571 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# Articulate Parser - Task Automation
+# https://taskfile.dev
+version: '3'
+
+# Global output settings
+output: prefixed
+
+# Shell settings (only applied on Unix-like systems)
+# Note: These are ignored on Windows where PowerShell/cmd is used
+set: [errexit, pipefail]
+shopt: [globstar]
+
+# Watch mode interval
+interval: 500ms
+
+# Global variables
+vars:
+  APP_NAME: articulate-parser
+  MAIN_FILE: main.go
+  OUTPUT_DIR: bin
+  COVERAGE_DIR: coverage
+  TEST_TIMEOUT: 5m
+
+  # Version info
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+  GIT_COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
+  BUILD_TIME: '{{now | date "2006-01-02T15:04:05Z07:00"}}'
+
+  # Go settings
+  CGO_ENABLED: 0
+  GO_FLAGS: -v
+  LDFLAGS: >-
+    -s -w
+    -X github.com/kjanat/articulate-parser/internal/version.Version={{.VERSION}}
+    -X github.com/kjanat/articulate-parser/internal/version.BuildTime={{.BUILD_TIME}}
+    -X github.com/kjanat/articulate-parser/internal/version.GitCommit={{.GIT_COMMIT}}
+
+  # Platform detection (using Task built-in variables)
+  GOOS:
+    sh: go env GOOS
+  GOARCH:
+    sh: go env GOARCH
+  EXE_EXT: '{{if eq OS "windows"}}.exe{{end}}'
+
+# Environment variables
+env:
+  CGO_ENABLED: '{{.CGO_ENABLED}}'
+  GO111MODULE: on
+
+# Load .env files if present
+dotenv: ['.env', '.env.local']
+
+# Task definitions
+tasks:
+  # Default task - show help
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # Development tasks
+  dev:
+    desc: Run the application in development mode (with hot reload)
+    aliases: [run, start]
+    interactive: true
+    watch: true
+    sources:
+      - '**/*.go'
+      - go.mod
+      - go.sum
+    cmds:
+      - task: build
+      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} --help'
+
+  # Build tasks
+  build:
+    desc: Build the application binary
+    aliases: [b]
+    deps: [clean-bin]
+    sources:
+      - '**/*.go'
+      - go.mod
+      - go.sum
+    generates:
+      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}}'
+    cmds:
+      - task: mkdir
+        vars: { DIR: '{{.OUTPUT_DIR}}' }
+      - go build {{.GO_FLAGS}} -ldflags="{{.LDFLAGS}}" -o {{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} {{.MAIN_FILE}}
+    method: checksum
+
+  build:all:
+    desc: Build binaries for all major platforms
+    aliases: [build-all, cross-compile]
+    deps: [clean-bin]
+    cmds:
+      - task: mkdir
+        vars: { DIR: '{{.OUTPUT_DIR}}' }
+      - for:
+          matrix:
+            GOOS: [linux, darwin, windows]
+            GOARCH: [amd64, arm64]
+        task: build:platform
+        vars:
+          TARGET_GOOS: '{{.ITEM.GOOS}}'
+          TARGET_GOARCH: '{{.ITEM.GOARCH}}'
+      - echo "Built binaries for all platforms in {{.OUTPUT_DIR}}/"
+
+  build:platform:
+    internal: true
+    vars:
+      TARGET_EXT: '{{if eq .TARGET_GOOS "windows"}}.exe{{end}}'
+      OUTPUT_FILE: '{{.OUTPUT_DIR}}/{{.APP_NAME}}-{{.TARGET_GOOS}}-{{.TARGET_GOARCH}}{{.TARGET_EXT}}'
+    env:
+      GOOS: '{{.TARGET_GOOS}}'
+      GOARCH: '{{.TARGET_GOARCH}}'
+    cmds:
+      - echo "Building {{.OUTPUT_FILE}}..."
+      - go build {{.GO_FLAGS}} -ldflags="{{.LDFLAGS}}" -o "{{.OUTPUT_FILE}}" {{.MAIN_FILE}}
+
+  # Install task
+  install:
+    desc: Install the binary to $GOPATH/bin
+    deps: [test]
+    cmds:
+      - go install -ldflags="{{.LDFLAGS}}" {{.MAIN_FILE}}
+      - echo "Installed {{.APP_NAME}} to $(go env GOPATH)/bin"
+
+  # Testing tasks
+  test:
+    desc: Run all tests
+    aliases: [t]
+    cmds:
+      - go test {{.GO_FLAGS}} -race -timeout {{.TEST_TIMEOUT}} ./...
+
+  test:coverage:
+    desc: Run tests with coverage report
+    aliases: [cover, cov]
+    deps: [clean-coverage]
+    cmds:
+      - task: mkdir
+        vars: { DIR: '{{.COVERAGE_DIR}}' }
+      - go test {{.GO_FLAGS}} -race -coverprofile={{.COVERAGE_DIR}}/coverage.out -covermode=atomic -timeout {{.TEST_TIMEOUT}} ./...
+      - go tool cover -html={{.COVERAGE_DIR}}/coverage.out -o {{.COVERAGE_DIR}}/coverage.html
+      - go tool cover -func={{.COVERAGE_DIR}}/coverage.out
+      - echo "Coverage report generated at {{.COVERAGE_DIR}}/coverage.html"
+
+  test:verbose:
+    desc: Run tests with verbose output
+    aliases: [tv]
+    cmds:
+      - go test -v -race -timeout {{.TEST_TIMEOUT}} ./...
+
+  test:watch:
+    desc: Run tests in watch mode
+    aliases: [tw]
+    watch: true
+    sources:
+      - '**/*.go'
+    cmds:
+      - task: test
+
+  test:bench:
+    desc: Run benchmark tests
+    aliases: [bench]
+    cmds:
+      - go test -bench=. -benchmem -timeout {{.TEST_TIMEOUT}} ./...
+
+  test:integration:
+    desc: Run integration tests
+    status:
+      - '{{if eq OS "windows"}}if not exist "main_test.go" exit 1{{else}}test ! -f "main_test.go"{{end}}'
+    cmds:
+      - go test -v -race -tags=integration -timeout {{.TEST_TIMEOUT}} ./...
+
+  # Code quality tasks
+  lint:
+    desc: Run all linters
+    aliases: [l]
+    cmds:
+      - task: lint:vet
+      - task: lint:fmt
+      - task: lint:staticcheck
+
+  lint:vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  lint:fmt:
+    desc: Check code formatting
+    vars:
+      UNFORMATTED:
+        sh: gofmt -s -l .
+    cmds:
+      - |
+        {{if ne .UNFORMATTED ""}}
+        echo "❌ The following files need formatting:"
+        echo "{{.UNFORMATTED}}"
+        exit 1
+        {{else}}
+        echo "All files are properly formatted"
+        {{end}}
+
+  lint:staticcheck:
+    desc: Run staticcheck (install if needed)
+    vars:
+      HAS_STATICCHECK:
+        sh: '{{if eq OS "windows"}}where staticcheck 2>NUL{{else}}command -v staticcheck 2>/dev/null{{end}}'
+    cmds:
+      - '{{if eq .HAS_STATICCHECK ""}}echo "Installing staticcheck..." && go install honnef.co/go/tools/cmd/staticcheck@latest{{end}}'
+      - staticcheck ./...
+    ignore_error: true
+
+  fmt:
+    desc: Format all Go files
+    aliases: [format]
+    cmds:
+      - gofmt -s -w .
+      - echo "Formatted all Go files"
+
+  modernize:
+    desc: Modernize Go code to use modern idioms
+    aliases: [modern]
+    cmds:
+      - go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
+      - echo "Code modernized"
+
+  # Dependency management
+  deps:
+    desc: Download and verify dependencies
+    aliases: [mod]
+    cmds:
+      - go mod download
+      - go mod verify
+      - echo "Dependencies downloaded and verified"
+
+  deps:tidy:
+    desc: Tidy go.mod and go.sum
+    aliases: [tidy]
+    cmds:
+      - go mod tidy
+      - echo "Dependencies tidied"
+
+  deps:update:
+    desc: Update all dependencies to latest versions
+    aliases: [update]
+    cmds:
+      - go get -u ./...
+      - go mod tidy
+      - echo "Dependencies updated"
+
+  deps:graph:
+    desc: Display dependency graph
+    cmds:
+      - go mod graph
+
+  # Docker tasks
+  docker:build:
+    desc: Build Docker image
+    aliases: [db]
+    cmds:
+      - |
+        docker build \
+          --build-arg VERSION={{.VERSION}} \
+          --build-arg BUILD_TIME={{.BUILD_TIME}} \
+          --build-arg GIT_COMMIT={{.GIT_COMMIT}} \
+          -t {{.APP_NAME}}:{{.VERSION}} \
+          -t {{.APP_NAME}}:latest \
+          .
+      - >
+        echo "Docker image built: {{.APP_NAME}}:{{.VERSION}}"
+
+  docker:build:dev:
+    desc: Build development Docker image
+    cmds:
+      - docker build -f Dockerfile.dev -t {{.APP_NAME}}:dev .
+      - >
+        echo "Development Docker image built: {{.APP_NAME}}:dev"
+
+  docker:run:
+    desc: Run Docker container
+    aliases: [dr]
+    deps: [docker:build]
+    cmds:
+      - docker run --rm {{.APP_NAME}}:{{.VERSION}} --help
+
+  docker:test:
+    desc: Test Docker image
+    deps: [docker:build]
+    cmds:
+      - docker run --rm {{.APP_NAME}}:{{.VERSION}} --version
+      - echo "Docker image tested successfully"
+
+  docker:compose:up:
+    desc: Start services with docker-compose
+    cmds:
+      - docker-compose up -d
+
+  docker:compose:down:
+    desc: Stop services with docker-compose
+    cmds:
+      - docker-compose down
+
+  # Cleanup tasks
+  clean:
+    desc: Clean all generated files
+    aliases: [c]
+    cmds:
+      - task: clean-bin
+      - task: clean-coverage
+      - task: clean-cache
+      - echo "All generated files cleaned"
+
+  clean-bin:
+    desc: Remove built binaries
+    internal: true
+    cmds:
+      - task: rmdir
+        vars: { DIR: '{{.OUTPUT_DIR}}' }
+
+  clean-coverage:
+    desc: Remove coverage files
+    internal: true
+    cmds:
+      - task: rmdir
+        vars: { DIR: '{{.COVERAGE_DIR}}' }
+
+  clean-cache:
+    desc: Clean Go build and test cache
+    cmds:
+      - go clean -cache -testcache -modcache
+      - echo "Go caches cleaned"
+
+  # CI/CD tasks
+  ci:
+    desc: Run all CI checks (test, lint, build)
+    cmds:
+      - task: deps
+      - task: lint
+      - task: test:coverage
+      - task: build
+      - echo "All CI checks passed"
+
+  ci:local:
+    desc: Run CI checks locally with detailed output
+    cmds:
+      - echo "🔍 Running local CI checks..."
+      - echo ""
+      - echo "📦 Checking dependencies..."
+      - task: deps
+      - echo ""
+      - echo "🔧 Running linters..."
+      - task: lint
+      - echo ""
+      - echo "🧪 Running tests with coverage..."
+      - task: test:coverage
+      - echo ""
+      - echo "🏗️ Building application..."
+      - task: build:all
+      - echo ""
+      - echo "All CI checks completed successfully!"
+
+  # Release tasks
+  release:check:
+    desc: Check if ready for release
+    cmds:
+      - task: ci
+      - git diff --exit-code
+      - git diff --cached --exit-code
+      - echo "Ready for release"
+
+  release:tag:
+    desc: Tag a new release (requires VERSION env var)
+    requires:
+      vars: [VERSION]
+    preconditions:
+      - sh: 'git diff --exit-code'
+        msg: 'Working directory is not clean'
+      - sh: 'git diff --cached --exit-code'
+        msg: 'Staging area is not clean'
+    cmds:
+      - git tag -a v{{.VERSION}} -m "Release v{{.VERSION}}"
+      - echo "Tagged v{{.VERSION}}"
+      - >
+        echo "Push with: git push origin v{{.VERSION}}"
+
+  # Documentation tasks
+  docs:serve:
+    desc: Serve documentation locally
+    vars:
+      HAS_GODOC:
+        sh: '{{if eq OS "windows"}}where godoc 2>NUL{{else}}command -v godoc 2>/dev/null{{end}}'
+    cmds:
+      - '{{if eq .HAS_GODOC ""}}echo "Installing godoc..." && go install golang.org/x/tools/cmd/godoc@latest{{end}}'
+      - echo "📚 Serving documentation at http://localhost:6060"
+      - godoc -http=:6060
+    interactive: true
+
+  docs:coverage:
+    desc: Open coverage report in browser
+    deps: [test:coverage]
+    cmds:
+      - '{{if eq OS "darwin"}}open {{.COVERAGE_DIR}}/coverage.html{{else if eq OS "windows"}}start {{.COVERAGE_DIR}}/coverage.html{{else}}xdg-open {{.COVERAGE_DIR}}/coverage.html 2>/dev/null || echo "Please open {{.COVERAGE_DIR}}/coverage.html in your browser"{{end}}'
+
+  # Info tasks
+  info:
+    desc: Display build information
+    vars:
+      GO_VERSION:
+        sh: go version
+    cmds:
+      - task: info:print
+    silent: true
+
+  info:print:
+    internal: true
+    silent: true
+    vars:
+      GO_VERSION:
+        sh: go version
+    cmds:
+      - echo "Application Info:"
+      - echo "  Name{{":"}}        {{.APP_NAME}}"
+      - echo "  Version{{":"}}     {{.VERSION}}"
+      - echo "  Git Commit{{":"}}  {{.GIT_COMMIT}}"
+      - echo "  Build Time{{":"}}  {{.BUILD_TIME}}"
+      - echo ""
+      - echo "Go Environment{{":"}}"
+      - echo "  Go Version{{":"}}  {{.GO_VERSION}}"
+      - echo "  GOOS{{":"}}        {{.GOOS}}"
+      - echo "  GOARCH{{":"}}      {{.GOARCH}}"
+      - echo "  CGO{{":"}}         {{.CGO_ENABLED}}"
+      - echo ""
+      - echo "Paths{{":"}}"
+      - echo "  Output Dir{{":"}}  {{.OUTPUT_DIR}}"
+      - echo "  Coverage{{":"}}    {{.COVERAGE_DIR}}"
+
+  # Security tasks
+  security:check:
+    desc: Run security checks with gosec
+    vars:
+      HAS_GOSEC:
+        sh: '{{if eq OS "windows"}}where gosec 2>NUL{{else}}command -v gosec 2>/dev/null{{end}}'
+    cmds:
+      - '{{if eq .HAS_GOSEC ""}}echo "Installing gosec..." && go install github.com/securego/gosec/v2/cmd/gosec@latest{{end}}'
+      - gosec ./...
+    ignore_error: true
+
+  security:audit:
+    desc: Audit dependencies for vulnerabilities
+    vars:
+      HAS_GOVULNCHECK:
+        sh: '{{if eq OS "windows"}}where govulncheck 2>NUL{{else}}command -v govulncheck 2>/dev/null{{end}}'
+    cmds:
+      - '{{if eq .HAS_GOVULNCHECK ""}}echo "Installing govulncheck..." && go install golang.org/x/vuln/cmd/govulncheck@latest{{end}}'
+      - govulncheck ./...
+
+  # Example/Demo tasks
+  demo:markdown:
+    desc: Demo - Convert sample to Markdown
+    status:
+      - '{{if eq OS "windows"}}if not exist "articulate-sample.json" exit 1{{else}}test ! -f "articulate-sample.json"{{end}}'
+    deps: [build]
+    cmds:
+      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json md output-demo.md'
+      - echo "Demo Markdown created{{:}} output-demo.md"
+      - defer:
+          task: rmfile
+          vars: { FILE: 'output-demo.md' }
+
+  demo:html:
+    desc: Demo - Convert sample to HTML
+    status:
+      - '{{if eq OS "windows"}}if not exist "articulate-sample.json" exit 1{{else}}test ! -f "articulate-sample.json"{{end}}'
+    deps: [build]
+    cmds:
+      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json html output-demo.html'
+      - echo "Demo HTML created{{:}} output-demo.html"
+      - defer:
+          task: rmfile
+          vars: { FILE: 'output-demo.html' }
+
+  demo:docx:
+    desc: Demo - Convert sample to DOCX
+    status:
+      - '{{if eq OS "windows"}}if not exist "articulate-sample.json" exit 1{{else}}test ! -f "articulate-sample.json"{{end}}'
+    deps: [build]
+    cmds:
+      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json docx output-demo.docx'
+      - echo "Demo DOCX created{{:}} output-demo.docx"
+      - defer:
+          task: rmfile
+          vars: { FILE: 'output-demo.docx' }
+
+  # Performance profiling
+  profile:cpu:
+    desc: Run CPU profiling
+    cmds:
+      - go test -cpuprofile=cpu.prof -bench=. ./...
+      - go tool pprof -http=:8080 cpu.prof
+      - defer:
+          task: rmfile
+          vars: { FILE: 'cpu.prof' }
+
+  profile:mem:
+    desc: Run memory profiling
+    cmds:
+      - go test -memprofile=mem.prof -bench=. ./...
+      - go tool pprof -http=:8080 mem.prof
+      - defer:
+          task: rmfile
+          vars: { FILE: 'mem.prof' }
+
+  # Git hooks
+  hooks:install:
+    desc: Install git hooks
+    cmds:
+      - task: mkdir
+        vars: { DIR: '.git/hooks' }
+      - '{{if eq OS "windows"}}echo "#!/bin/sh" > .git/hooks/pre-commit && echo "task lint:fmt" >> .git/hooks/pre-commit{{else}}cat > .git/hooks/pre-commit << ''EOF''{{printf "\n"}}#!/bin/sh{{printf "\n"}}task lint:fmt{{printf "\n"}}EOF{{printf "\n"}}chmod +x .git/hooks/pre-commit{{end}}'
+      - echo "Git hooks installed"
+
+  # Quick shortcuts
+  qa:
+    desc: Quick quality assurance (fmt + lint + test)
+    aliases: [q, quick]
+    cmds:
+      - task: fmt
+      - task: lint
+      - task: test
+      - echo "Quick QA passed"
+
+  all:
+    desc: Build everything (clean + deps + test + build:all + docker:build)
+    cmds:
+      - task: clean
+      - task: deps:tidy
+      - task: test:coverage
+      - task: build:all
+      - task: docker:build
+      - echo "Full build completed!"
+
+  # Cross-platform helper tasks
+  mkdir:
+    internal: true
+    requires:
+      vars: [DIR]
+    cmds:
+      - '{{if eq OS "windows"}}powershell -Command "New-Item -ItemType Directory -Force -Path ''{{.DIR}}'' | Out-Null"{{else}}mkdir -p "{{.DIR}}"{{end}}'
+    silent: true
+
+  rmdir:
+    internal: true
+    requires:
+      vars: [DIR]
+    cmds:
+      - '{{if eq OS "windows"}}powershell -Command "if (Test-Path ''{{.DIR}}'') { Remove-Item -Recurse -Force ''{{.DIR}}'' }"{{else}}rm -rf "{{.DIR}}" 2>/dev/null || true{{end}}'
+    silent: true
+
+  rmfile:
+    internal: true
+    requires:
+      vars: [FILE]
+    cmds:
+      - '{{if eq OS "windows"}}powershell -Command "if (Test-Path ''{{.FILE}}'') { Remove-Item -Force ''{{.FILE}}'' }"{{else}}rm -f "{{.FILE}}"{{end}}'
+    silent: true

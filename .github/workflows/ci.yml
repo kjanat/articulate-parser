@@ -37,47 +37,17 @@ jobs:
           go-version: ${{ matrix.go }}
           check-latest: true
 
-      - name: Download dependencies with retry
-        run: |
-          set -e
-          echo "Downloading Go dependencies..."
+      - name: Install Task
+        uses: go-task/setup-task@v1
 
-          # Function to download with retry
-          download_with_retry() {
-            local attempt=1
-            local max_attempts=3
+      - name: Show build info
+        run: task info
 
-            while [ $attempt -le $max_attempts ]; do
-              echo "Attempt $attempt of $max_attempts"
-
-              if go mod download; then
-                echo "Download successful on attempt $attempt"
-                return 0
-              else
-                echo "Download failed on attempt $attempt"
-                if [ $attempt -lt $max_attempts ]; then
-                  echo "Cleaning cache and retrying..."
-                  go clean -modcache
-                  go clean -cache
-                  sleep 2
-                fi
-                attempt=$((attempt + 1))
-              fi
-            done
-
-            echo "All download attempts failed"
-            return 1
-          }
-
-          # Try download with retry logic
-          download_with_retry
-
-          echo "Verifying module dependencies..."
-          go mod verify
-          echo "Dependencies verified successfully"
+      - name: Download dependencies
+        run: task deps
 
       - name: Build
-        run: go build -v ./...
+        run: task build
 
       - name: Run tests with enhanced reporting
         id: test
@@ -89,7 +59,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "Running tests with coverage..."
-          go test -v -race -coverprofile=coverage.out ./... 2>&1 | tee test-output.log
+          task test:coverage 2>&1 | tee test-output.log
 
           # Extract test results for summary
           TEST_STATUS=$?
@@ -151,9 +121,8 @@ jobs:
       - name: Generate coverage report
         if: always()
         run: |
-          if [ -f coverage.out ]; then
-            go tool cover -html=coverage.out -o coverage.html
-            COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
+          if [ -f coverage/coverage.out ]; then
+            COVERAGE=$(go tool cover -func=coverage/coverage.out | grep total | awk '{print $3}')
 
             echo "## 📊 Code Coverage (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -171,7 +140,7 @@ jobs:
             temp_coverage=$(mktemp)
 
             # Extract package-level coverage data
-            go tool cover -func=coverage.out | grep -v total | while read line; do
+            go tool cover -func=coverage/coverage.out | grep -v total | while read line; do
               if [[ $line == *".go:"* ]]; then
                 # Extract package path from file path (everything before the filename)
                 filepath=$(echo "$line" | awk '{print $1}')
@@ -217,16 +186,16 @@ jobs:
           name: test-results-go-${{ matrix.go }}
           path: |
             test-output.log
-            coverage.out
-            coverage.html
+            coverage/
           retention-days: 7
 
-      - name: Run go vet
+      - name: Run linters
         run: |
           echo "## 🔍 Static Analysis (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          VET_OUTPUT=$(go vet ./... 2>&1 || echo "")
+          # Run go vet
+          VET_OUTPUT=$(task lint:vet 2>&1 || echo "")
           VET_STATUS=$?
 
           if [ $VET_STATUS -eq 0 ]; then
@@ -240,13 +209,11 @@ jobs:
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          exit $VET_STATUS
+          # Run go fmt check
+          FMT_OUTPUT=$(task lint:fmt 2>&1 || echo "")
+          FMT_STATUS=$?
 
-      - name: Run go fmt
-        run: |
-          FMT_OUTPUT=$(gofmt -s -l . 2>&1 || echo "")
-
-          if [ -z "$FMT_OUTPUT" ]; then
+          if [ $FMT_STATUS -eq 0 ]; then
             echo "✅ **go fmt:** All files properly formatted" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ **go fmt:** Files need formatting" >> $GITHUB_STEP_SUMMARY
@@ -254,7 +221,10 @@ jobs:
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             echo "$FMT_OUTPUT" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Exit with error if any linter failed
+          if [ $VET_STATUS -ne 0 ] || [ $FMT_STATUS -ne 0 ]; then
             exit 1
           fi
 
@@ -276,6 +246,7 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
+          files: ./coverage/coverage.out
           flags: Go ${{ matrix.go }}
           slug: kjanat/articulate-parser
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -297,40 +268,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          check-latest: true
+
+      - name: Install Task
+        uses: go-task/setup-task@v1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Capture build date
-        run: echo "BUILD_TIME=$(git log -1 --format=%cd --date=iso-strict)" >> $GITHUB_ENV
+      - name: Build Docker image using Task
+        run: task docker:build
 
-      - name: Build Docker image (test)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: false
-          load: true
-          tags: test:latest
-          build-args: |
-            VERSION=test
-            BUILD_TIME=${{ env.BUILD_TIME }}
-            GIT_COMMIT=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Test Docker image
+      - name: Test Docker image using Task
         run: |
           echo "## 🧪 Docker Image Tests" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Test that the image runs and shows help
+          # Run Task docker test
+          task docker:test
+
           echo "**Testing help command:**" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          docker run --rm test:latest --help >> $GITHUB_STEP_SUMMARY
+          docker run --rm articulate-parser:latest --help >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Test image size
-          IMAGE_SIZE=$(docker image inspect test:latest --format='{{.Size}}' | numfmt --to=iec-i --suffix=B)
+          IMAGE_SIZE=$(docker image inspect articulate-parser:latest --format='{{.Size}}' | numfmt --to=iec-i --suffix=B)
           echo "**Image size:** $IMAGE_SIZE" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
