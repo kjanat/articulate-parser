@@ -72,6 +72,7 @@ func (e *DocxExporter) Export(course *models.Course, outputPath string) error {
 	}
 
 	// Create the file
+	// #nosec G304 - Output path is provided by user via CLI argument, which is expected behavior
 	file, err := os.Create(outputPath)
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %w", err)

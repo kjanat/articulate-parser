@@ -5,7 +5,17 @@ package version
 // Version information.
 var (
 	// Version is the current version of the application.
-	Version = "0.4.1"
+	// Breaking changes from 0.4.x:
+	// - Renamed GetSupportedFormat() -> SupportedFormat()
+	// - Renamed GetSupportedFormats() -> SupportedFormats()
+	// - FetchCourse now requires context.Context parameter
+	// - NewArticulateParser now accepts logger, baseURL, timeout
+	// New features:
+	// - Structured logging with slog
+	// - Configuration via environment variables
+	// - Context-aware HTTP requests
+	// - Comprehensive benchmarks and examples
+	Version = "1.0.0"
 
 	// BuildTime is the time the binary was built.
 	BuildTime = "unknown"

@@ -146,7 +146,7 @@ func createBenchmarkCourse() *models.Course {
 // createLargeBenchmarkCourse creates a large course for stress testing.
 func createLargeBenchmarkCourse() *models.Course {
 	lessons := make([]models.Lesson, 50)
-	for i := 0; i < 50; i++ {
+	for i := range 50 {
 		lessons[i] = models.Lesson{
 			ID:          string(rune(i)),
 			Title:       "Lesson " + string(rune(i)),

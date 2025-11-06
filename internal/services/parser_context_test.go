@@ -27,7 +27,8 @@ func TestArticulateParser_FetchCourse_ContextCancellation(t *testing.T) {
 				Title: "Test Course",
 			},
 		}
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in test setup; httptest.ResponseWriter is reliable
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -69,7 +70,8 @@ func TestArticulateParser_FetchCourse_ContextTimeout(t *testing.T) {
 				Title: "Test Course",
 			},
 		}
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in test setup; httptest.ResponseWriter is reliable
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -111,7 +113,8 @@ func TestArticulateParser_FetchCourse_ContextDeadline(t *testing.T) {
 				Title: "Test Course",
 			},
 		}
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in test setup; httptest.ResponseWriter is reliable
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -152,7 +155,8 @@ func TestArticulateParser_FetchCourse_ContextSuccess(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Respond quickly
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in test setup; httptest.ResponseWriter is reliable
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -196,7 +200,8 @@ func TestArticulateParser_FetchCourse_CancellationDuringRequest(t *testing.T) {
 		testCourse := &models.Course{
 			ShareID: "test-id",
 		}
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in test setup; httptest.ResponseWriter is reliable
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -242,7 +247,8 @@ func TestArticulateParser_FetchCourse_MultipleTimeouts(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(100 * time.Millisecond)
 		testCourse := &models.Course{ShareID: "test"}
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in test setup; httptest.ResponseWriter is reliable
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 

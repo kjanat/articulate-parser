@@ -58,7 +58,9 @@ func extractText(w io.Writer, n *html.Node) {
 
 	// If this is a text node, write its content
 	if n.Type == html.TextNode {
-		w.Write([]byte(n.Data))
+		// Write errors are ignored because we're writing to an in-memory buffer
+		// which cannot fail in normal circumstances
+		_, _ = w.Write([]byte(n.Data))
 	}
 
 	// Recursively process all child nodes

@@ -80,6 +80,7 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 		buf.WriteString("\n---\n\n")
 	}
 
+	// #nosec G306 - 0644 is appropriate for export files that should be readable by others
 	return os.WriteFile(outputPath, buf.Bytes(), 0644)
 }
 

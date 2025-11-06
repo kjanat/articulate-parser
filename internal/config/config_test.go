@@ -33,11 +33,10 @@ func TestLoad(t *testing.T) {
 
 func TestLoad_WithEnvironmentVariables(t *testing.T) {
 	// Set environment variables
-	os.Setenv("ARTICULATE_BASE_URL", "https://test.example.com")
-	os.Setenv("ARTICULATE_REQUEST_TIMEOUT", "60")
-	os.Setenv("LOG_LEVEL", "debug")
-	os.Setenv("LOG_FORMAT", "json")
-	defer os.Clearenv()
+	t.Setenv("ARTICULATE_BASE_URL", "https://test.example.com")
+	t.Setenv("ARTICULATE_REQUEST_TIMEOUT", "60")
+	t.Setenv("LOG_LEVEL", "debug")
+	t.Setenv("LOG_FORMAT", "json")
 
 	cfg := Load()
 
@@ -81,7 +80,7 @@ func TestGetLogLevelEnv(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Clearenv()
 			if tt.value != "" {
-				os.Setenv("TEST_LOG_LEVEL", tt.value)
+				t.Setenv("TEST_LOG_LEVEL", tt.value)
 			}
 			result := getLogLevelEnv("TEST_LOG_LEVEL", slog.LevelInfo)
 			if result != tt.expected {
@@ -107,7 +106,7 @@ func TestGetDurationEnv(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			os.Clearenv()
 			if tt.value != "" {
-				os.Setenv("TEST_DURATION", tt.value)
+				t.Setenv("TEST_DURATION", tt.value)
 			}
 			result := getDurationEnv("TEST_DURATION", 30*time.Second)
 			if result != tt.expected {

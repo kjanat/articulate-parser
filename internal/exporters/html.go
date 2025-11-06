@@ -110,6 +110,7 @@ func (e *HTMLExporter) Export(course *models.Course, outputPath string) error {
 	buf.WriteString("</body>\n")
 	buf.WriteString("</html>\n")
 
+	// #nosec G306 - 0644 is appropriate for export files that should be readable by others
 	return os.WriteFile(outputPath, buf.Bytes(), 0644)
 }
 

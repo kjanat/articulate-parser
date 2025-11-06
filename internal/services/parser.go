@@ -99,6 +99,7 @@ func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models
 
 // LoadCourseFromFile loads an Articulate Rise course from a local JSON file.
 func (p *ArticulateParser) LoadCourseFromFile(filePath string) (*models.Course, error) {
+	// #nosec G304 - File path is provided by user via CLI argument, which is expected behavior
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)

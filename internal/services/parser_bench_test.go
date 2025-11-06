@@ -34,7 +34,9 @@ func BenchmarkArticulateParser_FetchCourse(b *testing.B) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in benchmarks; the test server's ResponseWriter
+		// writes are reliable and any encoding error would be a test setup issue
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -57,7 +59,7 @@ func BenchmarkArticulateParser_FetchCourse(b *testing.B) {
 func BenchmarkArticulateParser_FetchCourse_LargeCourse(b *testing.B) {
 	// Create a large course with many lessons
 	lessons := make([]models.Lesson, 100)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		lessons[i] = models.Lesson{
 			ID:          string(rune(i)),
 			Title:       "Lesson " + string(rune(i)),
@@ -90,7 +92,9 @@ func BenchmarkArticulateParser_FetchCourse_LargeCourse(b *testing.B) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(testCourse)
+		// Encode errors are ignored in benchmarks; the test server's ResponseWriter
+		// writes are reliable and any encoding error would be a test setup issue
+		_ = json.NewEncoder(w).Encode(testCourse)
 	}))
 	defer server.Close()
 
@@ -145,7 +149,7 @@ func BenchmarkArticulateParser_LoadCourseFromFile(b *testing.B) {
 func BenchmarkArticulateParser_LoadCourseFromFile_Large(b *testing.B) {
 	// Create a large course
 	lessons := make([]models.Lesson, 200)
-	for i := 0; i < 200; i++ {
+	for i := range 200 {
 		lessons[i] = models.Lesson{
 			ID:    string(rune(i)),
 			Title: "Lesson " + string(rune(i)),
