@@ -31,8 +31,8 @@ func (m *MockCourseParser) LoadCourseFromFile(filePath string) (*models.Course, 
 
 // MockExporter is a mock implementation of interfaces.Exporter for testing.
 type MockExporter struct {
-	mockExport             func(course *models.Course, outputPath string) error
-	mockGetSupportedFormat func() string
+	mockExport          func(course *models.Course, outputPath string) error
+	mockSupportedFormat func() string
 }
 
 func (m *MockExporter) Export(course *models.Course, outputPath string) error {
@@ -42,17 +42,17 @@ func (m *MockExporter) Export(course *models.Course, outputPath string) error {
 	return nil
 }
 
-func (m *MockExporter) GetSupportedFormat() string {
-	if m.mockGetSupportedFormat != nil {
-		return m.mockGetSupportedFormat()
+func (m *MockExporter) SupportedFormat() string {
+	if m.mockSupportedFormat != nil {
+		return m.mockSupportedFormat()
 	}
 	return "mock"
 }
 
 // MockExporterFactory is a mock implementation of interfaces.ExporterFactory for testing.
 type MockExporterFactory struct {
-	mockCreateExporter      func(format string) (*MockExporter, error)
-	mockGetSupportedFormats func() []string
+	mockCreateExporter   func(format string) (*MockExporter, error)
+	mockSupportedFormats func() []string
 }
 
 func (m *MockExporterFactory) CreateExporter(format string) (interfaces.Exporter, error) {
@@ -63,9 +63,9 @@ func (m *MockExporterFactory) CreateExporter(format string) (interfaces.Exporter
 	return &MockExporter{}, nil
 }
 
-func (m *MockExporterFactory) GetSupportedFormats() []string {
-	if m.mockGetSupportedFormats != nil {
-		return m.mockGetSupportedFormats()
+func (m *MockExporterFactory) SupportedFormats() []string {
+	if m.mockSupportedFormats != nil {
+		return m.mockSupportedFormats()
 	}
 	return []string{"mock"}
 }
@@ -119,7 +119,7 @@ func TestNewApp(t *testing.T) {
 	}
 
 	// Test that the factory is set (we can't directly compare interface values)
-	formats := app.GetSupportedFormats()
+	formats := app.SupportedFormats()
 	if len(formats) == 0 {
 		t.Error("App exporterFactory was not set correctly - no supported formats")
 	}
@@ -306,19 +306,19 @@ func TestApp_ProcessCourseFromURI(t *testing.T) {
 	}
 }
 
-// TestApp_GetSupportedFormats tests the GetSupportedFormats method.
-func TestApp_GetSupportedFormats(t *testing.T) {
+// TestApp_SupportedFormats tests the SupportedFormats method.
+func TestApp_SupportedFormats(t *testing.T) {
 	expectedFormats := []string{"markdown", "docx", "pdf"}
 
 	parser := &MockCourseParser{}
 	factory := &MockExporterFactory{
-		mockGetSupportedFormats: func() []string {
+		mockSupportedFormats: func() []string {
 			return expectedFormats
 		},
 	}
 
 	app := NewApp(parser, factory)
-	formats := app.GetSupportedFormats()
+	formats := app.SupportedFormats()
 
 	if len(formats) != len(expectedFormats) {
 		t.Errorf("Expected %d formats, got %d", len(expectedFormats), len(formats))

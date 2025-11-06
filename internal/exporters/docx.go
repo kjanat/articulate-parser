@@ -191,10 +191,10 @@ func (e *DocxExporter) exportSubItem(doc *docx.Docx, subItem *models.SubItem) {
 	}
 }
 
-// GetSupportedFormat returns the format name this exporter supports.
+// SupportedFormat returns the format name this exporter supports.
 //
 // Returns:
 //   - A string representing the supported format ("docx")
-func (e *DocxExporter) GetSupportedFormat() string {
+func (e *DocxExporter) SupportedFormat() string {
 	return "docx"
 }

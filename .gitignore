@@ -73,3 +73,5 @@ main_coverage
 .task/
 
 **/*.local.*
+
+.claude/

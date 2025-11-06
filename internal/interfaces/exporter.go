@@ -12,9 +12,9 @@ type Exporter interface {
 	// specified output path. It returns an error if the export operation fails.
 	Export(course *models.Course, outputPath string) error
 
-	// GetSupportedFormat returns the name of the format this exporter supports.
+	// SupportedFormat returns the name of the format this exporter supports.
 	// This is used to identify which exporter to use for a given format.
-	GetSupportedFormat() string
+	SupportedFormat() string
 }
 
 // ExporterFactory creates exporters for different formats.
@@ -25,7 +25,7 @@ type ExporterFactory interface {
 	// It returns the appropriate exporter or an error if the format is not supported.
 	CreateExporter(format string) (Exporter, error)
 
-	// GetSupportedFormats returns a list of all export formats supported by this factory.
+	// SupportedFormats returns a list of all export formats supported by this factory.
 	// This is used to inform users of available export options.
-	GetSupportedFormats() []string
+	SupportedFormats() []string
 }

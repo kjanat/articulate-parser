@@ -2,7 +2,11 @@
 // It defines interfaces for parsing and exporting Articulate Rise courses.
 package interfaces
 
-import "github.com/kjanat/articulate-parser/internal/models"
+import (
+	"context"
+
+	"github.com/kjanat/articulate-parser/internal/models"
+)
 
 // CourseParser defines the interface for loading course data.
 // It provides methods to fetch course content either from a remote URI
@@ -10,8 +14,9 @@ import "github.com/kjanat/articulate-parser/internal/models"
 type CourseParser interface {
 	// FetchCourse loads a course from a URI (typically an Articulate Rise share URL).
 	// It retrieves the course data from the remote location and returns a parsed Course model.
+	// The context can be used for cancellation and timeout control.
 	// Returns an error if the fetch operation fails or if the data cannot be parsed.
-	FetchCourse(uri string) (*models.Course, error)
+	FetchCourse(ctx context.Context, uri string) (*models.Course, error)
 
 	// LoadCourseFromFile loads a course from a local file.
 	// It reads and parses the course data from the specified file path.

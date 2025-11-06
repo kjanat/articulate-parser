@@ -113,12 +113,12 @@ func (e *HTMLExporter) Export(course *models.Course, outputPath string) error {
 	return os.WriteFile(outputPath, buf.Bytes(), 0644)
 }
 
-// GetSupportedFormat returns the format name this exporter supports
+// SupportedFormat returns the format name this exporter supports
 // It indicates the file format that the HTMLExporter can generate.
 //
 // Returns:
 //   - A string representing the supported format ("html")
-func (e *HTMLExporter) GetSupportedFormat() string {
+func (e *HTMLExporter) SupportedFormat() string {
 	return "html"
 }
 

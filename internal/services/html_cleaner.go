@@ -7,6 +7,13 @@ import (
 	"strings"
 )
 
+var (
+	// htmlTagRegex matches HTML tags for removal
+	htmlTagRegex = regexp.MustCompile(`<[^>]*>`)
+	// whitespaceRegex matches multiple whitespace characters for normalization
+	whitespaceRegex = regexp.MustCompile(`\s+`)
+)
+
 // HTMLCleaner provides utilities for converting HTML content to plain text.
 // It removes HTML tags while preserving their content and converts HTML entities
 // to their plain text equivalents.
@@ -30,8 +37,7 @@ func NewHTMLCleaner() *HTMLCleaner {
 //   - A plain text string with all HTML elements and entities removed/converted
 func (h *HTMLCleaner) CleanHTML(html string) string {
 	// Remove HTML tags but preserve content
-	re := regexp.MustCompile(`<[^>]*>`)
-	cleaned := re.ReplaceAllString(html, "")
+	cleaned := htmlTagRegex.ReplaceAllString(html, "")
 
 	// Replace common HTML entities with their character equivalents
 	cleaned = strings.ReplaceAll(cleaned, "&nbsp;", " ")
@@ -46,7 +52,7 @@ func (h *HTMLCleaner) CleanHTML(html string) string {
 
 	// Clean up extra whitespace by replacing multiple spaces, tabs, and newlines
 	// with a single space, then trim any leading/trailing whitespace
-	cleaned = regexp.MustCompile(`\s+`).ReplaceAllString(cleaned, " ")
+	cleaned = whitespaceRegex.ReplaceAllString(cleaned, " ")
 	cleaned = strings.TrimSpace(cleaned)
 
 	return cleaned

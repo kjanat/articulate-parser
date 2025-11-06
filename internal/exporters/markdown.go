@@ -92,12 +92,12 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	return os.WriteFile(outputPath, buf.Bytes(), 0644)
 }
 
-// GetSupportedFormat returns the format name this exporter supports
+// SupportedFormat returns the format name this exporter supports
 // It indicates the file format that the MarkdownExporter can generate.
 //
 // Returns:
 //   - A string representing the supported format ("markdown")
-func (e *MarkdownExporter) GetSupportedFormat() string {
+func (e *MarkdownExporter) SupportedFormat() string {
 	return "markdown"
 }
 

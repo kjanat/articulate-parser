@@ -40,13 +40,13 @@ func run(args []string) int {
 
 	// Check for help flag
 	if len(args) > 1 && (args[1] == "--help" || args[1] == "-h" || args[1] == "help") {
-		printUsage(args[0], app.GetSupportedFormats())
+		printUsage(args[0], app.SupportedFormats())
 		return 0
 	}
 
 	// Check for required command-line arguments
 	if len(args) < 4 {
-		printUsage(args[0], app.GetSupportedFormats())
+		printUsage(args[0], app.SupportedFormats())
 		return 1
 	}
 

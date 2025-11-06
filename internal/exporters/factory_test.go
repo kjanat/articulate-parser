@@ -125,7 +125,7 @@ func TestFactory_CreateExporter(t *testing.T) {
 			}
 
 			// Check supported format
-			supportedFormat := exporter.GetSupportedFormat()
+			supportedFormat := exporter.SupportedFormat()
 			if supportedFormat != tc.expectedFormat {
 				t.Errorf("Expected supported format '%s' for format '%s', got '%s'", tc.expectedFormat, tc.format, supportedFormat)
 			}
@@ -173,7 +173,7 @@ func TestFactory_CreateExporter_CaseInsensitive(t *testing.T) {
 				t.Fatalf("CreateExporter returned nil for format '%s'", tc.format)
 			}
 
-			supportedFormat := exporter.GetSupportedFormat()
+			supportedFormat := exporter.SupportedFormat()
 			if supportedFormat != tc.expectedFormat {
 				t.Errorf("Expected supported format '%s' for format '%s', got '%s'", tc.expectedFormat, tc.format, supportedFormat)
 			}
@@ -221,15 +221,15 @@ func TestFactory_CreateExporter_ErrorMessages(t *testing.T) {
 	}
 }
 
-// TestFactory_GetSupportedFormats tests the GetSupportedFormats method.
-func TestFactory_GetSupportedFormats(t *testing.T) {
+// TestFactory_SupportedFormats tests the SupportedFormats method.
+func TestFactory_SupportedFormats(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
 	factory := NewFactory(htmlCleaner)
 
-	formats := factory.GetSupportedFormats()
+	formats := factory.SupportedFormats()
 
 	if formats == nil {
-		t.Fatal("GetSupportedFormats() returned nil")
+		t.Fatal("SupportedFormats() returned nil")
 	}
 
 	expected := []string{"markdown", "md", "docx", "word", "html", "htm"}
@@ -246,22 +246,22 @@ func TestFactory_GetSupportedFormats(t *testing.T) {
 	for _, format := range formats {
 		exporter, err := factory.CreateExporter(format)
 		if err != nil {
-			t.Errorf("Format '%s' from GetSupportedFormats() should be creatable, got error: %v", format, err)
+			t.Errorf("Format '%s' from SupportedFormats() should be creatable, got error: %v", format, err)
 		}
 		if exporter == nil {
-			t.Errorf("Format '%s' from GetSupportedFormats() should create non-nil exporter", format)
+			t.Errorf("Format '%s' from SupportedFormats() should create non-nil exporter", format)
 		}
 	}
 }
 
-// TestFactory_GetSupportedFormats_Immutable tests that the returned slice is safe to modify.
-func TestFactory_GetSupportedFormats_Immutable(t *testing.T) {
+// TestFactory_SupportedFormats_Immutable tests that the returned slice is safe to modify.
+func TestFactory_SupportedFormats_Immutable(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
 	factory := NewFactory(htmlCleaner)
 
 	// Get formats twice
-	formats1 := factory.GetSupportedFormats()
-	formats2 := factory.GetSupportedFormats()
+	formats1 := factory.SupportedFormats()
+	formats2 := factory.SupportedFormats()
 
 	// Modify first slice
 	if len(formats1) > 0 {
@@ -270,13 +270,13 @@ func TestFactory_GetSupportedFormats_Immutable(t *testing.T) {
 
 	// Check that second call returns unmodified data
 	if len(formats2) > 0 && formats2[0] == "modified" {
-		t.Error("GetSupportedFormats() should return independent slices")
+		t.Error("SupportedFormats() should return independent slices")
 	}
 
 	// Verify original functionality still works
-	formats3 := factory.GetSupportedFormats()
+	formats3 := factory.SupportedFormats()
 	if len(formats3) == 0 {
-		t.Error("GetSupportedFormats() should still return formats after modification")
+		t.Error("SupportedFormats() should still return formats after modification")
 	}
 }
 
@@ -436,7 +436,7 @@ func TestFactory_FormatNormalization(t *testing.T) {
 				t.Fatalf("Failed to create exporter for '%s': %v", tc.input, err)
 			}
 
-			format := exporter.GetSupportedFormat()
+			format := exporter.SupportedFormat()
 			if format != tc.expected {
 				t.Errorf("Expected format '%s' for input '%s', got '%s'", tc.expected, tc.input, format)
 			}
@@ -464,12 +464,12 @@ func BenchmarkFactory_CreateExporter_Docx(b *testing.B) {
 	}
 }
 
-// BenchmarkFactory_GetSupportedFormats benchmarks the GetSupportedFormats method.
-func BenchmarkFactory_GetSupportedFormats(b *testing.B) {
+// BenchmarkFactory_SupportedFormats benchmarks the SupportedFormats method.
+func BenchmarkFactory_SupportedFormats(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
 	factory := NewFactory(htmlCleaner)
 
 	for b.Loop() {
-		_ = factory.GetSupportedFormats()
+		_ = factory.SupportedFormats()
 	}
 }

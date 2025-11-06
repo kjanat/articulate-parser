@@ -32,13 +32,13 @@ func TestNewHTMLExporter(t *testing.T) {
 	}
 }
 
-// TestHTMLExporter_GetSupportedFormat tests the GetSupportedFormat method.
-func TestHTMLExporter_GetSupportedFormat(t *testing.T) {
+// TestHTMLExporter_SupportedFormat tests the SupportedFormat method.
+func TestHTMLExporter_SupportedFormat(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
 	exporter := NewHTMLExporter(htmlCleaner)
 
 	expected := "html"
-	result := exporter.GetSupportedFormat()
+	result := exporter.SupportedFormat()
 
 	if result != expected {
 		t.Errorf("Expected format '%s', got '%s'", expected, result)

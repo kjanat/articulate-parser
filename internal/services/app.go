@@ -3,6 +3,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/kjanat/articulate-parser/internal/interfaces"
@@ -44,8 +45,8 @@ func (a *App) ProcessCourseFromFile(filePath, format, outputPath string) error {
 // ProcessCourseFromURI fetches a course from the provided URI and exports it to the specified format.
 // It takes the URI to fetch the course from, the desired export format, and the output file path.
 // Returns an error if fetching or exporting fails.
-func (a *App) ProcessCourseFromURI(uri, format, outputPath string) error {
-	course, err := a.parser.FetchCourse(uri)
+func (a *App) ProcessCourseFromURI(ctx context.Context, uri, format, outputPath string) error {
+	course, err := a.parser.FetchCourse(ctx, uri)
 	if err != nil {
 		return fmt.Errorf("failed to fetch course: %w", err)
 	}
@@ -69,8 +70,8 @@ func (a *App) exportCourse(course *models.Course, format, outputPath string) err
 	return nil
 }
 
-// GetSupportedFormats returns a list of all export formats supported by the application.
+// SupportedFormats returns a list of all export formats supported by the application.
 // This information is provided by the ExporterFactory.
-func (a *App) GetSupportedFormats() []string {
-	return a.exporterFactory.GetSupportedFormats()
+func (a *App) SupportedFormats() []string {
+	return a.exporterFactory.SupportedFormats()
 }

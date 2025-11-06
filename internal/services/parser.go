@@ -3,6 +3,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -42,13 +43,14 @@ func NewArticulateParser() interfaces.CourseParser {
 // The course data is then unmarshalled into a Course model.
 //
 // Parameters:
+//   - ctx: Context for cancellation and timeout control
 //   - uri: The Articulate Rise share URL (e.g., https://rise.articulate.com/share/SHARE_ID)
 //
 // Returns:
 //   - A parsed Course model if successful
 //   - An error if the fetch fails, if the share ID can't be extracted,
 //     or if the response can't be parsed
-func (p *ArticulateParser) FetchCourse(uri string) (*models.Course, error) {
+func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models.Course, error) {
 	shareID, err := p.extractShareID(uri)
 	if err != nil {
 		return nil, err
@@ -56,7 +58,12 @@ func (p *ArticulateParser) FetchCourse(uri string) (*models.Course, error) {
 
 	apiURL := p.buildAPIURL(shareID)
 
-	resp, err := p.Client.Get(apiURL)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := p.Client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch course data: %w", err)
 	}

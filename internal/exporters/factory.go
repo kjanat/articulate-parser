@@ -55,11 +55,11 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	}
 }
 
-// GetSupportedFormats returns a list of all supported export formats.
+// SupportedFormats returns a list of all supported export formats.
 // This includes both primary format names and their aliases.
 //
 // Returns:
 //   - A string slice containing all supported format names
-func (f *Factory) GetSupportedFormats() []string {
+func (f *Factory) SupportedFormats() []string {
 	return []string{"markdown", "md", "docx", "word", "html", "htm"}
 }

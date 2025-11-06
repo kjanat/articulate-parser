@@ -32,13 +32,13 @@ func TestNewMarkdownExporter(t *testing.T) {
 	}
 }
 
-// TestMarkdownExporter_GetSupportedFormat tests the GetSupportedFormat method.
-func TestMarkdownExporter_GetSupportedFormat(t *testing.T) {
+// TestMarkdownExporter_SupportedFormat tests the SupportedFormat method.
+func TestMarkdownExporter_SupportedFormat(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
 	exporter := NewMarkdownExporter(htmlCleaner)
 
 	expected := "markdown"
-	result := exporter.GetSupportedFormat()
+	result := exporter.SupportedFormat()
 
 	if result != expected {
 		t.Errorf("Expected format '%s', got '%s'", expected, result)
