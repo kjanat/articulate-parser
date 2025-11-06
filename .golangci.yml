@@ -154,6 +154,7 @@ linters:
           - goconst
           - funlen
           - goerr113
+          - gocognit
 
       # Exclude benchmarks from some linters
       - path: _bench_test\.go
