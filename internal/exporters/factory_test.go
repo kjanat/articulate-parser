@@ -164,7 +164,6 @@ func TestFactory_CreateExporter_CaseInsensitive(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.format, func(t *testing.T) {
 			exporter, err := factory.CreateExporter(tc.format)
-
 			if err != nil {
 				t.Fatalf("Unexpected error for format '%s': %v", tc.format, err)
 			}

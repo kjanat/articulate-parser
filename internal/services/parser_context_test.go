@@ -144,7 +144,7 @@ func TestArticulateParser_FetchCourse_ContextDeadline(t *testing.T) {
 }
 
 // TestArticulateParser_FetchCourse_ContextSuccess tests that FetchCourse
-// succeeds when context is not cancelled.
+// succeeds when context is not canceled.
 func TestArticulateParser_FetchCourse_ContextSuccess(t *testing.T) {
 	testCourse := &models.Course{
 		ShareID: "test-id",
@@ -173,7 +173,6 @@ func TestArticulateParser_FetchCourse_ContextSuccess(t *testing.T) {
 	defer cancel()
 
 	course, err := parser.FetchCourse(ctx, "https://rise.articulate.com/share/test-id")
-
 	if err != nil {
 		t.Fatalf("Expected no error, got: %v", err)
 	}

@@ -569,7 +569,7 @@ func TestNilPointerSafety(t *testing.T) {
 // TestJSONTagsPresence tests that JSON tags are properly defined.
 func TestJSONTagsPresence(t *testing.T) {
 	// Test that important fields have JSON tags
-	courseType := reflect.TypeOf(Course{})
+	courseType := reflect.TypeFor[Course]()
 	if courseType.Kind() == reflect.Struct {
 		field, found := courseType.FieldByName("ShareID")
 		if !found {
@@ -586,7 +586,7 @@ func TestJSONTagsPresence(t *testing.T) {
 	}
 
 	// Test CourseInfo
-	courseInfoType := reflect.TypeOf(CourseInfo{})
+	courseInfoType := reflect.TypeFor[CourseInfo]()
 	if courseInfoType.Kind() == reflect.Struct {
 		field, found := courseInfoType.FieldByName("NavigationMode")
 		if !found {
@@ -665,7 +665,7 @@ func BenchmarkCourse_JSONUnmarshal(b *testing.B) {
 	}
 }
 
-// compareMaps compares two interface{} values that should be maps
+// compareMaps compares two any values that should be maps.
 func compareMaps(original, unmarshaled any) bool {
 	origMap, origOk := original.(map[string]any)
 	unMap, unOk := unmarshaled.(map[string]any)
@@ -712,7 +712,7 @@ func compareMaps(original, unmarshaled any) bool {
 	return true
 }
 
-// compareLessons compares two Lesson structs accounting for JSON type conversion
+// compareLessons compares two Lesson structs accounting for JSON type conversion.
 func compareLessons(original, unmarshaled Lesson) bool {
 	// Compare all fields except Position and Items
 	if original.ID != unmarshaled.ID ||
@@ -735,7 +735,7 @@ func compareLessons(original, unmarshaled Lesson) bool {
 	return compareItems(original.Items, unmarshaled.Items)
 }
 
-// compareItems compares two Item slices accounting for JSON type conversion
+// compareItems compares two Item slices accounting for JSON type conversion.
 func compareItems(original, unmarshaled []Item) bool {
 	if len(original) != len(unmarshaled) {
 		return false
@@ -749,7 +749,7 @@ func compareItems(original, unmarshaled []Item) bool {
 	return true
 }
 
-// compareItem compares two Item structs accounting for JSON type conversion
+// compareItem compares two Item structs accounting for JSON type conversion.
 func compareItem(original, unmarshaled Item) bool {
 	// Compare basic fields
 	if original.ID != unmarshaled.ID ||

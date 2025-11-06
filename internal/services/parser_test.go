@@ -209,7 +209,7 @@ func TestArticulateParser_LoadCourseFromFile(t *testing.T) {
 		t.Fatalf("Failed to marshal test course: %v", err)
 	}
 
-	if err := os.WriteFile(tempFile, data, 0644); err != nil {
+	if err := os.WriteFile(tempFile, data, 0o644); err != nil {
 		t.Fatalf("Failed to write test file: %v", err)
 	}
 
@@ -268,7 +268,7 @@ func TestArticulateParser_LoadCourseFromFile_InvalidJSON(t *testing.T) {
 	tempDir := t.TempDir()
 	tempFile := filepath.Join(tempDir, "invalid.json")
 
-	if err := os.WriteFile(tempFile, []byte("invalid json content"), 0644); err != nil {
+	if err := os.WriteFile(tempFile, []byte("invalid json content"), 0o644); err != nil {
 		t.Fatalf("Failed to write test file: %v", err)
 	}
 

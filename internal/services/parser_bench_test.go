@@ -130,7 +130,7 @@ func BenchmarkArticulateParser_LoadCourseFromFile(b *testing.B) {
 		b.Fatalf("Failed to marshal: %v", err)
 	}
 
-	if err := os.WriteFile(tempFile, data, 0644); err != nil {
+	if err := os.WriteFile(tempFile, data, 0o644); err != nil {
 		b.Fatalf("Failed to write file: %v", err)
 	}
 
@@ -177,7 +177,7 @@ func BenchmarkArticulateParser_LoadCourseFromFile_Large(b *testing.B) {
 		b.Fatalf("Failed to marshal: %v", err)
 	}
 
-	if err := os.WriteFile(tempFile, data, 0644); err != nil {
+	if err := os.WriteFile(tempFile, data, 0o644); err != nil {
 		b.Fatalf("Failed to write file: %v", err)
 	}
 

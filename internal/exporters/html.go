@@ -9,11 +9,12 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // HTMLExporter implements the Exporter interface for HTML format.
@@ -111,7 +112,7 @@ func (e *HTMLExporter) Export(course *models.Course, outputPath string) error {
 	buf.WriteString("</html>\n")
 
 	// #nosec G306 - 0644 is appropriate for export files that should be readable by others
-	return os.WriteFile(outputPath, buf.Bytes(), 0644)
+	return os.WriteFile(outputPath, buf.Bytes(), 0o644)
 }
 
 // SupportedFormat returns the format name this exporter supports
@@ -123,7 +124,7 @@ func (e *HTMLExporter) SupportedFormat() string {
 	return "html"
 }
 
-// getDefaultCSS returns basic CSS styling for the HTML document
+// getDefaultCSS returns basic CSS styling for the HTML document.
 func (e *HTMLExporter) getDefaultCSS() string {
 	return `
         body {
@@ -330,7 +331,7 @@ func (e *HTMLExporter) processItemToHTML(buf *bytes.Buffer, item models.Item) {
 	}
 }
 
-// processTextItem handles text content with headings and paragraphs
+// processTextItem handles text content with headings and paragraphs.
 func (e *HTMLExporter) processTextItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        <div class=\"item text-item\">\n")
 	buf.WriteString("            <h4>Text Content</h4>\n")
@@ -345,7 +346,7 @@ func (e *HTMLExporter) processTextItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        </div>\n\n")
 }
 
-// processListItem handles list content
+// processListItem handles list content.
 func (e *HTMLExporter) processListItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        <div class=\"item list-item\">\n")
 	buf.WriteString("            <h4>List</h4>\n")
@@ -360,7 +361,7 @@ func (e *HTMLExporter) processListItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        </div>\n\n")
 }
 
-// processKnowledgeCheckItem handles quiz questions and answers
+// processKnowledgeCheckItem handles quiz questions and answers.
 func (e *HTMLExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        <div class=\"item knowledge-check\">\n")
 	buf.WriteString("            <h4>Knowledge Check</h4>\n")
@@ -378,7 +379,7 @@ func (e *HTMLExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item models.
 	buf.WriteString("        </div>\n\n")
 }
 
-// processMultimediaItem handles multimedia content like videos
+// processMultimediaItem handles multimedia content like videos.
 func (e *HTMLExporter) processMultimediaItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        <div class=\"item multimedia-item\">\n")
 	buf.WriteString("            <h4>Media Content</h4>\n")
@@ -403,7 +404,7 @@ func (e *HTMLExporter) processMultimediaItem(buf *bytes.Buffer, item models.Item
 	buf.WriteString("        </div>\n\n")
 }
 
-// processImageItem handles image content
+// processImageItem handles image content.
 func (e *HTMLExporter) processImageItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        <div class=\"item multimedia-item\">\n")
 	buf.WriteString("            <h4>Image</h4>\n")
@@ -420,7 +421,7 @@ func (e *HTMLExporter) processImageItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        </div>\n\n")
 }
 
-// processInteractiveItem handles interactive content
+// processInteractiveItem handles interactive content.
 func (e *HTMLExporter) processInteractiveItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("        <div class=\"item interactive-item\">\n")
 	buf.WriteString("            <h4>Interactive Content</h4>\n")
@@ -435,12 +436,12 @@ func (e *HTMLExporter) processInteractiveItem(buf *bytes.Buffer, item models.Ite
 	buf.WriteString("        </div>\n\n")
 }
 
-// processDividerItem handles divider elements
+// processDividerItem handles divider elements.
 func (e *HTMLExporter) processDividerItem(buf *bytes.Buffer) {
 	buf.WriteString("        <hr>\n\n")
 }
 
-// processUnknownItem handles unknown or unsupported item types
+// processUnknownItem handles unknown or unsupported item types.
 func (e *HTMLExporter) processUnknownItem(buf *bytes.Buffer, item models.Item) {
 	if len(item.Items) > 0 {
 		buf.WriteString("        <div class=\"item unknown-item\">\n")
@@ -453,7 +454,7 @@ func (e *HTMLExporter) processUnknownItem(buf *bytes.Buffer, item models.Item) {
 	}
 }
 
-// processGenericSubItem processes sub-items for unknown types
+// processGenericSubItem processes sub-items for unknown types.
 func (e *HTMLExporter) processGenericSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Title != "" {
 		fmt.Fprintf(buf, "            <p><strong>%s</strong></p>\n", subItem.Title)
@@ -463,7 +464,7 @@ func (e *HTMLExporter) processGenericSubItem(buf *bytes.Buffer, subItem models.S
 	}
 }
 
-// processAnswers processes answer choices for quiz questions
+// processAnswers processes answer choices for quiz questions.
 func (e *HTMLExporter) processAnswers(buf *bytes.Buffer, answers []models.Answer) {
 	buf.WriteString("            <div class=\"answers\">\n")
 	buf.WriteString("                <h5>Answers:</h5>\n")

@@ -8,11 +8,12 @@ import (
 	"strings"
 
 	"github.com/fumiama/go-docx"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // DocxExporter implements the Exporter interface for DOCX format.

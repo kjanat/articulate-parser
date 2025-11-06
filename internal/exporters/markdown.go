@@ -8,11 +8,12 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 // MarkdownExporter implements the Exporter interface for Markdown format.
@@ -81,7 +82,7 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	}
 
 	// #nosec G306 - 0644 is appropriate for export files that should be readable by others
-	return os.WriteFile(outputPath, buf.Bytes(), 0644)
+	return os.WriteFile(outputPath, buf.Bytes(), 0o644)
 }
 
 // SupportedFormat returns "markdown".
@@ -114,7 +115,7 @@ func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.
 	}
 }
 
-// processTextItem handles text content with headings and paragraphs
+// processTextItem handles text content with headings and paragraphs.
 func (e *MarkdownExporter) processTextItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	for _, subItem := range item.Items {
 		if subItem.Heading != "" {
@@ -132,7 +133,7 @@ func (e *MarkdownExporter) processTextItem(buf *bytes.Buffer, item models.Item, 
 	}
 }
 
-// processListItem handles list items with bullet points
+// processListItem handles list items with bullet points.
 func (e *MarkdownExporter) processListItem(buf *bytes.Buffer, item models.Item) {
 	for _, subItem := range item.Items {
 		if subItem.Paragraph != "" {
@@ -145,7 +146,7 @@ func (e *MarkdownExporter) processListItem(buf *bytes.Buffer, item models.Item) 
 	buf.WriteString("\n")
 }
 
-// processMultimediaItem handles multimedia content including videos and images
+// processMultimediaItem handles multimedia content including videos and images.
 func (e *MarkdownExporter) processMultimediaItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	fmt.Fprintf(buf, "%s Media Content\n\n", headingPrefix)
 	for _, subItem := range item.Items {
@@ -154,7 +155,7 @@ func (e *MarkdownExporter) processMultimediaItem(buf *bytes.Buffer, item models.
 	buf.WriteString("\n")
 }
 
-// processMediaSubItem processes individual media items (video/image)
+// processMediaSubItem processes individual media items (video/image).
 func (e *MarkdownExporter) processMediaSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Media != nil {
 		e.processVideoMedia(buf, subItem.Media)
@@ -166,7 +167,7 @@ func (e *MarkdownExporter) processMediaSubItem(buf *bytes.Buffer, subItem models
 	}
 }
 
-// processVideoMedia processes video media content
+// processVideoMedia processes video media content.
 func (e *MarkdownExporter) processVideoMedia(buf *bytes.Buffer, media *models.Media) {
 	if media.Video != nil {
 		fmt.Fprintf(buf, "**Video**: %s\n", media.Video.OriginalUrl)
@@ -176,14 +177,14 @@ func (e *MarkdownExporter) processVideoMedia(buf *bytes.Buffer, media *models.Me
 	}
 }
 
-// processImageMedia processes image media content
+// processImageMedia processes image media content.
 func (e *MarkdownExporter) processImageMedia(buf *bytes.Buffer, media *models.Media) {
 	if media.Image != nil {
 		fmt.Fprintf(buf, "**Image**: %s\n", media.Image.OriginalUrl)
 	}
 }
 
-// processImageItem handles standalone image items
+// processImageItem handles standalone image items.
 func (e *MarkdownExporter) processImageItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	fmt.Fprintf(buf, "%s Image\n\n", headingPrefix)
 	for _, subItem := range item.Items {
@@ -198,7 +199,7 @@ func (e *MarkdownExporter) processImageItem(buf *bytes.Buffer, item models.Item,
 	buf.WriteString("\n")
 }
 
-// processKnowledgeCheckItem handles quiz questions and knowledge checks
+// processKnowledgeCheckItem handles quiz questions and knowledge checks.
 func (e *MarkdownExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	fmt.Fprintf(buf, "%s Knowledge Check\n\n", headingPrefix)
 	for _, subItem := range item.Items {
@@ -207,7 +208,7 @@ func (e *MarkdownExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item mod
 	buf.WriteString("\n")
 }
 
-// processQuestionSubItem processes individual question items
+// processQuestionSubItem processes individual question items.
 func (e *MarkdownExporter) processQuestionSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Title != "" {
 		title := e.htmlCleaner.CleanHTML(subItem.Title)
@@ -222,7 +223,7 @@ func (e *MarkdownExporter) processQuestionSubItem(buf *bytes.Buffer, subItem mod
 	}
 }
 
-// processAnswers processes answer choices for quiz questions
+// processAnswers processes answer choices for quiz questions.
 func (e *MarkdownExporter) processAnswers(buf *bytes.Buffer, answers []models.Answer) {
 	buf.WriteString("**Answers**:\n")
 	for i, answer := range answers {
@@ -234,7 +235,7 @@ func (e *MarkdownExporter) processAnswers(buf *bytes.Buffer, answers []models.An
 	}
 }
 
-// processInteractiveItem handles interactive content
+// processInteractiveItem handles interactive content.
 func (e *MarkdownExporter) processInteractiveItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	fmt.Fprintf(buf, "%s Interactive Content\n\n", headingPrefix)
 	for _, subItem := range item.Items {
@@ -245,12 +246,12 @@ func (e *MarkdownExporter) processInteractiveItem(buf *bytes.Buffer, item models
 	}
 }
 
-// processDividerItem handles divider elements
+// processDividerItem handles divider elements.
 func (e *MarkdownExporter) processDividerItem(buf *bytes.Buffer) {
 	buf.WriteString("---\n\n")
 }
 
-// processUnknownItem handles unknown or unsupported item types
+// processUnknownItem handles unknown or unsupported item types.
 func (e *MarkdownExporter) processUnknownItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	if len(item.Items) > 0 {
 		caser := cases.Title(language.English)
@@ -261,7 +262,7 @@ func (e *MarkdownExporter) processUnknownItem(buf *bytes.Buffer, item models.Ite
 	}
 }
 
-// processGenericSubItem processes sub-items for unknown types
+// processGenericSubItem processes sub-items for unknown types.
 func (e *MarkdownExporter) processGenericSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Title != "" {
 		title := e.htmlCleaner.CleanHTML(subItem.Title)

@@ -61,7 +61,7 @@ func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models
 
 	apiURL := p.buildAPIURL(shareID)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, http.NoBody)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

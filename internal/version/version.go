@@ -14,7 +14,7 @@ var (
 	// - Structured logging with slog
 	// - Configuration via environment variables
 	// - Context-aware HTTP requests
-	// - Comprehensive benchmarks and examples
+	// - Comprehensive benchmarks and examples.
 	Version = "1.0.0"
 
 	// BuildTime is the time the binary was built.

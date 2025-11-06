@@ -90,7 +90,6 @@ func TestDocxExporter_Export_AddDocxExtension(t *testing.T) {
 
 	err := exporter.Export(testCourse, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -155,7 +154,6 @@ func TestDocxExporter_ExportLesson(t *testing.T) {
 
 	err := exporter.Export(course, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -222,7 +220,6 @@ func TestDocxExporter_ExportItem(t *testing.T) {
 
 	err := exporter.Export(course, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -276,7 +273,6 @@ func TestDocxExporter_ExportSubItem(t *testing.T) {
 
 	err := exporter.Export(course, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -409,7 +405,6 @@ func TestDocxExporter_ComplexCourse(t *testing.T) {
 	// Export course
 	err := exporter.Export(course, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -444,7 +439,6 @@ func TestDocxExporter_EmptyCourse(t *testing.T) {
 
 	err := exporter.Export(course, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -493,7 +487,6 @@ func TestDocxExporter_HTMLCleaning(t *testing.T) {
 
 	err := exporter.Export(course, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -516,7 +509,6 @@ func TestDocxExporter_ExistingDocxExtension(t *testing.T) {
 
 	err := exporter.Export(testCourse, outputPath)
 	if err != nil {
-
 		t.Fatalf("Export failed: %v", err)
 	}
 
@@ -552,7 +544,6 @@ func TestDocxExporter_CaseInsensitiveExtension(t *testing.T) {
 
 		err := exporter.Export(testCourse, outputPath)
 		if err != nil {
-
 			t.Fatalf("Export failed for case %d (%s): %v", i, testCase, err)
 		}
 
