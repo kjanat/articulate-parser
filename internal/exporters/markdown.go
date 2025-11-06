@@ -11,6 +11,8 @@ import (
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // MarkdownExporter implements the Exporter interface for Markdown format.
@@ -269,7 +271,8 @@ func (e *MarkdownExporter) processDividerItem(buf *bytes.Buffer) {
 // processUnknownItem handles unknown or unsupported item types
 func (e *MarkdownExporter) processUnknownItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	if len(item.Items) > 0 {
-		buf.WriteString(fmt.Sprintf("%s %s Content\n\n", headingPrefix, strings.Title(item.Type)))
+		caser := cases.Title(language.English)
+		buf.WriteString(fmt.Sprintf("%s %s Content\n\n", headingPrefix, caser.String(item.Type)))
 		for _, subItem := range item.Items {
 			e.processGenericSubItem(buf, subItem)
 		}

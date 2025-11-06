@@ -12,6 +12,8 @@ import (
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // HTMLExporter implements the Exporter interface for HTML format.
@@ -441,7 +443,8 @@ func (e *HTMLExporter) processDividerItem(buf *bytes.Buffer) {
 func (e *HTMLExporter) processUnknownItem(buf *bytes.Buffer, item models.Item) {
 	if len(item.Items) > 0 {
 		buf.WriteString("        <div class=\"item unknown-item\">\n")
-		buf.WriteString(fmt.Sprintf("            <h4>%s Content</h4>\n", strings.Title(item.Type)))
+		caser := cases.Title(language.English)
+		buf.WriteString(fmt.Sprintf("            <h4>%s Content</h4>\n", caser.String(item.Type)))
 		for _, subItem := range item.Items {
 			e.processGenericSubItem(buf, subItem)
 		}

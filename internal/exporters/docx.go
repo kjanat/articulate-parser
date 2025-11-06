@@ -11,6 +11,8 @@ import (
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // DocxExporter implements the Exporter interface for DOCX format.
@@ -119,7 +121,8 @@ func (e *DocxExporter) exportItem(doc *docx.Docx, item *models.Item) {
 	// Add item type as heading
 	if item.Type != "" {
 		itemPara := doc.AddParagraph()
-		itemPara.AddText(strings.Title(item.Type)).Size("24").Bold()
+		caser := cases.Title(language.English)
+		itemPara.AddText(caser.String(item.Type)).Size("24").Bold()
 	}
 
 	// Add sub-items
