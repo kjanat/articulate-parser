@@ -124,13 +124,16 @@ func TestRunWithInsufficientArgs(t *testing.T) {
 			// Run the function
 			exitCode := run(tt.args)
 
-			// Restore stdout
-			w.Close()
+			// Restore stdout. Close errors are ignored: we've already captured the
+			// output before closing, and any close error doesn't affect test validity.
+			_ = w.Close()
 			os.Stdout = oldStdout
 
-			// Read captured output
+			// Read captured output. Copy errors are ignored: in this test context,
+			// reading from a pipe that was just closed is not expected to fail, and
+			// we're verifying the captured output regardless.
 			var buf bytes.Buffer
-			io.Copy(&buf, r)
+			_, _ = io.Copy(&buf, r)
 			output := buf.String()
 
 			// Verify exit code
@@ -165,13 +168,15 @@ func TestRunWithHelpFlags(t *testing.T) {
 			args := []string{"articulate-parser", flag}
 			exitCode := run(args)
 
-			// Restore stdout
-			w.Close()
+			// Restore stdout. Close errors are ignored: the pipe write end is already
+			// closed before reading, and any close error doesn't affect the test.
+			_ = w.Close()
 			os.Stdout = oldStdout
 
-			// Read captured output
+			// Read captured output. Copy errors are ignored: we successfully wrote
+			// the help output to the pipe and can verify it regardless of close semantics.
 			var buf bytes.Buffer
-			io.Copy(&buf, r)
+			_, _ = io.Copy(&buf, r)
 			output := buf.String()
 
 			// Verify exit code is 0 (success)
@@ -214,13 +219,15 @@ func TestRunWithVersionFlags(t *testing.T) {
 			args := []string{"articulate-parser", flag}
 			exitCode := run(args)
 
-			// Restore stdout
-			w.Close()
+			// Restore stdout. Close errors are ignored: the version output has already
+			// been written and we're about to read it; close semantics don't affect correctness.
+			_ = w.Close()
 			os.Stdout = oldStdout
 
-			// Read captured output
+			// Read captured output. Copy errors are ignored: the output was successfully
+			// produced and we can verify its contents regardless of any I/O edge cases.
 			var buf bytes.Buffer
-			io.Copy(&buf, r)
+			_, _ = io.Copy(&buf, r)
 			output := buf.String()
 
 			// Verify exit code is 0 (success)
@@ -264,20 +271,26 @@ func TestRunWithInvalidFile(t *testing.T) {
 	args := []string{"articulate-parser", "nonexistent-file.json", "markdown", "output.md"}
 	exitCode := run(args)
 
-	// Restore stdout/stderr and log output
-	stdoutW.Close()
-	stderrW.Close()
+	// Restore stdout/stderr and log output. Close errors are ignored: we've already
+	// written all error messages to these pipes before closing them, and the test
+	// only cares about verifying the captured output.
+	_ = stdoutW.Close()
+	_ = stderrW.Close()
 	os.Stdout = oldStdout
 	os.Stderr = oldStderr
 	log.SetOutput(oldLogOutput)
 
-	// Read captured output
+	// Read captured output. Copy errors are ignored: the error messages have been
+	// successfully written to the pipes, and we can verify the output content
+	// regardless of any edge cases in pipe closure or I/O completion.
 	var stdoutBuf, stderrBuf bytes.Buffer
-	io.Copy(&stdoutBuf, stdoutR)
-	io.Copy(&stderrBuf, stderrR)
+	_, _ = io.Copy(&stdoutBuf, stdoutR)
+	_, _ = io.Copy(&stderrBuf, stderrR)
 
-	stdoutR.Close()
-	stderrR.Close()
+	// Close read ends of pipes. Errors ignored: we've already consumed all data
+	// from these pipes, and close errors don't affect test assertions.
+	_ = stdoutR.Close()
+	_ = stderrR.Close()
 
 	// Verify exit code
 	if exitCode != 1 {
@@ -311,20 +324,26 @@ func TestRunWithInvalidURI(t *testing.T) {
 	args := []string{"articulate-parser", "https://example.com/invalid", "markdown", "output.md"}
 	exitCode := run(args)
 
-	// Restore stdout/stderr and log output
-	stdoutW.Close()
-	stderrW.Close()
+	// Restore stdout/stderr and log output. Close errors are ignored: we've already
+	// written all error messages about the invalid URI to these pipes before closing,
+	// and test correctness only depends on verifying the captured error output.
+	_ = stdoutW.Close()
+	_ = stderrW.Close()
 	os.Stdout = oldStdout
 	os.Stderr = oldStderr
 	log.SetOutput(oldLogOutput)
 
-	// Read captured output
+	// Read captured output. Copy errors are ignored: the error messages have been
+	// successfully written and we can verify the failure output content regardless
+	// of any edge cases in pipe lifecycle or I/O synchronization.
 	var stdoutBuf, stderrBuf bytes.Buffer
-	io.Copy(&stdoutBuf, stdoutR)
-	io.Copy(&stderrBuf, stderrR)
+	_, _ = io.Copy(&stdoutBuf, stdoutR)
+	_, _ = io.Copy(&stderrBuf, stderrR)
 
-	stdoutR.Close()
-	stderrR.Close()
+	// Close read ends of pipes. Errors ignored: we've already consumed all data
+	// and close errors don't affect the validation of the error output.
+	_ = stdoutR.Close()
+	_ = stderrR.Close()
 
 	// Should fail because the URI is invalid/unreachable
 	if exitCode != 1 {
@@ -364,16 +383,29 @@ func TestRunWithValidJSONFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	defer os.Remove(tmpFile.Name())
+	// Ensure temporary test file is cleaned up. Remove errors are ignored because
+	// the test has already used the file for its purpose, and cleanup failures don't
+	// invalidate the test results (the OS will eventually clean up temp files).
+	defer func() {
+		_ = os.Remove(tmpFile.Name())
+	}()
 
 	if _, err := tmpFile.WriteString(testContent); err != nil {
 		t.Fatalf("Failed to write test content: %v", err)
 	}
-	tmpFile.Close()
+	// Close the temporary file. Errors are ignored because we've already written
+	// the test content and the main test logic (loading the file) doesn't depend
+	// on the success of closing this file descriptor.
+	_ = tmpFile.Close()
 
 	// Test successful run with valid file
 	outputFile := "test-output.md"
-	defer os.Remove(outputFile)
+	// Ensure test output file is cleaned up. Remove errors are ignored because the
+	// test has already verified the export succeeded; cleanup failures don't affect
+	// the test assertions.
+	defer func() {
+		_ = os.Remove(outputFile)
+	}()
 
 	// Save original stdout
 	originalStdout := os.Stdout
@@ -386,13 +418,17 @@ func TestRunWithValidJSONFile(t *testing.T) {
 	args := []string{"articulate-parser", tmpFile.Name(), "markdown", outputFile}
 	exitCode := run(args)
 
-	// Close write end and restore stdout
-	w.Close()
+	// Close write end and restore stdout. Close errors are ignored: we've already
+	// written the success message before closing, and any close error doesn't affect
+	// the validity of the captured output or the test assertions.
+	_ = w.Close()
 	os.Stdout = originalStdout
 
-	// Read captured output
+	// Read captured output. Copy errors are ignored: the success message was
+	// successfully written to the pipe, and we can verify it regardless of any
+	// edge cases in pipe closure or I/O synchronization.
 	var buf bytes.Buffer
-	io.Copy(&buf, r)
+	_, _ = io.Copy(&buf, r)
 	output := buf.String()
 
 	// Verify successful execution
@@ -439,17 +475,24 @@ func TestRunIntegration(t *testing.T) {
 			args := []string{"articulate-parser", "articulate-sample.json", format.format, format.output}
 			exitCode := run(args)
 
-			// Restore stdout
-			w.Close()
+			// Restore stdout. Close errors are ignored: the export success message
+			// has already been written and we're about to read it; close semantics
+			// don't affect the validity of the captured output.
+			_ = w.Close()
 			os.Stdout = oldStdout
 
-			// Read captured output
+			// Read captured output. Copy errors are ignored: the output was successfully
+			// produced and we can verify its contents regardless of any I/O edge cases.
 			var buf bytes.Buffer
-			io.Copy(&buf, r)
+			_, _ = io.Copy(&buf, r)
 			output := buf.String()
 
-			// Clean up test file
-			defer os.Remove(format.output)
+			// Clean up test file. Remove errors are ignored because the test has
+			// already verified the export succeeded; cleanup failures don't affect
+			// the test assertions.
+			defer func() {
+				_ = os.Remove(format.output)
+			}()
 
 			// Verify successful execution
 			if exitCode != 0 {

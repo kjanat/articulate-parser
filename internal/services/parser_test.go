@@ -161,7 +161,10 @@ func TestArticulateParser_FetchCourse_InvalidJSON(t *testing.T) {
 	// Create test server that returns invalid JSON
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte("invalid json"))
+		// Write is used for its side effect; the test verifies error handling on
+		// the client side, not whether the write succeeds. Ignore the error since
+		// httptest.ResponseWriter writes are rarely problematic in test contexts.
+		_, _ = w.Write([]byte("invalid json"))
 	}))
 	defer server.Close()
 

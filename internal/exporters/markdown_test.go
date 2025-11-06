@@ -664,8 +664,10 @@ func BenchmarkMarkdownExporter_Export(b *testing.B) {
 	for b.Loop() {
 		outputPath := filepath.Join(tempDir, "benchmark-course.md")
 		_ = exporter.Export(course, outputPath)
-		// Clean up for next iteration
-		os.Remove(outputPath)
+		// Clean up for next iteration. Remove errors are ignored because we've already
+		// benchmarked the export operation; cleanup failures don't affect the benchmark
+		// measurements or the validity of the next iteration's export.
+		_ = os.Remove(outputPath)
 	}
 }
 

@@ -60,7 +60,15 @@ func (p *ArticulateParser) FetchCourse(uri string) (*models.Course, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch course data: %w", err)
 	}
-	defer resp.Body.Close()
+	// Ensure response body is closed even if ReadAll fails. Close errors are logged
+	// but not fatal since the body content has already been read and parsed. In the
+	// context of HTTP responses, the body must be closed to release the underlying
+	// connection, but a close error doesn't invalidate the data already consumed.
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to close response body: %v\n", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)

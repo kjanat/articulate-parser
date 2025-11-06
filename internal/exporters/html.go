@@ -335,10 +335,10 @@ func (e *HTMLExporter) processTextItem(buf *bytes.Buffer, item models.Item) {
 	buf.WriteString("            <h4>Text Content</h4>\n")
 	for _, subItem := range item.Items {
 		if subItem.Heading != "" {
-			buf.WriteString(fmt.Sprintf("            <h5>%s</h5>\n", subItem.Heading))
+			fmt.Fprintf(buf, "            <h5>%s</h5>\n", subItem.Heading)
 		}
 		if subItem.Paragraph != "" {
-			buf.WriteString(fmt.Sprintf("            <div>%s</div>\n", subItem.Paragraph))
+			fmt.Fprintf(buf, "            <div>%s</div>\n", subItem.Paragraph)
 		}
 	}
 	buf.WriteString("        </div>\n\n")
@@ -352,7 +352,7 @@ func (e *HTMLExporter) processListItem(buf *bytes.Buffer, item models.Item) {
 	for _, subItem := range item.Items {
 		if subItem.Paragraph != "" {
 			cleanText := e.htmlCleaner.CleanHTML(subItem.Paragraph)
-			buf.WriteString(fmt.Sprintf("                <li>%s</li>\n", html.EscapeString(cleanText)))
+			fmt.Fprintf(buf, "                <li>%s</li>\n", html.EscapeString(cleanText))
 		}
 	}
 	buf.WriteString("            </ul>\n")
@@ -365,13 +365,13 @@ func (e *HTMLExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item models.
 	buf.WriteString("            <h4>Knowledge Check</h4>\n")
 	for _, subItem := range item.Items {
 		if subItem.Title != "" {
-			buf.WriteString(fmt.Sprintf("            <p><strong>Question:</strong> %s</p>\n", subItem.Title))
+			fmt.Fprintf(buf, "            <p><strong>Question:</strong> %s</p>\n", subItem.Title)
 		}
 		if len(subItem.Answers) > 0 {
 			e.processAnswers(buf, subItem.Answers)
 		}
 		if subItem.Feedback != "" {
-			buf.WriteString(fmt.Sprintf("            <div class=\"feedback\"><strong>Feedback:</strong> %s</div>\n", subItem.Feedback))
+			fmt.Fprintf(buf, "            <div class=\"feedback\"><strong>Feedback:</strong> %s</div>\n", subItem.Feedback)
 		}
 	}
 	buf.WriteString("        </div>\n\n")
@@ -383,20 +383,20 @@ func (e *HTMLExporter) processMultimediaItem(buf *bytes.Buffer, item models.Item
 	buf.WriteString("            <h4>Media Content</h4>\n")
 	for _, subItem := range item.Items {
 		if subItem.Title != "" {
-			buf.WriteString(fmt.Sprintf("            <h5>%s</h5>\n", subItem.Title))
+			fmt.Fprintf(buf, "            <h5>%s</h5>\n", subItem.Title)
 		}
 		if subItem.Media != nil {
 			if subItem.Media.Video != nil {
 				buf.WriteString("            <div class=\"media-info\">\n")
-				buf.WriteString(fmt.Sprintf("                <p><strong>Video:</strong> %s</p>\n", html.EscapeString(subItem.Media.Video.OriginalUrl)))
+				fmt.Fprintf(buf, "                <p><strong>Video:</strong> %s</p>\n", html.EscapeString(subItem.Media.Video.OriginalUrl))
 				if subItem.Media.Video.Duration > 0 {
-					buf.WriteString(fmt.Sprintf("                <p><strong>Duration:</strong> %d seconds</p>\n", subItem.Media.Video.Duration))
+					fmt.Fprintf(buf, "                <p><strong>Duration:</strong> %d seconds</p>\n", subItem.Media.Video.Duration)
 				}
 				buf.WriteString("            </div>\n")
 			}
 		}
 		if subItem.Caption != "" {
-			buf.WriteString(fmt.Sprintf("            <div><em>%s</em></div>\n", subItem.Caption))
+			fmt.Fprintf(buf, "            <div><em>%s</em></div>\n", subItem.Caption)
 		}
 	}
 	buf.WriteString("        </div>\n\n")
@@ -409,11 +409,11 @@ func (e *HTMLExporter) processImageItem(buf *bytes.Buffer, item models.Item) {
 	for _, subItem := range item.Items {
 		if subItem.Media != nil && subItem.Media.Image != nil {
 			buf.WriteString("            <div class=\"media-info\">\n")
-			buf.WriteString(fmt.Sprintf("                <p><strong>Image:</strong> %s</p>\n", html.EscapeString(subItem.Media.Image.OriginalUrl)))
+			fmt.Fprintf(buf, "                <p><strong>Image:</strong> %s</p>\n", html.EscapeString(subItem.Media.Image.OriginalUrl))
 			buf.WriteString("            </div>\n")
 		}
 		if subItem.Caption != "" {
-			buf.WriteString(fmt.Sprintf("            <div><em>%s</em></div>\n", subItem.Caption))
+			fmt.Fprintf(buf, "            <div><em>%s</em></div>\n", subItem.Caption)
 		}
 	}
 	buf.WriteString("        </div>\n\n")
@@ -425,10 +425,10 @@ func (e *HTMLExporter) processInteractiveItem(buf *bytes.Buffer, item models.Ite
 	buf.WriteString("            <h4>Interactive Content</h4>\n")
 	for _, subItem := range item.Items {
 		if subItem.Title != "" {
-			buf.WriteString(fmt.Sprintf("            <p><strong>%s</strong></p>\n", subItem.Title))
+			fmt.Fprintf(buf, "            <p><strong>%s</strong></p>\n", subItem.Title)
 		}
 		if subItem.Paragraph != "" {
-			buf.WriteString(fmt.Sprintf("            <div>%s</div>\n", subItem.Paragraph))
+			fmt.Fprintf(buf, "            <div>%s</div>\n", subItem.Paragraph)
 		}
 	}
 	buf.WriteString("        </div>\n\n")
@@ -444,7 +444,7 @@ func (e *HTMLExporter) processUnknownItem(buf *bytes.Buffer, item models.Item) {
 	if len(item.Items) > 0 {
 		buf.WriteString("        <div class=\"item unknown-item\">\n")
 		caser := cases.Title(language.English)
-		buf.WriteString(fmt.Sprintf("            <h4>%s Content</h4>\n", caser.String(item.Type)))
+		fmt.Fprintf(buf, "            <h4>%s Content</h4>\n", caser.String(item.Type))
 		for _, subItem := range item.Items {
 			e.processGenericSubItem(buf, subItem)
 		}
@@ -455,10 +455,10 @@ func (e *HTMLExporter) processUnknownItem(buf *bytes.Buffer, item models.Item) {
 // processGenericSubItem processes sub-items for unknown types
 func (e *HTMLExporter) processGenericSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Title != "" {
-		buf.WriteString(fmt.Sprintf("            <p><strong>%s</strong></p>\n", subItem.Title))
+		fmt.Fprintf(buf, "            <p><strong>%s</strong></p>\n", subItem.Title)
 	}
 	if subItem.Paragraph != "" {
-		buf.WriteString(fmt.Sprintf("            <div>%s</div>\n", subItem.Paragraph))
+		fmt.Fprintf(buf, "            <div>%s</div>\n", subItem.Paragraph)
 	}
 }
 
@@ -472,7 +472,7 @@ func (e *HTMLExporter) processAnswers(buf *bytes.Buffer, answers []models.Answer
 		if answer.Correct {
 			cssClass = " class=\"correct-answer\""
 		}
-		buf.WriteString(fmt.Sprintf("                    <li%s>%s</li>\n", cssClass, html.EscapeString(answer.Title)))
+		fmt.Fprintf(buf, "                    <li%s>%s</li>\n", cssClass, html.EscapeString(answer.Title))
 	}
 	buf.WriteString("                </ol>\n")
 	buf.WriteString("            </div>\n")

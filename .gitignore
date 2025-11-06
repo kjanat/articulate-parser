@@ -71,3 +71,5 @@ main_coverage
 .idea/
 
 .task/
+
+**/*.local.*

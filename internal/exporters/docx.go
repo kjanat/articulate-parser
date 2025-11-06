@@ -76,7 +76,15 @@ func (e *DocxExporter) Export(course *models.Course, outputPath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %w", err)
 	}
-	defer file.Close()
+	// Ensure file is closed even if WriteTo fails. Close errors are logged but not
+	// fatal since the document content has already been written to disk. A close
+	// error typically indicates a filesystem synchronization issue that doesn't
+	// affect the validity of the exported file.
+	defer func() {
+		if err := file.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to close output file: %v\n", err)
+		}
+	}()
 
 	// Save the document
 	_, err = doc.WriteTo(file)

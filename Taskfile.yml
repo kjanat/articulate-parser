@@ -180,6 +180,7 @@ tasks:
   # Code quality tasks
   lint:
     desc: Run all linters
+    silent: true
     aliases: [l]
     cmds:
       - task: lint:vet
@@ -189,11 +190,13 @@ tasks:
 
   lint:vet:
     desc: Run go vet
+    silent: true
     cmds:
       - go vet ./...
 
   lint:fmt:
     desc: Check code formatting
+    silent: true
     vars:
       UNFORMATTED:
         sh: gofmt -s -l .
@@ -209,6 +212,7 @@ tasks:
 
   lint:staticcheck:
     desc: Run staticcheck (install if needed)
+    silent: true
     vars:
       HAS_STATICCHECK:
         sh: '{{if eq OS "windows"}}where.exe staticcheck 2>NUL{{else}}command -v staticcheck 2>/dev/null{{end}}'
@@ -219,6 +223,7 @@ tasks:
 
   lint:golangci:
     desc: Run golangci-lint (install if needed)
+    silent: true
     aliases: [golangci, golangci-lint]
     vars:
       HAS_GOLANGCI:
@@ -230,6 +235,7 @@ tasks:
 
   lint:golangci:fix:
     desc: Run golangci-lint with auto-fix
+    silent: true
     aliases: [golangci-fix]
     vars:
       HAS_GOLANGCI:
@@ -237,10 +243,11 @@ tasks:
     cmds:
       - '{{if eq .HAS_GOLANGCI ""}}echo "Installing golangci-lint..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest{{end}}'
       - golangci-lint run --fix ./...
-      - echo "✅ golangci-lint fixes applied"
+      - echo "golangci-lint fixes applied"
 
   fmt:
     desc: Format all Go files
+    silent: true
     aliases: [format]
     cmds:
       - gofmt -s -w .
@@ -248,6 +255,7 @@ tasks:
 
   modernize:
     desc: Modernize Go code to use modern idioms
+    silent: true
     aliases: [modern]
     cmds:
       - go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
