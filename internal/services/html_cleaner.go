@@ -3,20 +3,17 @@
 package services
 
 import (
-	"regexp"
+	"bytes"
+	stdhtml "html"
+	"io"
 	"strings"
-)
 
-var (
-	// htmlTagRegex matches HTML tags for removal
-	htmlTagRegex = regexp.MustCompile(`<[^>]*>`)
-	// whitespaceRegex matches multiple whitespace characters for normalization
-	whitespaceRegex = regexp.MustCompile(`\s+`)
+	"golang.org/x/net/html"
 )
 
 // HTMLCleaner provides utilities for converting HTML content to plain text.
 // It removes HTML tags while preserving their content and converts HTML entities
-// to their plain text equivalents.
+// to their plain text equivalents using proper HTML parsing instead of regex.
 type HTMLCleaner struct{}
 
 // NewHTMLCleaner creates a new HTML cleaner instance.
@@ -27,33 +24,51 @@ func NewHTMLCleaner() *HTMLCleaner {
 }
 
 // CleanHTML removes HTML tags and converts entities, returning clean plain text.
-// The function preserves the textual content of the HTML while removing markup.
-// It handles common HTML entities like &nbsp;, &amp;, etc., and normalizes whitespace.
+// The function parses the HTML into a node tree and extracts only text content,
+// which handles edge cases like script tags or attributes better than regex.
+// It handles HTML entities automatically through the parser and normalizes whitespace.
 //
 // Parameters:
-//   - html: The HTML content to clean
+//   - htmlStr: The HTML content to clean
 //
 // Returns:
 //   - A plain text string with all HTML elements and entities removed/converted
-func (h *HTMLCleaner) CleanHTML(html string) string {
-	// Remove HTML tags but preserve content
-	cleaned := htmlTagRegex.ReplaceAllString(html, "")
+func (h *HTMLCleaner) CleanHTML(htmlStr string) string {
+	// Parse the HTML into a node tree
+	doc, err := html.Parse(strings.NewReader(htmlStr))
+	if err != nil {
+		// If parsing fails, return empty string
+		// This maintains backward compatibility with the test expectations
+		return ""
+	}
 
-	// Replace common HTML entities with their character equivalents
-	cleaned = strings.ReplaceAll(cleaned, "&nbsp;", " ")
-	cleaned = strings.ReplaceAll(cleaned, "&amp;", "&")
-	cleaned = strings.ReplaceAll(cleaned, "&lt;", "<")
-	cleaned = strings.ReplaceAll(cleaned, "&gt;", ">")
-	cleaned = strings.ReplaceAll(cleaned, "&quot;", "\"")
-	cleaned = strings.ReplaceAll(cleaned, "&#39;", "'")
-	cleaned = strings.ReplaceAll(cleaned, "&iuml;", "ï")
-	cleaned = strings.ReplaceAll(cleaned, "&euml;", "ë")
-	cleaned = strings.ReplaceAll(cleaned, "&eacute;", "é")
+	// Extract text content from the node tree
+	var buf bytes.Buffer
+	extractText(&buf, doc)
 
-	// Clean up extra whitespace by replacing multiple spaces, tabs, and newlines
-	// with a single space, then trim any leading/trailing whitespace
-	cleaned = whitespaceRegex.ReplaceAllString(cleaned, " ")
-	cleaned = strings.TrimSpace(cleaned)
+	// Unescape any remaining HTML entities
+	unescaped := stdhtml.UnescapeString(buf.String())
 
-	return cleaned
+	// Normalize whitespace: replace multiple spaces, tabs, and newlines with a single space
+	cleaned := strings.Join(strings.Fields(unescaped), " ")
+	return strings.TrimSpace(cleaned)
+}
+
+// extractText recursively traverses the HTML node tree and extracts text content.
+// It skips script and style tags to avoid including their content in the output.
+func extractText(w io.Writer, n *html.Node) {
+	// Skip script and style tags entirely
+	if n.Type == html.ElementNode && (n.Data == "script" || n.Data == "style") {
+		return
+	}
+
+	// If this is a text node, write its content
+	if n.Type == html.TextNode {
+		w.Write([]byte(n.Data))
+	}
+
+	// Recursively process all child nodes
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		extractText(w, c)
+	}
 }
