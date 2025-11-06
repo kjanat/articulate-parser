@@ -185,6 +185,7 @@ tasks:
       - task: lint:vet
       - task: lint:fmt
       - task: lint:staticcheck
+      - task: lint:golangci
 
   lint:vet:
     desc: Run go vet
@@ -210,11 +211,33 @@ tasks:
     desc: Run staticcheck (install if needed)
     vars:
       HAS_STATICCHECK:
-        sh: '{{if eq OS "windows"}}where staticcheck 2>NUL{{else}}command -v staticcheck 2>/dev/null{{end}}'
+        sh: '{{if eq OS "windows"}}where.exe staticcheck 2>NUL{{else}}command -v staticcheck 2>/dev/null{{end}}'
     cmds:
       - '{{if eq .HAS_STATICCHECK ""}}echo "Installing staticcheck..." && go install honnef.co/go/tools/cmd/staticcheck@latest{{end}}'
       - staticcheck ./...
     ignore_error: true
+
+  lint:golangci:
+    desc: Run golangci-lint (install if needed)
+    aliases: [golangci, golangci-lint]
+    vars:
+      HAS_GOLANGCI:
+        sh: '{{if eq OS "windows"}}where.exe golangci-lint 2>NUL{{else}}command -v golangci-lint 2>/dev/null{{end}}'
+    cmds:
+      - '{{if eq .HAS_GOLANGCI ""}}echo "Installing golangci-lint..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest{{end}}'
+      - golangci-lint run ./...
+      - echo "✅ golangci-lint passed"
+
+  lint:golangci:fix:
+    desc: Run golangci-lint with auto-fix
+    aliases: [golangci-fix]
+    vars:
+      HAS_GOLANGCI:
+        sh: '{{if eq OS "windows"}}where.exe golangci-lint 2>NUL{{else}}command -v golangci-lint 2>/dev/null{{end}}'
+    cmds:
+      - '{{if eq .HAS_GOLANGCI ""}}echo "Installing golangci-lint..." && go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest{{end}}'
+      - golangci-lint run --fix ./...
+      - echo "✅ golangci-lint fixes applied"
 
   fmt:
     desc: Format all Go files
@@ -394,7 +417,7 @@ tasks:
     desc: Serve documentation locally
     vars:
       HAS_GODOC:
-        sh: '{{if eq OS "windows"}}where godoc 2>NUL{{else}}command -v godoc 2>/dev/null{{end}}'
+        sh: '{{if eq OS "windows"}}where.exe godoc 2>NUL{{else}}command -v godoc 2>/dev/null{{end}}'
     cmds:
       - '{{if eq .HAS_GODOC ""}}echo "Installing godoc..." && go install golang.org/x/tools/cmd/godoc@latest{{end}}'
       - echo "📚 Serving documentation at http://localhost:6060"
@@ -445,7 +468,7 @@ tasks:
     desc: Run security checks with gosec
     vars:
       HAS_GOSEC:
-        sh: '{{if eq OS "windows"}}where gosec 2>NUL{{else}}command -v gosec 2>/dev/null{{end}}'
+        sh: '{{if eq OS "windows"}}where.exe gosec 2>NUL{{else}}command -v gosec 2>/dev/null{{end}}'
     cmds:
       - '{{if eq .HAS_GOSEC ""}}echo "Installing gosec..." && go install github.com/securego/gosec/v2/cmd/gosec@latest{{end}}'
       - gosec ./...
@@ -455,7 +478,7 @@ tasks:
     desc: Audit dependencies for vulnerabilities
     vars:
       HAS_GOVULNCHECK:
-        sh: '{{if eq OS "windows"}}where govulncheck 2>NUL{{else}}command -v govulncheck 2>/dev/null{{end}}'
+        sh: '{{if eq OS "windows"}}where.exe govulncheck 2>NUL{{else}}command -v govulncheck 2>/dev/null{{end}}'
     cmds:
       - '{{if eq .HAS_GOVULNCHECK ""}}echo "Installing govulncheck..." && go install golang.org/x/vuln/cmd/govulncheck@latest{{end}}'
       - govulncheck ./...
