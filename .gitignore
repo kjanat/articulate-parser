@@ -75,3 +75,5 @@ main_coverage
 **/*.local.*
 
 .claude/
+
+NUL

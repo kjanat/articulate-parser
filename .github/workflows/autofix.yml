@@ -10,16 +10,36 @@ jobs:
   autofix:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: 'go.mod'
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-      # goimports works like gofmt, but also fixes imports.
-      # see https://pkg.go.dev/golang.org/x/tools/cmd/goimports
-      - run: go install golang.org/x/tools/cmd/goimports@latest
-      - run: goimports -w .
-      # of course we can also do just this instead:
-      # - run: gofmt -w .
+      - name: Install Task
+        uses: go-task/setup-task@v1
+
+      - uses: actions/setup-go@v6
+        with: { go-version-file: 'go.mod' }
+
+      - name: Setup go deps
+        run: |
+          # Install golangci-lint
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
+          # Install go-task dependencies
+          go install golang.org/x/tools/cmd/goimports@latest
+
+      - name: Run goimports
+        run: goimports -w .
+
+      - name: Run golangci-lint autofix
+        run: golangci-lint run --fix
+
+      - name: Run golangci-lint format
+        run: golangci-lint format
+
+      - name: Run go mod tidy
+        run: go mod tidy
+
+      - name: Run gopls modernize
+        run: task modernize
 
       - uses: autofix-ci/action@v1

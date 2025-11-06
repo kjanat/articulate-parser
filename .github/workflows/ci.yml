@@ -4,7 +4,6 @@ on:
   push:
     branches: ['master', 'develop']
   pull_request:
-    branches: ['master', 'develop', 'feature/*']
 
 env:
   REGISTRY: ghcr.io
@@ -15,8 +14,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with: { version: latest }
+
   test:
     name: Test
+    needs: [golangci]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,6 +42,7 @@ jobs:
           - 1.22.x
           - 1.23.x
           - 1.24.x
+          - 1.25.x
 
     steps:
       - uses: actions/checkout@v5
@@ -52,11 +68,13 @@ jobs:
       - name: Run tests with enhanced reporting
         id: test
         run: |
-          echo "## 🔧 Test Environment" >> $GITHUB_STEP_SUMMARY
-          echo "- **Go Version:** ${{ matrix.go }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **OS:** ubuntu-latest" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🔧 Test Environment
+          - **Go Version:** ${{ matrix.go }}
+          - **OS:** ubuntu-latest
+          - **Timestamp:** $(date -u)
+
+          EOF
 
           echo "Running tests with coverage..."
           task test:coverage 2>&1 | tee test-output.log
@@ -69,30 +87,30 @@ jobs:
           SKIPPED_TESTS=$(grep -c "--- SKIP:" test-output.log || echo "0")
 
           # Generate test summary
-          echo "## 🧪 Test Results (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Passed | ✅ $PASSED_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Failed | ❌ $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Skipped | ⏭️ $SKIPPED_TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | $([ $TEST_STATUS -eq 0 ] && echo "✅ PASSED" || echo "❌ FAILED") |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🧪 Test Results (Go ${{ matrix.go }})
 
-          # Add package breakdown
-          echo "### 📦 Package Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          | Metric      | Value                                                       |
+          | ----------- | ----------------------------------------------------------- |
+          | Total Tests | $TOTAL_TESTS                                                |
+          | Passed      | $PASSED_TESTS                                               |
+          | Failed      | $FAILED_TESTS                                               |
+          | Skipped     | $SKIPPED_TESTS                                              |
+          | Status      | $([ $TEST_STATUS -eq 0 ] && echo "PASSED" || echo "FAILED") |
+
+          ### 📦 Package Test Results
+
+          | Package | Status |
+          |---------|--------|
+          EOF
 
           # Extract package results
-          grep "^ok\|^FAIL" test-output.log | while read line; do
+          grep "^ok\|^FAIL" test-output.log | while read -r line; do
             if [[ $line == ok* ]]; then
-              pkg=$(echo $line | awk '{print $2}')
+              pkg=$(echo "$line" | awk '{print $2}')
               echo "| $pkg | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
             elif [[ $line == FAIL* ]]; then
-              pkg=$(echo $line | awk '{print $2}')
+              pkg=$(echo "$line" | awk '{print $2}')
               echo "| $pkg | ❌ FAIL |" >> $GITHUB_STEP_SUMMARY
             fi
           done
@@ -101,19 +119,24 @@ jobs:
 
           # Add detailed results if tests failed
           if [ $TEST_STATUS -ne 0 ]; then
-            echo "### ❌ Failed Tests Details" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ### ❌ Failed Tests Details
+          ```
+          EOF
             grep -A 10 "--- FAIL:" test-output.log | head -100 >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ```
+
+          EOF
           fi
 
           # Set outputs for other steps
-          echo "test-status=$TEST_STATUS" >> $GITHUB_OUTPUT
-          echo "total-tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
-          echo "passed-tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
-          echo "failed-tests=$FAILED_TESTS" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT << EOF
+          test-status=$TEST_STATUS
+          total-tests=$TOTAL_TESTS
+          passed-tests=$PASSED_TESTS
+          failed-tests=$FAILED_TESTS
+          EOF
 
           # Exit with the original test status
           exit $TEST_STATUS
@@ -124,33 +147,31 @@ jobs:
           if [ -f coverage/coverage.out ]; then
             COVERAGE=$(go tool cover -func=coverage/coverage.out | grep total | awk '{print $3}')
 
-            echo "## 📊 Code Coverage (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Total Coverage: $COVERAGE**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 📊 Code Coverage (Go ${{ matrix.go }})
 
-            # Add coverage by package
-            echo "<details>" >> $GITHUB_STEP_SUMMARY
-            echo "<summary>Click to expand 📋 Coverage by Package details</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "| Package | Coverage |" >> $GITHUB_STEP_SUMMARY
-            echo "|---------|----------|" >> $GITHUB_STEP_SUMMARY
+          **Total Coverage: $COVERAGE**
+
+          <details>
+          <summary>Click to expand 📋 Coverage by Package details</summary>
+
+          | Package | Coverage |
+          | ------- | -------- |
+          EOF
 
             # Create temporary file for package coverage aggregation
             temp_coverage=$(mktemp)
 
             # Extract package-level coverage data
-            go tool cover -func=coverage/coverage.out | grep -v total | while read line; do
+            go tool cover -func=coverage/coverage.out | grep -v total | while read -r line; do
               if [[ $line == *".go:"* ]]; then
                 # Extract package path from file path (everything before the filename)
                 filepath=$(echo "$line" | awk '{print $1}')
-                pkg_path=$(dirname "$filepath" | sed 's|github.com/kjanat/articulate-parser/||' | sed 's|^\./||')
+                pkg_path=$(dirname "$filepath" | sed 's|github.com/kjanat/articulate-parser/||; s|^\./||')
                 coverage=$(echo "$line" | awk '{print $3}' | sed 's/%//')
 
                 # Use root package if no subdirectory
-                if [[ "$pkg_path" == "." || "$pkg_path" == "" ]]; then
-                  pkg_path="root"
-                fi
+                [[ "$pkg_path" == "." || "$pkg_path" == "" ]] && pkg_path="root"
 
                 echo "$pkg_path $coverage" >> "$temp_coverage"
               fi
@@ -158,7 +179,7 @@ jobs:
 
             # Aggregate coverage by package (average)
             awk '{
-              packages[$1] += $2;
+              packages[$1] += $2
               counts[$1]++
             }
             END {
@@ -166,17 +187,21 @@ jobs:
                 avg = packages[pkg] / counts[pkg]
                 printf "| %s | %.1f%% |\n", pkg, avg
               }
-            }' $temp_coverage | sort >> $GITHUB_STEP_SUMMARY
+            }' "$temp_coverage" | sort >> $GITHUB_STEP_SUMMARY
 
-            rm -f $temp_coverage
+            rm -f "$temp_coverage"
 
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << 'EOF'
 
-            echo "" >> $GITHUB_STEP_SUMMARY
+          </details>
+
+          EOF
           else
-            echo "## ⚠️ Coverage Report" >> $GITHUB_STEP_SUMMARY
-            echo "No coverage file generated" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## ⚠️ Coverage Report
+          No coverage file generated
+
+          EOF
           fi
 
       - name: Upload test artifacts
@@ -191,8 +216,11 @@ jobs:
 
       - name: Run linters
         run: |
-          echo "## 🔍 Static Analysis (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          # Initialize summary
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🔍 Static Analysis (Go ${{ matrix.go }})
+
+          EOF
 
           # Run go vet
           VET_OUTPUT=$(task lint:vet 2>&1 || echo "")
@@ -201,11 +229,13 @@ jobs:
           if [ $VET_STATUS -eq 0 ]; then
             echo "✅ **go vet:** No issues found" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **go vet:** Issues found" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ❌ **go vet:** Issues found
+
+          ```
+          EOF
             echo "$VET_OUTPUT" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -216,32 +246,33 @@ jobs:
           if [ $FMT_STATUS -eq 0 ]; then
             echo "✅ **go fmt:** All files properly formatted" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ **go fmt:** Files need formatting" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ❌ **go fmt:** Files need formatting
+
+          ```
+          EOF
             echo "$FMT_OUTPUT" >> $GITHUB_STEP_SUMMARY
-            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
           fi
 
           # Exit with error if any linter failed
-          if [ $VET_STATUS -ne 0 ] || [ $FMT_STATUS -ne 0 ]; then
-            exit 1
-          fi
+          [ $VET_STATUS -eq 0 ] && [ $FMT_STATUS -eq 0 ] || exit 1
 
       - name: Job Summary
         if: always()
         run: |
-          echo "## 📋 Job Summary (Go ${{ matrix.go }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Dependencies | ✅ Success |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build | ✅ Success |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests | ${{ steps.test.outcome == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Coverage | ${{ job.status == 'success' && '✅ Generated' || '⚠️ Partial' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Static Analysis | ${{ job.status == 'success' && '✅ Clean' || '❌ Issues' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Code Formatting | ${{ job.status == 'success' && '✅ Clean' || '❌ Issues' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 📋 Job Summary (Go ${{ matrix.go }})
+
+          | Step            | Status                                                          |
+          | --------------- | --------------------------------------------------------------- |
+          | Dependencies    | Success                                                         |
+          | Build           | Success                                                         |
+          | Tests           | ${{ steps.test.outcome == 'success' && 'Success' || 'Failed' }} |
+          | Coverage        | ${{ job.status == 'success' && 'Generated' || 'Partial' }}      |
+          | Static Analysis | ${{ job.status == 'success' && 'Clean' || 'Issues' }}           |
+          | Code Formatting | ${{ job.status == 'success' && 'Clean' || 'Issues' }}           |
+          EOF
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
@@ -285,16 +316,18 @@ jobs:
 
       - name: Test Docker image using Task
         run: |
-          echo "## 🧪 Docker Image Tests" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🧪 Docker Image Tests
+
+          EOF
 
           # Run Task docker test
           task docker:test
 
           echo "**Testing help command:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo '```terminaloutput' >> $GITHUB_STEP_SUMMARY
           docker run --rm articulate-parser:latest --help >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Test image size
@@ -324,8 +357,11 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: ['test']
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/docker'))
+    needs: [test, docker-test, dependency-review]
+    if: |
+      github.event_name == 'push' && (github.ref == 'refs/heads/master' ||
+      github.ref == 'refs/heads/develop' ||
+      startsWith(github.ref, 'refs/heads/feature/docker'))
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -400,35 +436,39 @@ jobs:
 
       - name: Generate Docker summary
         run: |
-          echo "## 🐳 Docker Build Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Image:** \`ghcr.io/${{ github.repository }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tags built:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Features:**" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platforms:** linux/amd64, linux/arm64, linux/arm/v7, linux/386, linux/ppc64le, linux/s390x" >> $GITHUB_STEP_SUMMARY
-          echo "- **Architecture optimization:** ✅ Native compilation for each platform" >> $GITHUB_STEP_SUMMARY
-          echo "- **Multi-arch image description:** ✅ Enabled" >> $GITHUB_STEP_SUMMARY
-          echo "- **SBOM (Software Bill of Materials):** ✅ Generated" >> $GITHUB_STEP_SUMMARY
-          echo "- **Provenance attestation:** ✅ Generated" >> $GITHUB_STEP_SUMMARY
-          echo "- **Security scanning:** Ready for vulnerability analysis" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Usage:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Pull the image" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull ghcr.io/${{ github.repository }}:latest" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Run with help" >> $GITHUB_STEP_SUMMARY
-          echo "docker run --rm ghcr.io/${{ github.repository }}:latest --help" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Process a local file (mount current directory)" >> $GITHUB_STEP_SUMMARY
-          echo "docker run --rm -v \$(pwd):/workspace ghcr.io/${{ github.repository }}:latest /workspace/input.json markdown /workspace/output.md" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## 🐳 Docker Build Summary
+
+          **Image:** `ghcr.io/${{ github.repository }}`
+
+          **Tags built:**
+
+          ```text
+          ${{ steps.meta.outputs.tags }}
+          ```
+
+          **Features:**
+          - **Platforms:** linux/amd64, linux/arm64, linux/arm/v7, linux/386, linux/ppc64le, linux/s390x
+          - **Architecture optimization:** Native compilation for each platform
+          - **Multi-arch image description:** Enabled
+          - **SBOM (Software Bill of Materials):** Generated
+          - **Provenance attestation:** Generated
+          - **Security scanning:** Ready for vulnerability analysis
+
+          **Usage:**
+
+          ```bash
+          # Pull the image
+          docker pull ghcr.io/${{ github.repository }}:latest
+
+          # Run with help
+          docker run --rm ghcr.io/${{ github.repository }}:latest --help
+
+          # Process a local file (mount current directory)
+          docker run --rm -v $(pwd):/workspace ghcr.io/${{ github.repository }}:latest /workspace/input.json markdown /workspace/output.md
+          ```
+          
+          EOF
 
   # Security and quality analysis workflows
   codeql-analysis:
