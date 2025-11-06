@@ -24,32 +24,35 @@ type ArticulateParser struct {
 	BaseURL string
 	// Client is the HTTP client used to make requests to the API
 	Client *http.Client
+	// Logger for structured logging
+	Logger interfaces.Logger
 }
 
-// NewArticulateParser creates a new ArticulateParser instance with default settings.
-// The default configuration uses the standard Articulate Rise API URL and a
-// HTTP client with a 30-second timeout.
-func NewArticulateParser() interfaces.CourseParser {
+// NewArticulateParser creates a new ArticulateParser instance.
+// If baseURL is empty, uses the default Articulate Rise API URL.
+// If timeout is zero, uses a 30-second timeout.
+func NewArticulateParser(logger interfaces.Logger, baseURL string, timeout time.Duration) interfaces.CourseParser {
+	if logger == nil {
+		logger = NewNoOpLogger()
+	}
+	if baseURL == "" {
+		baseURL = "https://rise.articulate.com"
+	}
+	if timeout == 0 {
+		timeout = 30 * time.Second
+	}
 	return &ArticulateParser{
-		BaseURL: "https://rise.articulate.com",
+		BaseURL: baseURL,
 		Client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: timeout,
 		},
+		Logger: logger,
 	}
 }
 
-// FetchCourse fetches a course from the given URI.
-// It extracts the share ID from the URI, constructs an API URL, and fetches the course data.
-// The course data is then unmarshalled into a Course model.
-//
-// Parameters:
-//   - ctx: Context for cancellation and timeout control
-//   - uri: The Articulate Rise share URL (e.g., https://rise.articulate.com/share/SHARE_ID)
-//
-// Returns:
-//   - A parsed Course model if successful
-//   - An error if the fetch fails, if the share ID can't be extracted,
-//     or if the response can't be parsed
+// FetchCourse fetches a course from the given URI and returns the parsed course data.
+// The URI should be an Articulate Rise share URL (e.g., https://rise.articulate.com/share/SHARE_ID).
+// The context can be used for cancellation and timeout control.
 func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models.Course, error) {
 	shareID, err := p.extractShareID(uri)
 	if err != nil {
@@ -73,7 +76,7 @@ func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models
 	// connection, but a close error doesn't invalidate the data already consumed.
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			fmt.Fprintf(os.Stderr, "warning: failed to close response body: %v\n", err)
+			p.Logger.Warn("failed to close response body", "error", err, "url", apiURL)
 		}
 	}()
 
@@ -95,14 +98,6 @@ func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models
 }
 
 // LoadCourseFromFile loads an Articulate Rise course from a local JSON file.
-// The file should contain a valid JSON representation of an Articulate Rise course.
-//
-// Parameters:
-//   - filePath: The path to the JSON file containing the course data
-//
-// Returns:
-//   - A parsed Course model if successful
-//   - An error if the file can't be read or the JSON can't be parsed
 func (p *ArticulateParser) LoadCourseFromFile(filePath string) (*models.Course, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {

@@ -3,7 +3,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -297,10 +296,10 @@ func TestRunWithInvalidFile(t *testing.T) {
 		t.Errorf("Expected exit code 1 for non-existent file, got %d", exitCode)
 	}
 
-	// Should have error output
-	errorOutput := stderrBuf.String()
-	if !strings.Contains(errorOutput, "Error processing course") {
-		t.Errorf("Expected error message about processing course, got: %s", errorOutput)
+	// Should have error output in structured log format
+	output := stdoutBuf.String()
+	if !strings.Contains(output, "level=ERROR") && !strings.Contains(output, "failed to process course") {
+		t.Errorf("Expected error message about processing course, got: %s", output)
 	}
 }
 
@@ -350,10 +349,10 @@ func TestRunWithInvalidURI(t *testing.T) {
 		t.Errorf("Expected failure (exit code 1) for invalid URI, got %d", exitCode)
 	}
 
-	// Should have error output
-	errorOutput := stderrBuf.String()
-	if !strings.Contains(errorOutput, "Error processing course") {
-		t.Errorf("Expected error message about processing course, got: %s", errorOutput)
+	// Should have error output in structured log format
+	output := stdoutBuf.String()
+	if !strings.Contains(output, "level=ERROR") && !strings.Contains(output, "failed to process course") {
+		t.Errorf("Expected error message about processing course, got: %s", output)
 	}
 }
 
@@ -436,10 +435,9 @@ func TestRunWithValidJSONFile(t *testing.T) {
 		t.Errorf("Expected successful execution (exit code 0), got %d", exitCode)
 	}
 
-	// Verify success message
-	expectedMsg := fmt.Sprintf("Successfully exported course to %s", outputFile)
-	if !strings.Contains(output, expectedMsg) {
-		t.Errorf("Expected success message '%s' in output, got: %s", expectedMsg, output)
+	// Verify success message in structured log format
+	if !strings.Contains(output, "level=INFO") || !strings.Contains(output, "successfully exported course") {
+		t.Errorf("Expected success message in output, got: %s", output)
 	}
 
 	// Verify output file was created

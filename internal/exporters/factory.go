@@ -33,15 +33,7 @@ func NewFactory(htmlCleaner *services.HTMLCleaner) interfaces.ExporterFactory {
 }
 
 // CreateExporter creates an exporter for the specified format.
-// It returns an appropriate exporter implementation based on the format string.
-// Format strings are case-insensitive.
-//
-// Parameters:
-//   - format: The desired export format (e.g., "markdown", "docx")
-//
-// Returns:
-//   - An implementation of the Exporter interface if the format is supported
-//   - An error if the format is not supported
+// Format strings are case-insensitive (e.g., "markdown", "DOCX").
 func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	switch strings.ToLower(format) {
 	case "markdown", "md":
@@ -55,11 +47,8 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	}
 }
 
-// SupportedFormats returns a list of all supported export formats.
-// This includes both primary format names and their aliases.
-//
-// Returns:
-//   - A string slice containing all supported format names
+// SupportedFormats returns a list of all supported export formats,
+// including both primary format names and their aliases.
 func (f *Factory) SupportedFormats() []string {
 	return []string{"markdown", "md", "docx", "word", "html", "htm"}
 }

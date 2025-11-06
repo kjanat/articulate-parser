@@ -4,12 +4,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
+	"github.com/kjanat/articulate-parser/internal/config"
 	"github.com/kjanat/articulate-parser/internal/exporters"
+	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/services"
 	"github.com/kjanat/articulate-parser/internal/version"
 )
@@ -24,9 +26,19 @@ func main() {
 // run contains the main application logic and returns an exit code.
 // This function is testable as it doesn't call os.Exit directly.
 func run(args []string) int {
-	// Dependency injection setup
+	// Load configuration
+	cfg := config.Load()
+
+	// Dependency injection setup with configuration
+	var logger interfaces.Logger
+	if cfg.LogFormat == "json" {
+		logger = services.NewSlogLogger(cfg.LogLevel)
+	} else {
+		logger = services.NewTextLogger(cfg.LogLevel)
+	}
+
 	htmlCleaner := services.NewHTMLCleaner()
-	parser := services.NewArticulateParser()
+	parser := services.NewArticulateParser(logger, cfg.BaseURL, cfg.RequestTimeout)
 	exporterFactory := exporters.NewFactory(htmlCleaner)
 	app := services.NewApp(parser, exporterFactory)
 
@@ -58,17 +70,17 @@ func run(args []string) int {
 
 	// Determine if source is a URI or file path
 	if isURI(source) {
-		err = app.ProcessCourseFromURI(source, format, output)
+		err = app.ProcessCourseFromURI(context.Background(), source, format, output)
 	} else {
 		err = app.ProcessCourseFromFile(source, format, output)
 	}
 
 	if err != nil {
-		log.Printf("Error processing course: %v", err)
+		logger.Error("failed to process course", "error", err, "source", source)
 		return 1
 	}
 
-	fmt.Printf("Successfully exported course to %s\n", output)
+	logger.Info("successfully exported course", "output", output, "format", format)
 	return 0
 }
 

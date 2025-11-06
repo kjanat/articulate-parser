@@ -2,6 +2,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -16,7 +17,7 @@ import (
 
 // TestNewArticulateParser tests the NewArticulateParser constructor.
 func TestNewArticulateParser(t *testing.T) {
-	parser := NewArticulateParser()
+	parser := NewArticulateParser(nil, "", 0)
 
 	if parser == nil {
 		t.Fatal("NewArticulateParser() returned nil")
@@ -112,7 +113,7 @@ func TestArticulateParser_FetchCourse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			course, err := parser.FetchCourse(tt.uri)
+			course, err := parser.FetchCourse(context.Background(), tt.uri)
 
 			if tt.expectedError != "" {
 				if err == nil {
@@ -146,7 +147,7 @@ func TestArticulateParser_FetchCourse_NetworkError(t *testing.T) {
 		},
 	}
 
-	_, err := parser.FetchCourse("https://rise.articulate.com/share/test-share-id")
+	_, err := parser.FetchCourse(context.Background(), "https://rise.articulate.com/share/test-share-id")
 	if err == nil {
 		t.Fatal("Expected network error, got nil")
 	}
@@ -175,7 +176,7 @@ func TestArticulateParser_FetchCourse_InvalidJSON(t *testing.T) {
 		},
 	}
 
-	_, err := parser.FetchCourse("https://rise.articulate.com/share/test-share-id")
+	_, err := parser.FetchCourse(context.Background(), "https://rise.articulate.com/share/test-share-id")
 	if err == nil {
 		t.Fatal("Expected JSON parsing error, got nil")
 	}
@@ -212,7 +213,7 @@ func TestArticulateParser_LoadCourseFromFile(t *testing.T) {
 		t.Fatalf("Failed to write test file: %v", err)
 	}
 
-	parser := NewArticulateParser()
+	parser := NewArticulateParser(nil, "", 0)
 
 	tests := []struct {
 		name          string
@@ -271,7 +272,7 @@ func TestArticulateParser_LoadCourseFromFile_InvalidJSON(t *testing.T) {
 		t.Fatalf("Failed to write test file: %v", err)
 	}
 
-	parser := NewArticulateParser()
+	parser := NewArticulateParser(nil, "", 0)
 	_, err := parser.LoadCourseFromFile(tempFile)
 
 	if err == nil {

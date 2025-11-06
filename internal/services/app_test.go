@@ -2,6 +2,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -11,13 +12,13 @@ import (
 
 // MockCourseParser is a mock implementation of interfaces.CourseParser for testing.
 type MockCourseParser struct {
-	mockFetchCourse        func(uri string) (*models.Course, error)
+	mockFetchCourse        func(ctx context.Context, uri string) (*models.Course, error)
 	mockLoadCourseFromFile func(filePath string) (*models.Course, error)
 }
 
-func (m *MockCourseParser) FetchCourse(uri string) (*models.Course, error) {
+func (m *MockCourseParser) FetchCourse(ctx context.Context, uri string) (*models.Course, error) {
 	if m.mockFetchCourse != nil {
-		return m.mockFetchCourse(uri)
+		return m.mockFetchCourse(ctx, uri)
 	}
 	return nil, errors.New("not implemented")
 }
@@ -243,7 +244,7 @@ func TestApp_ProcessCourseFromURI(t *testing.T) {
 			format:     "docx",
 			outputPath: "output.docx",
 			setupMocks: func(parser *MockCourseParser, factory *MockExporterFactory, exporter *MockExporter) {
-				parser.mockFetchCourse = func(uri string) (*models.Course, error) {
+				parser.mockFetchCourse = func(ctx context.Context, uri string) (*models.Course, error) {
 					if uri != "https://rise.articulate.com/share/test123" {
 						t.Errorf("Expected uri 'https://rise.articulate.com/share/test123', got '%s'", uri)
 					}
@@ -271,7 +272,7 @@ func TestApp_ProcessCourseFromURI(t *testing.T) {
 			format:     "docx",
 			outputPath: "output.docx",
 			setupMocks: func(parser *MockCourseParser, factory *MockExporterFactory, exporter *MockExporter) {
-				parser.mockFetchCourse = func(uri string) (*models.Course, error) {
+				parser.mockFetchCourse = func(ctx context.Context, uri string) (*models.Course, error) {
 					return nil, errors.New("network error")
 				}
 			},
@@ -288,7 +289,7 @@ func TestApp_ProcessCourseFromURI(t *testing.T) {
 			tt.setupMocks(parser, factory, exporter)
 
 			app := NewApp(parser, factory)
-			err := app.ProcessCourseFromURI(tt.uri, tt.format, tt.outputPath)
+			err := app.ProcessCourseFromURI(context.Background(), tt.uri, tt.format, tt.outputPath)
 
 			if tt.expectedError != "" {
 				if err == nil {

@@ -36,16 +36,7 @@ func NewMarkdownExporter(htmlCleaner *services.HTMLCleaner) interfaces.Exporter 
 	}
 }
 
-// Export exports a course to Markdown format.
-// It generates a structured Markdown document from the course data
-// and writes it to the specified output path.
-//
-// Parameters:
-//   - course: The course data model to export
-//   - outputPath: The file path where the Markdown content will be written
-//
-// Returns:
-//   - An error if writing to the output file fails
+// Export converts the course to Markdown format and writes it to the output path.
 func (e *MarkdownExporter) Export(course *models.Course, outputPath string) error {
 	var buf bytes.Buffer
 
@@ -92,23 +83,13 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	return os.WriteFile(outputPath, buf.Bytes(), 0644)
 }
 
-// SupportedFormat returns the format name this exporter supports
-// It indicates the file format that the MarkdownExporter can generate.
-//
-// Returns:
-//   - A string representing the supported format ("markdown")
+// SupportedFormat returns "markdown".
 func (e *MarkdownExporter) SupportedFormat() string {
 	return "markdown"
 }
 
-// processItemToMarkdown converts a course item into Markdown format
-// and appends it to the provided buffer. It handles different item types
-// with appropriate Markdown formatting.
-//
-// Parameters:
-//   - buf: The buffer to write the Markdown content to
-//   - item: The course item to process
-//   - level: The heading level for the item (determines the number of # characters)
+// processItemToMarkdown converts a course item into Markdown format.
+// The level parameter determines the heading level (number of # characters).
 func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.Item, level int) {
 	headingPrefix := strings.Repeat("#", level)
 

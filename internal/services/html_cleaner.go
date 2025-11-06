@@ -24,15 +24,9 @@ func NewHTMLCleaner() *HTMLCleaner {
 }
 
 // CleanHTML removes HTML tags and converts entities, returning clean plain text.
-// The function parses the HTML into a node tree and extracts only text content,
-// which handles edge cases like script tags or attributes better than regex.
-// It handles HTML entities automatically through the parser and normalizes whitespace.
-//
-// Parameters:
-//   - htmlStr: The HTML content to clean
-//
-// Returns:
-//   - A plain text string with all HTML elements and entities removed/converted
+// It parses the HTML into a node tree and extracts only text content,
+// skipping script and style tags. HTML entities are automatically handled
+// by the parser, and whitespace is normalized.
 func (h *HTMLCleaner) CleanHTML(htmlStr string) string {
 	// Parse the HTML into a node tree
 	doc, err := html.Parse(strings.NewReader(htmlStr))
