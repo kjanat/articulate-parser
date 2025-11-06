@@ -1,4 +1,3 @@
-// Package models_test provides tests for the data models.
 package models
 
 import (
@@ -98,7 +97,7 @@ func TestCourseInfo_JSONMarshalUnmarshal(t *testing.T) {
 				Type:        "jpg",
 				Width:       800,
 				Height:      600,
-				OriginalUrl: "https://example.com/image.jpg",
+				OriginalURL: "https://example.com/image.jpg",
 			},
 		},
 	}
@@ -149,7 +148,7 @@ func TestLesson_JSONMarshalUnmarshal(t *testing.T) {
 								URL:         "https://example.com/video.mp4",
 								Type:        "mp4",
 								Duration:    120,
-								OriginalUrl: "https://example.com/video.mp4",
+								OriginalURL: "https://example.com/video.mp4",
 							},
 						},
 					},
@@ -244,7 +243,7 @@ func TestSubItem_JSONMarshalUnmarshal(t *testing.T) {
 				Type:          "png",
 				Width:         400,
 				Height:        300,
-				OriginalUrl:   "https://example.com/subitem.png",
+				OriginalURL:   "https://example.com/subitem.png",
 				CrushedKey:    "crushed-123",
 				UseCrushedKey: true,
 			},
@@ -305,7 +304,7 @@ func TestMedia_JSONMarshalUnmarshal(t *testing.T) {
 			Type:          "jpeg",
 			Width:         1200,
 			Height:        800,
-			OriginalUrl:   "https://example.com/media.jpg",
+			OriginalURL:   "https://example.com/media.jpg",
 			CrushedKey:    "crushed-media",
 			UseCrushedKey: false,
 		},
@@ -336,7 +335,7 @@ func TestMedia_JSONMarshalUnmarshal(t *testing.T) {
 			Poster:      "https://example.com/poster.jpg",
 			Thumbnail:   "https://example.com/thumb.jpg",
 			InputKey:    "input-123",
-			OriginalUrl: "https://example.com/original.mp4",
+			OriginalURL: "https://example.com/original.mp4",
 		},
 	}
 
@@ -363,7 +362,7 @@ func TestImageMedia_JSONMarshalUnmarshal(t *testing.T) {
 		Type:          "gif",
 		Width:         640,
 		Height:        480,
-		OriginalUrl:   "https://example.com/image.gif",
+		OriginalURL:   "https://example.com/image.gif",
 		CrushedKey:    "crushed-gif",
 		UseCrushedKey: true,
 	}
@@ -397,7 +396,7 @@ func TestVideoMedia_JSONMarshalUnmarshal(t *testing.T) {
 		Poster:      "https://example.com/poster.jpg",
 		Thumbnail:   "https://example.com/thumbnail.jpg",
 		InputKey:    "upload-456",
-		OriginalUrl: "https://example.com/original.webm",
+		OriginalURL: "https://example.com/original.webm",
 	}
 
 	// Marshal to JSON

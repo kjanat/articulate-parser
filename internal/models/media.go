@@ -1,5 +1,3 @@
-// Package models defines the data structures representing Articulate Rise courses.
-// These structures closely match the JSON format used by Articulate Rise.
 package models
 
 // Media represents a media element that can be either an image or a video.
@@ -23,8 +21,8 @@ type ImageMedia struct {
 	Height int `json:"height,omitempty"`
 	// CrushedKey is the identifier for a compressed version of the image
 	CrushedKey string `json:"crushedKey,omitempty"`
-	// OriginalUrl is the URL to the full-resolution image
-	OriginalUrl string `json:"originalUrl"`
+	// OriginalURL is the URL to the full-resolution image
+	OriginalURL string `json:"originalUrl"`
 	// UseCrushedKey indicates whether to use the compressed version
 	UseCrushedKey bool `json:"useCrushedKey,omitempty"`
 }
@@ -45,6 +43,6 @@ type VideoMedia struct {
 	InputKey string `json:"inputKey,omitempty"`
 	// Thumbnail is the URL to a smaller preview image
 	Thumbnail string `json:"thumbnail,omitempty"`
-	// OriginalUrl is the URL to the source video file
-	OriginalUrl string `json:"originalUrl"`
+	// OriginalURL is the URL to the source video file
+	OriginalURL string `json:"originalUrl"`
 }

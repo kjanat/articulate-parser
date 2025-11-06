@@ -1,4 +1,3 @@
-// Package services_test provides tests for the services package.
 package services
 
 import (
@@ -217,10 +216,8 @@ func TestApp_ProcessCourseFromFile(t *testing.T) {
 				if !contains(err.Error(), tt.expectedError) {
 					t.Errorf("Expected error containing '%s', got '%s'", tt.expectedError, err.Error())
 				}
-			} else {
-				if err != nil {
-					t.Errorf("Expected no error, got: %v", err)
-				}
+			} else if err != nil {
+				t.Errorf("Expected no error, got: %v", err)
 			}
 		})
 	}
@@ -298,10 +295,8 @@ func TestApp_ProcessCourseFromURI(t *testing.T) {
 				if !contains(err.Error(), tt.expectedError) {
 					t.Errorf("Expected error containing '%s', got '%s'", tt.expectedError, err.Error())
 				}
-			} else {
-				if err != nil {
-					t.Errorf("Expected no error, got: %v", err)
-				}
+			} else if err != nil {
+				t.Errorf("Expected no error, got: %v", err)
 			}
 		})
 	}
@@ -335,7 +330,7 @@ func TestApp_SupportedFormats(t *testing.T) {
 // contains checks if a string contains a substring.
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) &&
-		(len(substr) == 0 ||
+		(substr == "" ||
 			s == substr ||
 			(len(s) > len(substr) &&
 				(s[:len(substr)] == substr ||

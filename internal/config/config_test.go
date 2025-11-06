@@ -1,4 +1,3 @@
-// Package config_test provides tests for the config package.
 package config
 
 import (

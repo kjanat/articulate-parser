@@ -1,5 +1,3 @@
-// Package exporters provides implementations of the Exporter interface
-// for converting Articulate Rise courses into various file formats.
 package exporters
 
 import (
@@ -82,12 +80,15 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	}
 
 	// #nosec G306 - 0644 is appropriate for export files that should be readable by others
-	return os.WriteFile(outputPath, buf.Bytes(), 0o644)
+	if err := os.WriteFile(outputPath, buf.Bytes(), 0o644); err != nil {
+		return fmt.Errorf("failed to write markdown file: %w", err)
+	}
+	return nil
 }
 
 // SupportedFormat returns "markdown".
 func (e *MarkdownExporter) SupportedFormat() string {
-	return "markdown"
+	return FormatMarkdown
 }
 
 // processItemToMarkdown converts a course item into Markdown format.
@@ -170,7 +171,7 @@ func (e *MarkdownExporter) processMediaSubItem(buf *bytes.Buffer, subItem models
 // processVideoMedia processes video media content.
 func (e *MarkdownExporter) processVideoMedia(buf *bytes.Buffer, media *models.Media) {
 	if media.Video != nil {
-		fmt.Fprintf(buf, "**Video**: %s\n", media.Video.OriginalUrl)
+		fmt.Fprintf(buf, "**Video**: %s\n", media.Video.OriginalURL)
 		if media.Video.Duration > 0 {
 			fmt.Fprintf(buf, "**Duration**: %d seconds\n", media.Video.Duration)
 		}
@@ -180,7 +181,7 @@ func (e *MarkdownExporter) processVideoMedia(buf *bytes.Buffer, media *models.Me
 // processImageMedia processes image media content.
 func (e *MarkdownExporter) processImageMedia(buf *bytes.Buffer, media *models.Media) {
 	if media.Image != nil {
-		fmt.Fprintf(buf, "**Image**: %s\n", media.Image.OriginalUrl)
+		fmt.Fprintf(buf, "**Image**: %s\n", media.Image.OriginalURL)
 	}
 }
 
@@ -189,7 +190,7 @@ func (e *MarkdownExporter) processImageItem(buf *bytes.Buffer, item models.Item,
 	fmt.Fprintf(buf, "%s Image\n\n", headingPrefix)
 	for _, subItem := range item.Items {
 		if subItem.Media != nil && subItem.Media.Image != nil {
-			fmt.Fprintf(buf, "**Image**: %s\n", subItem.Media.Image.OriginalUrl)
+			fmt.Fprintf(buf, "**Image**: %s\n", subItem.Media.Image.OriginalURL)
 		}
 		if subItem.Caption != "" {
 			caption := e.htmlCleaner.CleanHTML(subItem.Caption)

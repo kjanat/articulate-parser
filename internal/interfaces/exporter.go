@@ -1,5 +1,3 @@
-// Package interfaces provides the core contracts for the articulate-parser application.
-// It defines interfaces for parsing and exporting Articulate Rise courses.
 package interfaces
 
 import "github.com/kjanat/articulate-parser/internal/models"

@@ -1,4 +1,3 @@
-// Package services_test provides tests for the HTML cleaner service.
 package services
 
 import (

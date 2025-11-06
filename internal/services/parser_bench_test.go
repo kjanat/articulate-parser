@@ -1,4 +1,3 @@
-// Package services_test provides benchmarks for the parser service.
 package services
 
 import (

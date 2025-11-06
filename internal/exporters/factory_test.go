@@ -1,4 +1,3 @@
-// Package exporters_test provides tests for the exporter factory.
 package exporters
 
 import (

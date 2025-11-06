@@ -69,7 +69,7 @@ func (e *DocxExporter) Export(course *models.Course, outputPath string) error {
 
 	// Ensure output directory exists and add .docx extension
 	if !strings.HasSuffix(strings.ToLower(outputPath), ".docx") {
-		outputPath = outputPath + ".docx"
+		outputPath += ".docx"
 	}
 
 	// Create the file
@@ -198,5 +198,5 @@ func (e *DocxExporter) exportSubItem(doc *docx.Docx, subItem *models.SubItem) {
 // Returns:
 //   - A string representing the supported format ("docx")
 func (e *DocxExporter) SupportedFormat() string {
-	return "docx"
+	return FormatDocx
 }

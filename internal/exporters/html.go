@@ -1,5 +1,3 @@
-// Package exporters provides implementations of the Exporter interface
-// for converting Articulate Rise courses into various file formats.
 package exporters
 
 import (
@@ -112,7 +110,10 @@ func (e *HTMLExporter) Export(course *models.Course, outputPath string) error {
 	buf.WriteString("</html>\n")
 
 	// #nosec G306 - 0644 is appropriate for export files that should be readable by others
-	return os.WriteFile(outputPath, buf.Bytes(), 0o644)
+	if err := os.WriteFile(outputPath, buf.Bytes(), 0o644); err != nil {
+		return fmt.Errorf("failed to write HTML file: %w", err)
+	}
+	return nil
 }
 
 // SupportedFormat returns the format name this exporter supports
@@ -121,7 +122,7 @@ func (e *HTMLExporter) Export(course *models.Course, outputPath string) error {
 // Returns:
 //   - A string representing the supported format ("html")
 func (e *HTMLExporter) SupportedFormat() string {
-	return "html"
+	return FormatHTML
 }
 
 // getDefaultCSS returns basic CSS styling for the HTML document.
@@ -390,7 +391,7 @@ func (e *HTMLExporter) processMultimediaItem(buf *bytes.Buffer, item models.Item
 		if subItem.Media != nil {
 			if subItem.Media.Video != nil {
 				buf.WriteString("            <div class=\"media-info\">\n")
-				fmt.Fprintf(buf, "                <p><strong>Video:</strong> %s</p>\n", html.EscapeString(subItem.Media.Video.OriginalUrl))
+				fmt.Fprintf(buf, "                <p><strong>Video:</strong> %s</p>\n", html.EscapeString(subItem.Media.Video.OriginalURL))
 				if subItem.Media.Video.Duration > 0 {
 					fmt.Fprintf(buf, "                <p><strong>Duration:</strong> %d seconds</p>\n", subItem.Media.Video.Duration)
 				}
@@ -411,7 +412,7 @@ func (e *HTMLExporter) processImageItem(buf *bytes.Buffer, item models.Item) {
 	for _, subItem := range item.Items {
 		if subItem.Media != nil && subItem.Media.Image != nil {
 			buf.WriteString("            <div class=\"media-info\">\n")
-			fmt.Fprintf(buf, "                <p><strong>Image:</strong> %s</p>\n", html.EscapeString(subItem.Media.Image.OriginalUrl))
+			fmt.Fprintf(buf, "                <p><strong>Image:</strong> %s</p>\n", html.EscapeString(subItem.Media.Image.OriginalURL))
 			buf.WriteString("            </div>\n")
 		}
 		if subItem.Caption != "" {

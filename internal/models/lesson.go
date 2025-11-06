@@ -1,5 +1,3 @@
-// Package models defines the data structures representing Articulate Rise courses.
-// These structures closely match the JSON format used by Articulate Rise.
 package models
 
 // Lesson represents a single lesson or section within an Articulate Rise course.

@@ -1,5 +1,3 @@
-// Package exporters provides implementations of the Exporter interface
-// for converting Articulate Rise courses into various file formats.
 package exporters
 
 import (
@@ -8,6 +6,13 @@ import (
 
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/services"
+)
+
+// Format constants for supported export formats.
+const (
+	FormatMarkdown = "markdown"
+	FormatDocx     = "docx"
+	FormatHTML     = "html"
 )
 
 // Factory implements the ExporterFactory interface.
@@ -36,11 +41,11 @@ func NewFactory(htmlCleaner *services.HTMLCleaner) interfaces.ExporterFactory {
 // Format strings are case-insensitive (e.g., "markdown", "DOCX").
 func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	switch strings.ToLower(format) {
-	case "markdown", "md":
+	case FormatMarkdown, "md":
 		return NewMarkdownExporter(f.htmlCleaner), nil
-	case "docx", "word":
+	case FormatDocx, "word":
 		return NewDocxExporter(f.htmlCleaner), nil
-	case "html", "htm":
+	case FormatHTML, "htm":
 		return NewHTMLExporter(f.htmlCleaner), nil
 	default:
 		return nil, fmt.Errorf("unsupported export format: %s", format)
@@ -50,5 +55,5 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 // SupportedFormats returns a list of all supported export formats,
 // including both primary format names and their aliases.
 func (f *Factory) SupportedFormats() []string {
-	return []string{"markdown", "md", "docx", "word", "html", "htm"}
+	return []string{FormatMarkdown, "md", FormatDocx, "word", FormatHTML, "htm"}
 }

@@ -1,4 +1,3 @@
-// Package services provides the core functionality for the articulate-parser application.
 package services
 
 import (

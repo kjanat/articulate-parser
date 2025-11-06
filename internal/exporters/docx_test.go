@@ -1,4 +1,3 @@
-// Package exporters_test provides tests for the docx exporter.
 package exporters
 
 import (
@@ -331,7 +330,7 @@ func TestDocxExporter_ComplexCourse(t *testing.T) {
 									Caption: "<p>Watch this introductory video</p>",
 									Media: &models.Media{
 										Video: &models.VideoMedia{
-											OriginalUrl: "https://example.com/intro.mp4",
+											OriginalURL: "https://example.com/intro.mp4",
 											Duration:    300,
 										},
 									},
@@ -359,7 +358,7 @@ func TestDocxExporter_ComplexCourse(t *testing.T) {
 									Caption: "<p>Course overview diagram</p>",
 									Media: &models.Media{
 										Image: &models.ImageMedia{
-											OriginalUrl: "https://example.com/overview.png",
+											OriginalURL: "https://example.com/overview.png",
 										},
 									},
 								},

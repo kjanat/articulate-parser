@@ -1,4 +1,3 @@
-// Package exporters_test provides benchmarks for all exporters.
 package exporters
 
 import (

@@ -467,7 +467,7 @@ jobs:
           # Process a local file (mount current directory)
           docker run --rm -v $(pwd):/workspace ghcr.io/${{ github.repository }}:latest /workspace/input.json markdown /workspace/output.md
           ```
-          
+
           EOF
 
   # Security and quality analysis workflows

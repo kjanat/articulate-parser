@@ -1,4 +1,3 @@
-// Package exporters_test provides tests for the markdown exporter.
 package exporters
 
 import (
@@ -188,7 +187,7 @@ func TestMarkdownExporter_ProcessMultimediaItem(t *testing.T) {
 			{
 				Media: &models.Media{
 					Video: &models.VideoMedia{
-						OriginalUrl: "https://example.com/video.mp4",
+						OriginalURL: "https://example.com/video.mp4",
 						Duration:    120,
 					},
 				},
@@ -227,7 +226,7 @@ func TestMarkdownExporter_ProcessImageItem(t *testing.T) {
 			{
 				Media: &models.Media{
 					Image: &models.ImageMedia{
-						OriginalUrl: "https://example.com/image.jpg",
+						OriginalURL: "https://example.com/image.jpg",
 					},
 				},
 				Caption: "<p>Image caption</p>",
@@ -372,7 +371,7 @@ func TestMarkdownExporter_ProcessVideoMedia(t *testing.T) {
 	var buf bytes.Buffer
 	media := &models.Media{
 		Video: &models.VideoMedia{
-			OriginalUrl: "https://example.com/video.mp4",
+			OriginalURL: "https://example.com/video.mp4",
 			Duration:    300,
 		},
 	}
@@ -397,7 +396,7 @@ func TestMarkdownExporter_ProcessImageMedia(t *testing.T) {
 	var buf bytes.Buffer
 	media := &models.Media{
 		Image: &models.ImageMedia{
-			OriginalUrl: "https://example.com/image.jpg",
+			OriginalURL: "https://example.com/image.jpg",
 		},
 	}
 

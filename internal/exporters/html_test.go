@@ -1,4 +1,3 @@
-// Package exporters_test provides tests for the html exporter.
 package exporters
 
 import (
@@ -270,7 +269,7 @@ func TestHTMLExporter_ProcessMultimediaItem(t *testing.T) {
 				Title: "<p>Video Title</p>",
 				Media: &models.Media{
 					Video: &models.VideoMedia{
-						OriginalUrl: "https://example.com/video.mp4",
+						OriginalURL: "https://example.com/video.mp4",
 						Duration:    120,
 					},
 				},
@@ -315,7 +314,7 @@ func TestHTMLExporter_ProcessImageItem(t *testing.T) {
 			{
 				Media: &models.Media{
 					Image: &models.ImageMedia{
-						OriginalUrl: "https://example.com/image.png",
+						OriginalURL: "https://example.com/image.png",
 					},
 				},
 				Caption: "<p>Image caption</p>",

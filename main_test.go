@@ -1,4 +1,3 @@
-// Package main_test provides tests for the main package utility functions.
 package main
 
 import (

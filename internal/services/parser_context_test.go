@@ -1,4 +1,3 @@
-// Package services_test provides context-aware tests for the parser service.
 package services
 
 import (

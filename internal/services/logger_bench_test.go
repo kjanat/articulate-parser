@@ -1,4 +1,3 @@
-// Package services_test provides benchmarks for the logger implementations.
 package services
 
 import (
