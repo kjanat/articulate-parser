@@ -78,32 +78,32 @@ flowchart TD
 
 The system follows **Clean Architecture** principles with clear separation of concerns:
 
--   **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
--   **🏗️ Application Layer**: Core business logic with dependency injection
--   **📋 Interface Layer**: Contracts defining behavior without implementation details
--   **🔧 Service Layer**: Concrete implementations of parsing and utility services
--   **📤 Export Layer**: Factory pattern for format-specific exporters
--   **📊 Data Layer**: Domain models representing course structure
+- **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
+- **🏗️ Application Layer**: Core business logic with dependency injection
+- **📋 Interface Layer**: Contracts defining behavior without implementation details
+- **🔧 Service Layer**: Concrete implementations of parsing and utility services
+- **📤 Export Layer**: Factory pattern for format-specific exporters
+- **📊 Data Layer**: Domain models representing course structure
 
 ## Features
 
--   Parse Articulate Rise JSON data from URLs or local files
--   Export to Markdown (.md) format
--   Export to HTML (.html) format with professional styling
--   Export to Word Document (.docx) format
--   Support for various content types:
-    -   Text content with headings and paragraphs
-    -   Lists and bullet points
-    -   Multimedia content (videos and images)
-    -   Knowledge checks and quizzes
-    -   Interactive content (flashcards)
-    -   Course structure and metadata
+- Parse Articulate Rise JSON data from URLs or local files
+- Export to Markdown (.md) format
+- Export to HTML (.html) format with professional styling
+- Export to Word Document (.docx) format
+- Support for various content types:
+  - Text content with headings and paragraphs
+  - Lists and bullet points
+  - Multimedia content (videos and images)
+  - Knowledge checks and quizzes
+  - Interactive content (flashcards)
+  - Course structure and metadata
 
 ## Installation
 
 ### Prerequisites
 
--   Go, I don't know the version, but I have [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?label=)][gomod] configured right now, and it works, see the [CI][Build] workflow where it is tested.
+- Go, I don't know the version, but I have [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?label=)][gomod] configured right now, and it works, see the [CI][Build] workflow where it is tested.
 
 ### Install from source
 
@@ -124,7 +124,7 @@ go install github.com/kjanat/articulate-parser@latest
 
 The parser uses the following external library:
 
--   `github.com/fumiama/go-docx` - For creating Word documents (MIT license)
+- `github.com/fumiama/go-docx` - For creating Word documents (MIT license)
 
 ## Testing
 
@@ -164,25 +164,25 @@ go run main.go <input_uri_or_file> <output_format> [output_path]
 
 #### Examples
 
-1.  **Parse from URL and export to Markdown:**
+1. **Parse from URL and export to Markdown:**
 
 ```bash
 go run main.go "https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/" md
 ```
 
-2.  **Parse from local file and export to Word:**
+2. **Parse from local file and export to Word:**
 
 ```bash
 go run main.go "articulate-sample.json" docx "my-course.docx"
 ```
 
-3.  **Parse from local file and export to HTML:**
+3. **Parse from local file and export to HTML:**
 
 ```bash
 go run main.go "articulate-sample.json" html "output.html"
 ```
 
-4.  **Parse from local file and export to Markdown:**
+4. **Parse from local file and export to Markdown:**
 
 ```bash
 go run main.go "articulate-sample.json" md "output.md"
@@ -332,88 +332,88 @@ The Docker image supports the following build-time arguments:
 
 The project maintains high code quality standards:
 
--   Cyclomatic complexity ≤ 15 (checked with [gocyclo](https://github.com/fzipp/gocyclo))
--   Race condition detection enabled
--   Comprehensive test coverage
--   Code formatting with `gofmt`
--   Static analysis with `go vet`
+- Cyclomatic complexity ≤ 15 (checked with [gocyclo](https://github.com/fzipp/gocyclo))
+- Race condition detection enabled
+- Comprehensive test coverage
+- Code formatting with `gofmt`
+- Static analysis with `go vet`
 
 ### Contributing
 
-1.  Fork the repository
-2.  Create a feature branch
-3.  Make your changes
-4.  Run tests: `go test ./...`
-5.  Submit a pull request
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `go test ./...`
+5. Submit a pull request
 
 ## Output Formats
 
 ### Markdown (`.md`)
 
--   Hierarchical structure with proper heading levels
--   Clean text content with HTML tags removed
--   Lists and bullet points preserved
--   Quiz questions with correct answers marked
--   Media references included
--   Course metadata at the top
+- Hierarchical structure with proper heading levels
+- Clean text content with HTML tags removed
+- Lists and bullet points preserved
+- Quiz questions with correct answers marked
+- Media references included
+- Course metadata at the top
 
 ### HTML (`.html`)
 
--   Professional styling with embedded CSS
--   Interactive and visually appealing layout
--   Proper HTML structure with semantic elements
--   Responsive design for different screen sizes
--   All content types beautifully formatted
--   Maintains course hierarchy and organization
+- Professional styling with embedded CSS
+- Interactive and visually appealing layout
+- Proper HTML structure with semantic elements
+- Responsive design for different screen sizes
+- All content types beautifully formatted
+- Maintains course hierarchy and organization
 
 ### Word Document (`.docx`)
 
--   Professional document formatting
--   Bold headings and proper typography
--   Bulleted lists
--   Quiz questions with answers
--   Media content references
--   Maintains course structure
+- Professional document formatting
+- Bold headings and proper typography
+- Bulleted lists
+- Quiz questions with answers
+- Media content references
+- Maintains course structure
 
 ## Supported Content Types
 
 The parser handles the following Articulate Rise content types:
 
--   **Text blocks**: Headings and paragraphs
--   **Lists**: Bullet points and numbered lists
--   **Multimedia**: Videos and images (references only)
--   **Knowledge Checks**: Multiple choice, multiple response, fill-in-the-blank, matching
--   **Interactive Content**: Flashcards and interactive scenarios
--   **Dividers**: Section breaks
--   **Sections**: Course organization
+- **Text blocks**: Headings and paragraphs
+- **Lists**: Bullet points and numbered lists
+- **Multimedia**: Videos and images (references only)
+- **Knowledge Checks**: Multiple choice, multiple response, fill-in-the-blank, matching
+- **Interactive Content**: Flashcards and interactive scenarios
+- **Dividers**: Section breaks
+- **Sections**: Course organization
 
 ## Data Structure
 
 The parser works with the standard Articulate Rise JSON format which includes:
 
--   Course metadata (title, description, settings)
--   Lesson structure
--   Content items with various types
--   Media references
--   Quiz/assessment data
--   Styling and layout information
+- Course metadata (title, description, settings)
+- Lesson structure
+- Content items with various types
+- Media references
+- Quiz/assessment data
+- Styling and layout information
 
 ## URL Pattern Recognition
 
 The parser automatically extracts share IDs from Articulate Rise URLs:
 
--   Input: `https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/`
--   API URL: `https://rise.articulate.com/api/rise-runtime/boot/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO`
+- Input: `https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/`
+- API URL: `https://rise.articulate.com/api/rise-runtime/boot/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO`
 
 ## Error Handling
 
 The parser includes error handling for:
 
--   Invalid URLs or share IDs
--   Network connection issues
--   Malformed JSON data
--   File I/O errors
--   Unsupported content types
+- Invalid URLs or share IDs
+- Network connection issues
+- Malformed JSON data
+- File I/O errors
+- Unsupported content types
 
 <!-- ## Code coverage
 
@@ -425,28 +425,28 @@ The parser includes error handling for:
 
 ## Limitations
 
--   Media files (videos, images) are referenced but not downloaded
--   Complex interactive elements may be simplified in export
--   Styling and visual formatting is not preserved
--   Assessment logic and interactivity is lost in static exports
+- Media files (videos, images) are referenced but not downloaded
+- Complex interactive elements may be simplified in export
+- Styling and visual formatting is not preserved
+- Assessment logic and interactivity is lost in static exports
 
 ## Performance
 
--   Lightweight with minimal dependencies
--   Fast JSON parsing and export
--   Memory efficient processing
--   No external license requirements
+- Lightweight with minimal dependencies
+- Fast JSON parsing and export
+- Memory efficient processing
+- No external license requirements
 
 ## Future Enhancements
 
 Potential improvements could include:
 
--   [ ]  PDF export support
--   [ ]  Media file downloading
--   [x]  ~~HTML export with preserved styling~~
--   [ ]  SCORM package support
--   [ ]  Batch processing capabilities
--   [ ]  Custom template support
+- [ ]  PDF export support
+- [ ]  Media file downloading
+- [x]  ~~HTML export with preserved styling~~
+- [ ]  SCORM package support
+- [ ]  Batch processing capabilities
+- [ ]  Custom template support
 
 ## License
 
