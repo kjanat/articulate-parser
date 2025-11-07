@@ -188,6 +188,12 @@ linters:
           - gochecknoglobals
           - gochecknoinits
 
+      # Exclude var-naming for interfaces package (standard Go pattern for interface definitions)
+      - path: internal/interfaces/
+        text: "var-naming: avoid meaningless package names"
+        linters:
+          - revive
+
       # Allow fmt.Print* in main package
       - path: ^main\.go$
         text: "use of fmt.Print"

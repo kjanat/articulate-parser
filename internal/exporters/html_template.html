@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Course.Title}}</title>
+    <style>
+{{safeCSS .CSS}}
+    </style>
+</head>
+<body>
+    <header>
+        <h1>{{.Course.Title}}</h1>
+        {{if .Course.Description}}
+        <div class="course-description">{{safeHTML .Course.Description}}</div>
+        {{end}}
+    </header>
+
+    <section class="course-info">
+        <h2>Course Information</h2>
+        <ul>
+            <li><strong>Course ID:</strong> {{.Course.ID}}</li>
+            <li><strong>Share ID:</strong> {{.ShareID}}</li>
+            <li><strong>Navigation Mode:</strong> {{.Course.NavigationMode}}</li>
+            {{if .Course.ExportSettings}}
+            <li><strong>Export Format:</strong> {{.Course.ExportSettings.Format}}</li>
+            {{end}}
+        </ul>
+    </section>
+
+    {{range .Sections}}
+    {{if eq .Type "section"}}
+    <section class="course-section">
+        <h2>{{.Title}}</h2>
+    </section>
+    {{else}}
+    <section class="lesson">
+        <h3>Lesson {{.Number}}: {{.Title}}</h3>
+        {{if .Description}}
+        <div class="lesson-description">{{safeHTML .Description}}</div>
+        {{end}}
+        {{range .Items}}
+        {{template "item" .}}
+        {{end}}
+    </section>
+    {{end}}
+    {{end}}
+</body>
+</html>
+{{define "item"}}
+{{if eq .Type "text"}}{{template "textItem" .}}
+{{else if eq .Type "list"}}{{template "listItem" .}}
+{{else if eq .Type "knowledgecheck"}}{{template "knowledgeCheckItem" .}}
+{{else if eq .Type "multimedia"}}{{template "multimediaItem" .}}
+{{else if eq .Type "image"}}{{template "imageItem" .}}
+{{else if eq .Type "interactive"}}{{template "interactiveItem" .}}
+{{else if eq .Type "divider"}}{{template "dividerItem" .}}
+{{else}}{{template "unknownItem" .}}
+{{end}}
+{{end}}
+
+{{define "textItem"}}
+        <div class="item text-item">
+            <h4>Text Content</h4>
+            {{range .Items}}
+            {{if .Heading}}
+            {{safeHTML .Heading}}
+            {{end}}
+            {{if .Paragraph}}
+            <div>{{safeHTML .Paragraph}}</div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}
+
+{{define "listItem"}}
+        <div class="item list-item">
+            <h4>List</h4>
+            <ul>
+                {{range .Items}}
+                {{if .Paragraph}}
+                <li>{{.CleanText}}</li>
+                {{end}}
+                {{end}}
+            </ul>
+        </div>
+{{end}}
+
+{{define "knowledgeCheckItem"}}
+        <div class="item knowledge-check">
+            <h4>Knowledge Check</h4>
+            {{range .Items}}
+            {{if .Title}}
+            <p><strong>Question:</strong> {{safeHTML .Title}}</p>
+            {{end}}
+            {{if .Answers}}
+            <div class="answers">
+                <h5>Answers:</h5>
+                <ol>
+                    {{range .Answers}}
+                    <li{{if .Correct}} class="correct-answer"{{end}}>{{.Title}}</li>
+                    {{end}}
+                </ol>
+            </div>
+            {{end}}
+            {{if .Feedback}}
+            <div class="feedback"><strong>Feedback:</strong> {{safeHTML .Feedback}}</div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}
+
+{{define "multimediaItem"}}
+        <div class="item multimedia-item">
+            <h4>Media Content</h4>
+            {{range .Items}}
+            {{if .Title}}
+            <h5>{{.Title}}</h5>
+            {{end}}
+            {{if .Media}}
+            {{if .Media.Video}}
+            <div class="media-info">
+                <p><strong>Video:</strong> {{.Media.Video.OriginalURL}}</p>
+                {{if gt .Media.Video.Duration 0}}
+                <p><strong>Duration:</strong> {{.Media.Video.Duration}} seconds</p>
+                {{end}}
+            </div>
+            {{end}}
+            {{end}}
+            {{if .Caption}}
+            <div><em>{{.Caption}}</em></div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}
+
+{{define "imageItem"}}
+        <div class="item multimedia-item">
+            <h4>Image</h4>
+            {{range .Items}}
+            {{if and .Media .Media.Image}}
+            <div class="media-info">
+                <p><strong>Image:</strong> {{.Media.Image.OriginalURL}}</p>
+            </div>
+            {{end}}
+            {{if .Caption}}
+            <div><em>{{.Caption}}</em></div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}
+
+{{define "interactiveItem"}}
+        <div class="item interactive-item">
+            <h4>Interactive Content</h4>
+            {{range .Items}}
+            {{if .Title}}
+            <p><strong>{{.Title}}</strong></p>
+            {{end}}
+            {{if .Paragraph}}
+            <div>{{safeHTML .Paragraph}}</div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}
+
+{{define "dividerItem"}}
+        <hr>
+{{end}}
+
+{{define "unknownItem"}}
+        <div class="item unknown-item">
+            <h4>{{.TypeTitle}} Content</h4>
+            {{range .Items}}
+            {{if .Title}}
+            <p><strong>{{.Title}}</strong></p>
+            {{end}}
+            {{if .Paragraph}}
+            <div>{{safeHTML .Paragraph}}</div>
+            {{end}}
+            {{end}}
+        </div>
+{{end}}

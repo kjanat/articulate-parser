@@ -1,0 +1,173 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+}
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 300;
+}
+.course-description {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+.course-info {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.course-info h2 {
+    margin-top: 0;
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+.course-info ul {
+    list-style: none;
+    padding: 0;
+}
+.course-info li {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: #f7fafc;
+    border-radius: 4px;
+}
+.course-section {
+    background: #4299e1;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.course-section h2 {
+    margin: 0;
+    font-weight: 400;
+}
+.lesson {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #4299e1;
+}
+.lesson h3 {
+    margin-top: 0;
+    color: #2d3748;
+    font-size: 1.5rem;
+}
+.lesson-description {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 4px;
+    border-left: 3px solid #4299e1;
+}
+.item {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border-radius: 6px;
+    background: #fafafa;
+    border: 1px solid #e2e8f0;
+}
+.item h4 {
+    margin-top: 0;
+    color: #4a5568;
+    font-size: 1.2rem;
+    text-transform: capitalize;
+}
+.text-item {
+    background: #f0fff4;
+    border-left: 3px solid #48bb78;
+}
+.list-item {
+    background: #fffaf0;
+    border-left: 3px solid #ed8936;
+}
+.knowledge-check {
+    background: #e6fffa;
+    border-left: 3px solid #38b2ac;
+}
+.multimedia-item {
+    background: #faf5ff;
+    border-left: 3px solid #9f7aea;
+}
+.interactive-item {
+    background: #fff5f5;
+    border-left: 3px solid #f56565;
+}
+.unknown-item {
+    background: #f7fafc;
+    border-left: 3px solid #a0aec0;
+}
+.answers {
+    margin: 1rem 0;
+}
+.answers h5 {
+    margin: 0.5rem 0;
+    color: #4a5568;
+}
+.answers ol {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+.answers li {
+    margin: 0.3rem 0;
+    padding: 0.3rem;
+}
+.correct-answer {
+    background: #c6f6d5;
+    border-radius: 3px;
+    font-weight: bold;
+}
+.correct-answer::after {
+    content: " ✓";
+    color: #38a169;
+}
+.feedback {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #edf2f7;
+    border-radius: 4px;
+    border-left: 3px solid #4299e1;
+    font-style: italic;
+}
+.media-info {
+    background: #edf2f7;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+.media-info strong {
+    color: #4a5568;
+}
+hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    margin: 2rem 0;
+    border-radius: 1px;
+}
+ul {
+    padding-left: 1.5rem;
+}
+li {
+    margin: 0.5rem 0;
+}

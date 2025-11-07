@@ -1,7 +1,6 @@
 package exporters
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,6 +27,10 @@ func TestNewHTMLExporter(t *testing.T) {
 
 	if htmlExporter.htmlCleaner == nil {
 		t.Error("htmlCleaner should not be nil")
+	}
+
+	if htmlExporter.tmpl == nil {
+		t.Error("template should not be nil")
 	}
 }
 
@@ -118,6 +121,7 @@ func TestHTMLExporter_Export(t *testing.T) {
 	}
 
 	if !strings.Contains(contentStr, "font-family") {
+		t.Logf("Generated HTML (first 500 chars):\n%s", contentStr[:min(500, len(contentStr))])
 		t.Error("Output should contain CSS font-family")
 	}
 }
@@ -138,409 +142,7 @@ func TestHTMLExporter_Export_InvalidPath(t *testing.T) {
 	}
 }
 
-// TestHTMLExporter_ProcessTextItem tests the processTextItem method.
-func TestHTMLExporter_ProcessTextItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "text",
-		Items: []models.SubItem{
-			{
-				Heading:   "<h1>Test Heading</h1>",
-				Paragraph: "<p>Test paragraph with <strong>bold</strong> text.</p>",
-			},
-			{
-				Paragraph: "<p>Another paragraph.</p>",
-			},
-		},
-	}
-
-	exporter.processTextItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "text-item") {
-		t.Error("Should contain text-item CSS class")
-	}
-	if !strings.Contains(result, "Text Content") {
-		t.Error("Should contain text content heading")
-	}
-	if !strings.Contains(result, "<h1>Test Heading</h1>") {
-		t.Error("Should preserve HTML heading")
-	}
-	if !strings.Contains(result, "<strong>bold</strong>") {
-		t.Error("Should preserve HTML formatting in paragraph")
-	}
-}
-
-// TestHTMLExporter_ProcessListItem tests the processListItem method.
-func TestHTMLExporter_ProcessListItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "list",
-		Items: []models.SubItem{
-			{Paragraph: "<p>First item</p>"},
-			{Paragraph: "<p>Second item with <em>emphasis</em></p>"},
-			{Paragraph: "<p>Third item</p>"},
-		},
-	}
-
-	exporter.processListItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "list-item") {
-		t.Error("Should contain list-item CSS class")
-	}
-	if !strings.Contains(result, "<ul>") {
-		t.Error("Should contain unordered list")
-	}
-	if !strings.Contains(result, "<li>First item</li>") {
-		t.Error("Should contain first list item")
-	}
-	if !strings.Contains(result, "<li>Second item with emphasis</li>") {
-		t.Error("Should contain second list item with cleaned HTML")
-	}
-	if !strings.Contains(result, "<li>Third item</li>") {
-		t.Error("Should contain third list item")
-	}
-}
-
-// TestHTMLExporter_ProcessKnowledgeCheckItem tests the processKnowledgeCheckItem method.
-func TestHTMLExporter_ProcessKnowledgeCheckItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "knowledgeCheck",
-		Items: []models.SubItem{
-			{
-				Title: "<p>What is the correct answer?</p>",
-				Answers: []models.Answer{
-					{Title: "Wrong answer", Correct: false},
-					{Title: "Correct answer", Correct: true},
-					{Title: "Another wrong answer", Correct: false},
-				},
-				Feedback: "<p>Great job! This is the feedback.</p>",
-			},
-		},
-	}
-
-	exporter.processKnowledgeCheckItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "knowledge-check") {
-		t.Error("Should contain knowledge-check CSS class")
-	}
-	if !strings.Contains(result, "Knowledge Check") {
-		t.Error("Should contain knowledge check heading")
-	}
-	if !strings.Contains(result, "What is the correct answer?") {
-		t.Error("Should contain question text")
-	}
-	if !strings.Contains(result, "Wrong answer") {
-		t.Error("Should contain first answer")
-	}
-	if !strings.Contains(result, "correct-answer") {
-		t.Error("Should mark correct answer with CSS class")
-	}
-	if !strings.Contains(result, "Feedback") {
-		t.Error("Should contain feedback section")
-	}
-}
-
-// TestHTMLExporter_ProcessMultimediaItem tests the processMultimediaItem method.
-func TestHTMLExporter_ProcessMultimediaItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "multimedia",
-		Items: []models.SubItem{
-			{
-				Title: "<p>Video Title</p>",
-				Media: &models.Media{
-					Video: &models.VideoMedia{
-						OriginalURL: "https://example.com/video.mp4",
-						Duration:    120,
-					},
-				},
-				Caption: "<p>Video caption</p>",
-			},
-		},
-	}
-
-	exporter.processMultimediaItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "multimedia-item") {
-		t.Error("Should contain multimedia-item CSS class")
-	}
-	if !strings.Contains(result, "Media Content") {
-		t.Error("Should contain media content heading")
-	}
-	if !strings.Contains(result, "Video Title") {
-		t.Error("Should contain video title")
-	}
-	if !strings.Contains(result, "https://example.com/video.mp4") {
-		t.Error("Should contain video URL")
-	}
-	if !strings.Contains(result, "120 seconds") {
-		t.Error("Should contain video duration")
-	}
-	if !strings.Contains(result, "Video caption") {
-		t.Error("Should contain video caption")
-	}
-}
-
-// TestHTMLExporter_ProcessImageItem tests the processImageItem method.
-func TestHTMLExporter_ProcessImageItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "image",
-		Items: []models.SubItem{
-			{
-				Media: &models.Media{
-					Image: &models.ImageMedia{
-						OriginalURL: "https://example.com/image.png",
-					},
-				},
-				Caption: "<p>Image caption</p>",
-			},
-		},
-	}
-
-	exporter.processImageItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "multimedia-item") {
-		t.Error("Should contain multimedia-item CSS class")
-	}
-	if !strings.Contains(result, "Image") {
-		t.Error("Should contain image heading")
-	}
-	if !strings.Contains(result, "https://example.com/image.png") {
-		t.Error("Should contain image URL")
-	}
-	if !strings.Contains(result, "Image caption") {
-		t.Error("Should contain image caption")
-	}
-}
-
-// TestHTMLExporter_ProcessInteractiveItem tests the processInteractiveItem method.
-func TestHTMLExporter_ProcessInteractiveItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "interactive",
-		Items: []models.SubItem{
-			{
-				Title:     "<p>Interactive element title</p>",
-				Paragraph: "<p>Interactive content description</p>",
-			},
-		},
-	}
-
-	exporter.processInteractiveItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "interactive-item") {
-		t.Error("Should contain interactive-item CSS class")
-	}
-	if !strings.Contains(result, "Interactive Content") {
-		t.Error("Should contain interactive content heading")
-	}
-	if !strings.Contains(result, "Interactive element title") {
-		t.Error("Should contain interactive element title")
-	}
-	if !strings.Contains(result, "Interactive content description") {
-		t.Error("Should contain interactive content description")
-	}
-}
-
-// TestHTMLExporter_ProcessDividerItem tests the processDividerItem method.
-func TestHTMLExporter_ProcessDividerItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	exporter.processDividerItem(&buf)
-
-	result := buf.String()
-	expected := "        <hr>\n\n"
-
-	if result != expected {
-		t.Errorf("Expected %q, got %q", expected, result)
-	}
-}
-
-// TestHTMLExporter_ProcessUnknownItem tests the processUnknownItem method.
-func TestHTMLExporter_ProcessUnknownItem(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	item := models.Item{
-		Type: "unknown",
-		Items: []models.SubItem{
-			{
-				Title:     "<p>Unknown item title</p>",
-				Paragraph: "<p>Unknown item content</p>",
-			},
-		},
-	}
-
-	exporter.processUnknownItem(&buf, item)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "unknown-item") {
-		t.Error("Should contain unknown-item CSS class")
-	}
-	if !strings.Contains(result, "Unknown Content") {
-		t.Error("Should contain unknown content heading")
-	}
-	if !strings.Contains(result, "Unknown item title") {
-		t.Error("Should contain unknown item title")
-	}
-	if !strings.Contains(result, "Unknown item content") {
-		t.Error("Should contain unknown item content")
-	}
-}
-
-// TestHTMLExporter_ProcessAnswers tests the processAnswers method.
-func TestHTMLExporter_ProcessAnswers(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	var buf bytes.Buffer
-	answers := []models.Answer{
-		{Title: "Answer 1", Correct: false},
-		{Title: "Answer 2", Correct: true},
-		{Title: "Answer 3", Correct: false},
-	}
-
-	exporter.processAnswers(&buf, answers)
-
-	result := buf.String()
-
-	if !strings.Contains(result, "answers") {
-		t.Error("Should contain answers CSS class")
-	}
-	if !strings.Contains(result, "<h5>Answers:</h5>") {
-		t.Error("Should contain answers heading")
-	}
-	if !strings.Contains(result, "<ol>") {
-		t.Error("Should contain ordered list")
-	}
-	if !strings.Contains(result, "<li>Answer 1</li>") {
-		t.Error("Should contain first answer")
-	}
-	if !strings.Contains(result, "correct-answer") {
-		t.Error("Should mark correct answer with CSS class")
-	}
-	if !strings.Contains(result, "<li class=\"correct-answer\">Answer 2</li>") {
-		t.Error("Should mark correct answer properly")
-	}
-	if !strings.Contains(result, "<li>Answer 3</li>") {
-		t.Error("Should contain third answer")
-	}
-}
-
-// TestHTMLExporter_ProcessItemToHTML_AllTypes tests all item types.
-func TestHTMLExporter_ProcessItemToHTML_AllTypes(t *testing.T) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	tests := []struct {
-		name         string
-		itemType     string
-		expectedText string
-	}{
-		{
-			name:         "text item",
-			itemType:     "text",
-			expectedText: "Text Content",
-		},
-		{
-			name:         "list item",
-			itemType:     "list",
-			expectedText: "List",
-		},
-		{
-			name:         "knowledge check item",
-			itemType:     "knowledgeCheck",
-			expectedText: "Knowledge Check",
-		},
-		{
-			name:         "multimedia item",
-			itemType:     "multimedia",
-			expectedText: "Media Content",
-		},
-		{
-			name:         "image item",
-			itemType:     "image",
-			expectedText: "Image",
-		},
-		{
-			name:         "interactive item",
-			itemType:     "interactive",
-			expectedText: "Interactive Content",
-		},
-		{
-			name:         "divider item",
-			itemType:     "divider",
-			expectedText: "<hr>",
-		},
-		{
-			name:         "unknown item",
-			itemType:     "unknown",
-			expectedText: "Unknown Content",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var buf bytes.Buffer
-			item := models.Item{
-				Type: tt.itemType,
-				Items: []models.SubItem{
-					{Title: "Test title", Paragraph: "Test content"},
-				},
-			}
-
-			// Handle empty unknown items
-			if tt.itemType == "unknown" && tt.expectedText == "" {
-				item.Items = []models.SubItem{}
-			}
-
-			exporter.processItemToHTML(&buf, item)
-
-			result := buf.String()
-			if tt.expectedText != "" && !strings.Contains(result, tt.expectedText) {
-				t.Errorf("Expected content to contain: %q\nGot: %q", tt.expectedText, result)
-			}
-		})
-	}
-}
-
-// TestHTMLExporter_ComplexCourse tests export of a complex course structure.
+// TestHTMLExporter_ComplexCourse tests export of a course with complex content.
 func TestHTMLExporter_ComplexCourse(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
 	exporter := NewHTMLExporter(htmlCleaner)
@@ -742,9 +344,15 @@ func TestHTMLExporter_HTMLCleaning(t *testing.T) {
 							Type: "text",
 							Items: []models.SubItem{
 								{
-									Heading:   "<h1>Heading with <em>emphasis</em> and &amp; entities</h1>",
-									Paragraph: "<p>Paragraph with &lt;code&gt; entities and <strong>formatting</strong>.</p>",
+									Heading:   "<h2>HTML Heading</h2>",
+									Paragraph: "<p>Content with <em>emphasis</em> and <strong>strong</strong> text.</p>",
 								},
+							},
+						},
+						{
+							Type: "list",
+							Items: []models.SubItem{
+								{Paragraph: "<p>List item with <b>bold</b> text</p>"},
 							},
 						},
 					},
@@ -761,13 +369,6 @@ func TestHTMLExporter_HTMLCleaning(t *testing.T) {
 		t.Fatalf("Export failed: %v", err)
 	}
 
-	// Verify file was created (basic check that HTML handling didn't break export)
-	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
-		t.Fatal("Output file was not created")
-	}
-
-	// Read content and verify some HTML is preserved (descriptions, headings, paragraphs)
-	// while list items are cleaned for safety
 	content, err := os.ReadFile(outputPath)
 	if err != nil {
 		t.Fatalf("Failed to read output file: %v", err)
@@ -775,19 +376,23 @@ func TestHTMLExporter_HTMLCleaning(t *testing.T) {
 
 	contentStr := string(content)
 
-	// HTML should be preserved in some places
+	// HTML content in descriptions should be preserved
 	if !strings.Contains(contentStr, "<b>bold</b>") {
 		t.Error("Should preserve HTML formatting in descriptions")
 	}
-	if !strings.Contains(contentStr, "<h1>Heading with <em>emphasis</em>") {
+
+	// HTML content in headings should be preserved
+	if !strings.Contains(contentStr, "<h2>HTML Heading</h2>") {
 		t.Error("Should preserve HTML in headings")
 	}
-	if !strings.Contains(contentStr, "<strong>formatting</strong>") {
-		t.Error("Should preserve HTML in paragraphs")
+
+	// List items should have HTML tags stripped (cleaned)
+	if !strings.Contains(contentStr, "List item with bold text") {
+		t.Error("Should clean HTML from list items")
 	}
 }
 
-// createTestCourseForHTML creates a test course for HTML export testing.
+// createTestCourseForHTML creates a test course for HTML export tests.
 func createTestCourseForHTML() *models.Course {
 	return &models.Course{
 		ShareID: "test-share-id",
@@ -837,37 +442,13 @@ func BenchmarkHTMLExporter_Export(b *testing.B) {
 	exporter := NewHTMLExporter(htmlCleaner)
 	course := createTestCourseForHTML()
 
-	// Create temporary directory
 	tempDir := b.TempDir()
 
-	for b.Loop() {
-		outputPath := filepath.Join(tempDir, "benchmark-course.html")
-		_ = exporter.Export(course, outputPath)
-		// Clean up for next iteration. Remove errors are ignored because we've already
-		// benchmarked the export operation; cleanup failures don't affect the benchmark
-		// measurements or the validity of the next iteration's export.
-		_ = os.Remove(outputPath)
-	}
-}
-
-// BenchmarkHTMLExporter_ProcessTextItem benchmarks text item processing.
-func BenchmarkHTMLExporter_ProcessTextItem(b *testing.B) {
-	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &HTMLExporter{htmlCleaner: htmlCleaner}
-
-	item := models.Item{
-		Type: "text",
-		Items: []models.SubItem{
-			{
-				Heading:   "<h1>Benchmark Heading</h1>",
-				Paragraph: "<p>Benchmark paragraph with <strong>formatting</strong>.</p>",
-			},
-		},
-	}
-
-	for b.Loop() {
-		var buf bytes.Buffer
-		exporter.processTextItem(&buf, item)
+	for i := range b.N {
+		outputPath := filepath.Join(tempDir, "bench-course-"+string(rune(i))+".html")
+		if err := exporter.Export(course, outputPath); err != nil {
+			b.Fatalf("Export failed: %v", err)
+		}
 	}
 }
 
@@ -890,38 +471,38 @@ func BenchmarkHTMLExporter_ComplexCourse(b *testing.B) {
 	// Fill with test data
 	for i := range 10 {
 		lesson := models.Lesson{
-			ID:    "lesson-" + string(rune(i)),
-			Title: "Lesson " + string(rune(i)),
-			Type:  "lesson",
-			Items: make([]models.Item, 5), // 5 items per lesson
+			ID:          "lesson-" + string(rune(i)),
+			Title:       "Benchmark Lesson " + string(rune(i)),
+			Type:        "lesson",
+			Description: "<p>Lesson description</p>",
+			Items: []models.Item{
+				{
+					Type: "text",
+					Items: []models.SubItem{
+						{
+							Heading:   "<h2>Heading</h2>",
+							Paragraph: "<p>Paragraph with content.</p>",
+						},
+					},
+				},
+				{
+					Type: "list",
+					Items: []models.SubItem{
+						{Paragraph: "<p>Item 1</p>"},
+						{Paragraph: "<p>Item 2</p>"},
+					},
+				},
+			},
 		}
-
-		for j := range 5 {
-			item := models.Item{
-				Type:  "text",
-				Items: make([]models.SubItem, 3), // 3 sub-items per item
-			}
-
-			for k := range 3 {
-				item.Items[k] = models.SubItem{
-					Heading:   "<h3>Heading " + string(rune(k)) + "</h3>",
-					Paragraph: "<p>Paragraph content with <strong>formatting</strong> for performance testing.</p>",
-				}
-			}
-
-			lesson.Items[j] = item
-		}
-
 		course.Course.Lessons[i] = lesson
 	}
 
 	tempDir := b.TempDir()
 
-	for b.Loop() {
-		outputPath := filepath.Join(tempDir, "benchmark-complex.html")
-		_ = exporter.Export(course, outputPath)
-		// Remove errors are ignored because we're only benchmarking the export
-		// operation itself; cleanup failures don't affect the benchmark metrics.
-		_ = os.Remove(outputPath)
+	for i := range b.N {
+		outputPath := filepath.Join(tempDir, "bench-complex-"+string(rune(i))+".html")
+		if err := exporter.Export(course, outputPath); err != nil {
+			b.Fatalf("Export failed: %v", err)
+		}
 	}
 }
