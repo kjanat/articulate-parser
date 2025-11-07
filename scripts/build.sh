@@ -73,7 +73,7 @@ EXAMPLES:
 DEFAULT TARGETS:
     Operating Systems: darwin, freebsd, linux, windows
     Architectures:     amd64, arm64
-    
+
     This creates 8 binaries total (4 OS × 2 ARCH)
 
 GO BUILD FLAGS:

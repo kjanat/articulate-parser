@@ -22,7 +22,7 @@ jobs:
       - name: Setup go deps
         run: |
           # Install golangci-lint
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b "$(go env GOPATH)/bin"
 
           # Install go-task dependencies
           go install golang.org/x/tools/cmd/goimports@latest
@@ -34,7 +34,7 @@ jobs:
         run: golangci-lint run --fix
 
       - name: Run golangci-lint format
-        run: golangci-lint format
+        run: golangci-lint fmt
 
       - name: Run go mod tidy
         run: go mod tidy

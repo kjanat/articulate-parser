@@ -15,7 +15,7 @@ import (
 //go:embed html_styles.css
 var defaultCSS string
 
-//go:embed html_template.html
+//go:embed html_template.gohtml
 var htmlTemplate string
 
 // HTMLExporter implements the Exporter interface for HTML format.

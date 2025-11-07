@@ -49,17 +49,17 @@ docker run --rm ghcr.io/kjanat/articulate-parser:latest --version
 
 ## Available Tags
 
--   `latest` - Latest stable release
--   `v1.x.x` - Specific version tags
--   `main` - Latest development build
+- `latest` - Latest stable release
+- `v1.x.x` - Specific version tags
+- `main` - Latest development build
 
 ## Image Details
 
--   **Base Image**: `scratch` (minimal attack surface)
--   **Architecture**: Multi-arch support (amd64, arm64)
--   **Size**: < 10MB (optimized binary)
--   **Security**: Runs as non-root user
--   **Features**: SBOM and provenance attestation included
+- **Base Image**: `scratch` (minimal attack surface)
+- **Architecture**: Multi-arch support (amd64, arm64)
+- **Size**: < 10MB (optimized binary)
+- **Security**: Runs as non-root user
+- **Features**: SBOM and provenance attestation included
 
 ## Development
 
@@ -77,6 +77,6 @@ docker-compose up --build
 
 ## Repository
 
--   **Source**: [github.com/kjanat/articulate-parser](https://github.com/kjanat/articulate-parser)
--   **Issues**: [Report bugs or request features](https://github.com/kjanat/articulate-parser/issues)
--   **License**: See repository for license details
+- **Source**: [github.com/kjanat/articulate-parser](https://github.com/kjanat/articulate-parser)
+- **Issues**: [Report bugs or request features](https://github.com/kjanat/articulate-parser/issues)
+- **License**: See repository for license details
