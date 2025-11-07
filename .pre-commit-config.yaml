@@ -4,10 +4,31 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      # File quality
       - id: trailing-whitespace
+        exclude: '^\.github/ISSUE_TEMPLATE/.*\.yml$'
       - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+      # File validation
       - id: check-yaml
+      - id: check-json
+      - id: check-toml
+
+      # Security
+      - id: detect-private-key
+
+      # Git safety
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: no-commit-to-branch
+        args: ['--branch=master', '--branch=main']
+
+      # File structure
       - id: check-added-large-files
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
   - repo: https://github.com/golangci/golangci-lint
     rev: v2.6.1
     hooks:

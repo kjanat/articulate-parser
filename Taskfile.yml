@@ -316,13 +316,13 @@ tasks:
   docker:run:
     desc: Run Docker container
     aliases: [dr]
-    deps: [docker:build]
+    deps: ['docker:build']
     cmds:
       - docker run --rm {{.APP_NAME}}:{{.VERSION}} --help
 
   docker:test:
     desc: Test Docker image
-    deps: [docker:build]
+    deps: ['docker:build']
     cmds:
       - docker run --rm {{.APP_NAME}}:{{.VERSION}} --version
       - echo "Docker image tested successfully"
@@ -434,7 +434,7 @@ tasks:
 
   docs:coverage:
     desc: Open coverage report in browser
-    deps: [test:coverage]
+    deps: ['test:coverage']
     cmds:
       - '{{if eq OS "darwin"}}open {{.COVERAGE_DIR}}/coverage.html{{else if eq OS "windows"}}start {{.COVERAGE_DIR}}/coverage.html{{else}}xdg-open {{.COVERAGE_DIR}}/coverage.html 2>/dev/null || echo "Please open {{.COVERAGE_DIR}}/coverage.html in your browser"{{end}}'
 

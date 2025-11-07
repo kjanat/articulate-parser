@@ -34,7 +34,7 @@ jobs:
         run: golangci-lint run --fix
 
       - name: Run golangci-lint format
-        run: golangci-lint format
+        run: golangci-lint fmt
 
       - name: Run go mod tidy
         run: go mod tidy

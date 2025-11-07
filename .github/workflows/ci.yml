@@ -64,6 +64,8 @@ jobs:
 
       - name: Run tests with enhanced reporting
         id: test
+        env:
+          CGO_ENABLED: 1
         run: |
           cat >> $GITHUB_STEP_SUMMARY << EOF
           ## 🔧 Test Environment
@@ -79,9 +81,9 @@ jobs:
           # Extract test results for summary
           TEST_STATUS=$?
           TOTAL_TESTS=$(grep -c "=== RUN" test-output.log || echo "0")
-          PASSED_TESTS=$(grep -c "--- PASS:" test-output.log || echo "0")
-          FAILED_TESTS=$(grep -c "--- FAIL:" test-output.log || echo "0")
-          SKIPPED_TESTS=$(grep -c "--- SKIP:" test-output.log || echo "0")
+          PASSED_TESTS=$(grep -c -- "--- PASS:" test-output.log || echo "0")
+          FAILED_TESTS=$(grep -c -- "--- FAIL:" test-output.log || echo "0")
+          SKIPPED_TESTS=$(grep -c -- "--- SKIP:" test-output.log || echo "0")
 
           # Generate test summary
           cat >> $GITHUB_STEP_SUMMARY << EOF
@@ -120,7 +122,7 @@ jobs:
           ### ❌ Failed Tests Details
           ```
           EOF
-            grep -A 10 "--- FAIL:" test-output.log | head -100 >> $GITHUB_STEP_SUMMARY
+            grep -A 10 -- "--- FAIL:" test-output.log | head -100 >> $GITHUB_STEP_SUMMARY
             cat >> $GITHUB_STEP_SUMMARY << 'EOF'
           ```
 
@@ -128,12 +130,10 @@ jobs:
           fi
 
           # Set outputs for other steps
-          cat >> $GITHUB_OUTPUT << EOF
-          test-status=$TEST_STATUS
-          total-tests=$TOTAL_TESTS
-          passed-tests=$PASSED_TESTS
-          failed-tests=$FAILED_TESTS
-          EOF
+          echo "test-status=$TEST_STATUS" >> $GITHUB_OUTPUT
+          echo "total-tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "passed-tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "failed-tests=$FAILED_TESTS" >> $GITHUB_OUTPUT
 
           # Exit with the original test status
           exit $TEST_STATUS

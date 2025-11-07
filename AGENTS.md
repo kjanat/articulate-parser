@@ -4,8 +4,8 @@
 - **Build**: `task build` or `go build -o bin/articulate-parser main.go`
 - **Run tests**: `task test` or `go test -race -timeout 5m ./...`
 - **Run single test**: `go test -v -race -run ^TestName$ ./path/to/package`
-- **Test with coverage**: 
-  - `task test:coverage` or 
+- **Test with coverage**:
+  - `task test:coverage` or
   - `go test -race -coverprofile=coverage/coverage.out -covermode=atomic ./...`
 - **Lint**: `task lint` (runs vet, fmt check, staticcheck, golangci-lint)
 - **Format**: `task fmt` or `gofmt -s -w .`

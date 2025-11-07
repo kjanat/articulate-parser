@@ -20,36 +20,36 @@ A Go-based parser that converts Articulate Rise e-learning content to various fo
 flowchart TD
     %% User Input
     CLI[Command Line Interface<br/>main.go] --> APP{App Service<br/>services/app.go}
-    
+
     %% Core Application Logic
     APP --> |"ProcessCourseFromURI"| PARSER[Course Parser<br/>services/parser.go]
     APP --> |"ProcessCourseFromFile"| PARSER
     APP --> |"exportCourse"| FACTORY[Exporter Factory<br/>exporters/factory.go]
-    
+
     %% Data Sources
     PARSER --> |"FetchCourse"| API[Articulate Rise API<br/>rise.articulate.com]
     PARSER --> |"LoadCourseFromFile"| FILE[Local JSON File<br/>*.json]
-    
+
     %% Data Models
     API --> MODELS[Data Models<br/>models/course.go]
     FILE --> MODELS
     MODELS --> |Course, Lesson, Item| APP
-    
+
     %% Export Factory Pattern
     FACTORY --> |"CreateExporter"| MARKDOWN[Markdown Exporter<br/>exporters/markdown.go]
     FACTORY --> |"CreateExporter"| HTML[HTML Exporter<br/>exporters/html.go]
     FACTORY --> |"CreateExporter"| DOCX[DOCX Exporter<br/>exporters/docx.go]
-    
+
     %% HTML Cleaning Service
     CLEANER[HTML Cleaner<br/>services/html_cleaner.go] --> MARKDOWN
     CLEANER --> HTML
     CLEANER --> DOCX
-    
+
     %% Output Files
     MARKDOWN --> |"Export"| MD_OUT[Markdown Files<br/>*.md]
     HTML --> |"Export"| HTML_OUT[HTML Files<br/>*.html]
     DOCX --> |"Export"| DOCX_OUT[Word Documents<br/>*.docx]
-    
+
     %% Interfaces (Contracts)
     IPARSER[CourseParser Interface<br/>interfaces/parser.go] -.-> PARSER
     IEXPORTER[Exporter Interface<br/>interfaces/exporter.go] -.-> MARKDOWN
@@ -64,7 +64,7 @@ flowchart TD
     classDef output fill:#fce7f3,stroke:#be185d,stroke-width:2px,color:#be185d
     classDef interface fill:#ecfdf5,stroke:#16a34a,stroke-width:1px,stroke-dasharray: 5 5,color:#16a34a
     classDef service fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#0891b2
-    
+
     class CLI userInput
     class APP,FACTORY coreLogic
     class API,FILE,MODELS dataSource
@@ -80,7 +80,7 @@ The system follows **Clean Architecture** principles with clear separation of co
 
 -   **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
 -   **🏗️ Application Layer**: Core business logic with dependency injection
--   **📋 Interface Layer**: Contracts defining behavior without implementation details  
+-   **📋 Interface Layer**: Contracts defining behavior without implementation details
 -   **🔧 Service Layer**: Concrete implementations of parsing and utility services
 -   **📤 Export Layer**: Factory pattern for format-specific exporters
 -   **📊 Data Layer**: Domain models representing course structure
