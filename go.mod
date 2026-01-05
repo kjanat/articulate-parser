@@ -1,6 +1,8 @@
 module github.com/kjanat/articulate-parser
 
-go 1.25.5
+go 1.24.0
+
+toolchain go1.25.5
 
 require (
 	github.com/fumiama/go-docx v0.0.0-20250506085032-0c30fd09304b
