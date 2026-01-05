@@ -79,68 +79,68 @@ linters:
   # Enable specific linters
   enable:
     # Default/standard linters
-    - errcheck      # Check for unchecked errors
-    - govet         # Go vet
-    - ineffassign   # Detect ineffectual assignments
-    - staticcheck   # Staticcheck
-    - unused        # Find unused code
+    - errcheck # Check for unchecked errors
+    - govet # Go vet
+    - ineffassign # Detect ineffectual assignments
+    - staticcheck # Staticcheck
+    - unused # Find unused code
 
     # Code quality
-    - revive        # Fast, configurable linter
-    - gocritic      # Opinionated Go source code linter
-    - godot         # Check comment periods
-    - godox         # Detect TODO/FIXME comments
-    - gocognit      # Cognitive complexity
-    - gocyclo       # Cyclomatic complexity
-    - funlen        # Function length
-    - maintidx      # Maintainability index
+    - revive # Fast, configurable linter
+    - gocritic # Opinionated Go source code linter
+    - godot # Check comment periods
+    - godox # Detect TODO/FIXME comments
+    - gocognit # Cognitive complexity
+    - gocyclo # Cyclomatic complexity
+    - funlen # Function length
+    - maintidx # Maintainability index
 
     # Security
-    - gosec         # Security problems
+    - gosec # Security problems
 
     # Performance
-    - prealloc      # Find slice preallocation opportunities
-    - bodyclose     # Check HTTP response body closed
+    - prealloc # Find slice preallocation opportunities
+    - bodyclose # Check HTTP response body closed
 
     # Style and formatting
-    - goconst       # Find repeated strings
-    - misspell      # Find misspellings
-    - whitespace    # Find unnecessary blank lines
-    - unconvert     # Remove unnecessary type conversions
-    - dupword       # Check for duplicate words
+    - goconst # Find repeated strings
+    - misspell # Find misspellings
+    - whitespace # Find unnecessary blank lines
+    - unconvert # Remove unnecessary type conversions
+    - dupword # Check for duplicate words
 
     # Error handling
-    - errorlint     # Error handling improvements
-    - wrapcheck     # Check error wrapping
+    - errorlint # Error handling improvements
+    - wrapcheck # Check error wrapping
 
     # Testing
-    - testifylint   # Testify usage
-    - tparallel     # Detect improper t.Parallel() usage
-    - thelper       # Detect test helpers without t.Helper()
+    - testifylint # Testify usage
+    - tparallel # Detect improper t.Parallel() usage
+    - thelper # Detect test helpers without t.Helper()
 
     # Best practices
-    - exhaustive    # Check exhaustiveness of enum switches
-    - nolintlint    # Check nolint directives
-    - nakedret      # Find naked returns
-    - nilnil        # Check for redundant nil checks
-    - noctx         # Check sending HTTP requests without context
-    - contextcheck  # Check context propagation
-    - asciicheck    # Check for non-ASCII identifiers
-    - bidichk       # Check for dangerous unicode sequences
+    - exhaustive # Check exhaustiveness of enum switches
+    - nolintlint # Check nolint directives
+    - nakedret # Find naked returns
+    - nilnil # Check for redundant nil checks
+    - noctx # Check sending HTTP requests without context
+    - contextcheck # Check context propagation
+    - asciicheck # Check for non-ASCII identifiers
+    - bidichk # Check for dangerous unicode sequences
     - durationcheck # Check for multiplied durations
-    - makezero      # Find slice declarations with non-zero length
-    - nilerr        # Find code returning nil with non-nil error
-    - predeclared   # Find code shadowing predeclared identifiers
-    - promlinter    # Check Prometheus metrics naming
-    - reassign      # Check reassignment of package variables
+    - makezero # Find slice declarations with non-zero length
+    - nilerr # Find code returning nil with non-nil error
+    - predeclared # Find code shadowing predeclared identifiers
+    - promlinter # Check Prometheus metrics naming
+    - reassign # Check reassignment of package variables
     - usestdlibvars # Use variables from stdlib
-    - wastedassign  # Find wasted assignments
+    - wastedassign # Find wasted assignments
 
     # Documentation
-    - godoclint     # Check godoc comments
+    - godoclint # Check godoc comments
 
     # New
-    - modernize     # Suggest simplifications using new Go features
+    - modernize # Suggest simplifications using new Go features
 
   # Exclusion rules for linters
   exclusions:
@@ -221,8 +221,8 @@ linters:
     govet:
       enable-all: true
       disable:
-        - fieldalignment  # Too many false positives
-        - shadow         # Can be noisy
+        - fieldalignment # Too many false positives
+        - shadow # Can be noisy
 
     # goconst settings
     goconst:
@@ -286,8 +286,8 @@ linters:
       severity: medium
       confidence: medium
       excludes:
-        - G104  # Handled by errcheck
-        - G304  # File path provided as taint input
+        - G104 # Handled by errcheck
+        - G304 # File path provided as taint input
 
     # revive settings
     revive:
@@ -349,7 +349,15 @@ linters:
 
     # stylecheck settings
     staticcheck:
-      checks: ["all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022"]
+      checks: [
+        "all",
+        "-ST1000",
+        "-ST1003",
+        "-ST1016",
+        "-ST1020",
+        "-ST1021",
+        "-ST1022",
+      ]
 
     # maintidx settings
     maintidx:

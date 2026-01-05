@@ -137,7 +137,7 @@ try {
 	# Show targets and exit if requested
 	if ($ShowTargets) {
 		Write-Host 'Available build targets:' -ForegroundColor Cyan
-		
+
 		# Get available platforms and architectures from Go toolchain
 		try {
 			$GoTargets = @(go tool dist list 2>$null)
@@ -148,7 +148,7 @@ try {
 			Write-Host '⚠️ Could not retrieve targets from Go. Using default targets.' -ForegroundColor Yellow
 			$PlatformList = $Platforms.Split(',') | ForEach-Object { $_.Trim() }
 			$ArchList = $Architectures.Split(',') | ForEach-Object { $_.Trim() }
-			
+
 			foreach ($platform in $PlatformList) {
 				foreach ($arch in $ArchList) {
 					$BinaryName = "articulate-parser-$platform-$arch"
@@ -163,12 +163,12 @@ try {
 		$SelectedTargets = @()
 		$PlatformList = $Platforms.Split(',') | ForEach-Object { $_.Trim() }
 		$ArchList = $Architectures.Split(',') | ForEach-Object { $_.Trim() }
-		
+
 		foreach ($target in $GoTargets) {
 			$parts = $target.Split('/')
 			$platform = $parts[0]
 			$arch = $parts[1]
-			
+
 			if ($PlatformList -contains $platform -and $ArchList -contains $arch) {
 				$SelectedTargets += @{
 					Platform = $platform
@@ -177,14 +177,14 @@ try {
 				}
 			}
 		}
-		
+
 		# Display filtered targets
 		foreach ($target in $SelectedTargets) {
 			$BinaryName = "articulate-parser-$($target.Platform)-$($target.Arch)"
 			if ($target.Platform -eq 'windows') { $BinaryName += '.exe' }
 			Write-Host "  $($target.Original) -> $BinaryName" -ForegroundColor Gray
 		}
-		
+
 		# Show all available targets if verbose
 		if ($VerboseOutput) {
 			Write-Host "`nAll Go targets available on this system:" -ForegroundColor Cyan
@@ -404,13 +404,13 @@ try {
 		}
 		$BuildArgs += '-o'
 		$BuildArgs += $Target.Path
-		
+
 		# If using custom entry point that's not main.go
 		# we need to use the file explicitly to avoid duplicate declarations
 		$EntryPointPath = Join-Path $ProjectRoot $EntryPoint
 		$EntryPointFile = Split-Path $EntryPointPath -Leaf
 		$IsCustomEntryPoint = ($EntryPointFile -ne 'main.go')
-		
+
 		if ($IsCustomEntryPoint) {
 			# When using custom entry point, compile only that file
 			$BuildArgs += $EntryPointPath
@@ -419,7 +419,7 @@ try {
 			$PackagePath = Split-Path $EntryPointPath -Parent
 			$BuildArgs += $PackagePath
 		}
-		
+
 		# For verbose output, show the command that will be executed
 		if ($VerboseOutput) {
 			Write-Host "Command: go $($BuildArgs -join ' ')" -ForegroundColor DarkCyan

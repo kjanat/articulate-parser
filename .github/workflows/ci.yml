@@ -64,6 +64,8 @@ jobs:
 
       - name: Run tests with enhanced reporting
         id: test
+        env:
+          CGO_ENABLED: 1
         run: |
           cat >> $GITHUB_STEP_SUMMARY << EOF
           ## 🔧 Test Environment
@@ -354,7 +356,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    needs: [test, docker-test, dependency-review]
+    needs: [test, docker-test]
     if: |
       github.event_name == 'push' && (github.ref == 'refs/heads/master' ||
       github.ref == 'refs/heads/develop' ||

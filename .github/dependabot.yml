@@ -1,86 +1,86 @@
 version: 2
 updates:
   # Check for updates to GitHub Actions
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '07:00'
-      timezone: 'Europe/Amsterdam'
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     open-pull-requests-limit: 2
     labels:
-      - 'dependencies'
-      - 'dependencies/github-actions'
+      - "dependencies"
+      - "dependencies/github-actions"
     commit-message:
-      prefix: 'ci'
-      include: 'scope'
+      prefix: "ci"
+      include: "scope"
 
   # Check for updates to Docker
-  - package-ecosystem: 'docker'
-    directory: '/'
+  - package-ecosystem: "docker"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '07:00'
-      timezone: 'Europe/Amsterdam'
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     open-pull-requests-limit: 2
     labels:
-      - 'dependencies'
-      - 'dependencies/docker'
+      - "dependencies"
+      - "dependencies/docker"
     commit-message:
-      prefix: 'docker'
-      include: 'scope'
+      prefix: "docker"
+      include: "scope"
     groups:
       docker:
         patterns:
-          - '*'
+          - "*"
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"
 
   # Check for updates to Docker Compose
-  - package-ecosystem: 'docker-compose'
-    directory: '/'
+  - package-ecosystem: "docker-compose"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '07:00'
-      timezone: 'Europe/Amsterdam'
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     open-pull-requests-limit: 2
     labels:
-      - 'dependencies'
-      - 'dependencies/docker-compose'
+      - "dependencies"
+      - "dependencies/docker-compose"
     commit-message:
-      prefix: 'docker'
-      include: 'scope'
+      prefix: "docker"
+      include: "scope"
     groups:
       docker:
         patterns:
-          - '*'
+          - "*"
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"
 
   # Check for updates to Go modules
-  - package-ecosystem: 'gomod'
-    directory: '/'
+  - package-ecosystem: "gomod"
+    directory: "/"
     schedule:
-      interval: 'weekly'
-      day: 'monday'
-      time: '07:00'
-      timezone: 'Europe/Amsterdam'
+      interval: "weekly"
+      day: "monday"
+      time: "07:00"
+      timezone: "Europe/Amsterdam"
     open-pull-requests-limit: 2
     labels:
-      - 'dependencies'
-      - 'dependencies/go'
+      - "dependencies"
+      - "dependencies/go"
     commit-message:
-      prefix: 'deps'
-      include: 'scope'
+      prefix: "deps"
+      include: "scope"
     groups:
       go-modules:
         patterns:
-          - '*'
+          - "*"
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"

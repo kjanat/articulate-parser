@@ -2,6 +2,11 @@
 
 A Go CLI tool that parses Articulate Rise courses from URLs or local JSON files and exports them to Markdown, HTML, or DOCX formats.
 
+## Repository Info
+
+- **GitHub**: https://github.com/kjanat/articulate-parser
+- **Default branch**: `master` (not `main`)
+
 ## Build/Test Commands
 
 ### Primary Commands (using Taskfile)

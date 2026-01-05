@@ -20,36 +20,36 @@ A Go-based parser that converts Articulate Rise e-learning content to various fo
 flowchart TD
     %% User Input
     CLI[Command Line Interface<br/>main.go] --> APP{App Service<br/>services/app.go}
-    
+
     %% Core Application Logic
     APP --> |"ProcessCourseFromURI"| PARSER[Course Parser<br/>services/parser.go]
     APP --> |"ProcessCourseFromFile"| PARSER
     APP --> |"exportCourse"| FACTORY[Exporter Factory<br/>exporters/factory.go]
-    
+
     %% Data Sources
     PARSER --> |"FetchCourse"| API[Articulate Rise API<br/>rise.articulate.com]
     PARSER --> |"LoadCourseFromFile"| FILE[Local JSON File<br/>*.json]
-    
+
     %% Data Models
     API --> MODELS[Data Models<br/>models/course.go]
     FILE --> MODELS
     MODELS --> |Course, Lesson, Item| APP
-    
+
     %% Export Factory Pattern
     FACTORY --> |"CreateExporter"| MARKDOWN[Markdown Exporter<br/>exporters/markdown.go]
     FACTORY --> |"CreateExporter"| HTML[HTML Exporter<br/>exporters/html.go]
     FACTORY --> |"CreateExporter"| DOCX[DOCX Exporter<br/>exporters/docx.go]
-    
+
     %% HTML Cleaning Service
     CLEANER[HTML Cleaner<br/>services/html_cleaner.go] --> MARKDOWN
     CLEANER --> HTML
     CLEANER --> DOCX
-    
+
     %% Output Files
     MARKDOWN --> |"Export"| MD_OUT[Markdown Files<br/>*.md]
     HTML --> |"Export"| HTML_OUT[HTML Files<br/>*.html]
     DOCX --> |"Export"| DOCX_OUT[Word Documents<br/>*.docx]
-    
+
     %% Interfaces (Contracts)
     IPARSER[CourseParser Interface<br/>interfaces/parser.go] -.-> PARSER
     IEXPORTER[Exporter Interface<br/>interfaces/exporter.go] -.-> MARKDOWN
@@ -64,7 +64,7 @@ flowchart TD
     classDef output fill:#fce7f3,stroke:#be185d,stroke-width:2px,color:#be185d
     classDef interface fill:#ecfdf5,stroke:#16a34a,stroke-width:1px,stroke-dasharray: 5 5,color:#16a34a
     classDef service fill:#cffafe,stroke:#0891b2,stroke-width:2px,color:#0891b2
-    
+
     class CLI userInput
     class APP,FACTORY coreLogic
     class API,FILE,MODELS dataSource
@@ -78,32 +78,32 @@ flowchart TD
 
 The system follows **Clean Architecture** principles with clear separation of concerns:
 
--   **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
--   **🏗️ Application Layer**: Core business logic with dependency injection
--   **📋 Interface Layer**: Contracts defining behavior without implementation details  
--   **🔧 Service Layer**: Concrete implementations of parsing and utility services
--   **📤 Export Layer**: Factory pattern for format-specific exporters
--   **📊 Data Layer**: Domain models representing course structure
+- **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
+- **🏗️ Application Layer**: Core business logic with dependency injection
+- **📋 Interface Layer**: Contracts defining behavior without implementation details
+- **🔧 Service Layer**: Concrete implementations of parsing and utility services
+- **📤 Export Layer**: Factory pattern for format-specific exporters
+- **📊 Data Layer**: Domain models representing course structure
 
 ## Features
 
--   Parse Articulate Rise JSON data from URLs or local files
--   Export to Markdown (.md) format
--   Export to HTML (.html) format with professional styling
--   Export to Word Document (.docx) format
--   Support for various content types:
-    -   Text content with headings and paragraphs
-    -   Lists and bullet points
-    -   Multimedia content (videos and images)
-    -   Knowledge checks and quizzes
-    -   Interactive content (flashcards)
-    -   Course structure and metadata
+- Parse Articulate Rise JSON data from URLs or local files
+- Export to Markdown (.md) format
+- Export to HTML (.html) format with professional styling
+- Export to Word Document (.docx) format
+- Support for various content types:
+  - Text content with headings and paragraphs
+  - Lists and bullet points
+  - Multimedia content (videos and images)
+  - Knowledge checks and quizzes
+  - Interactive content (flashcards)
+  - Course structure and metadata
 
 ## Installation
 
 ### Prerequisites
 
--   Go, I don't know the version, but I have [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?label=)][gomod] configured right now, and it works, see the [CI][Build] workflow where it is tested.
+- Go, I don't know the version, but I have [![Go version](https://img.shields.io/github/go-mod/go-version/kjanat/articulate-parser?label=)][gomod] configured right now, and it works, see the [CI][Build] workflow where it is tested.
 
 ### Install from source
 
@@ -124,7 +124,7 @@ go install github.com/kjanat/articulate-parser@latest
 
 The parser uses the following external library:
 
--   `github.com/fumiama/go-docx` - For creating Word documents (MIT license)
+- `github.com/fumiama/go-docx` - For creating Word documents (MIT license)
 
 ## Testing
 
@@ -164,25 +164,25 @@ go run main.go <input_uri_or_file> <output_format> [output_path]
 
 #### Examples
 
-1.  **Parse from URL and export to Markdown:**
+1. **Parse from URL and export to Markdown:**
 
 ```bash
 go run main.go "https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/" md
 ```
 
-2.  **Parse from local file and export to Word:**
+2. **Parse from local file and export to Word:**
 
 ```bash
 go run main.go "articulate-sample.json" docx "my-course.docx"
 ```
 
-3.  **Parse from local file and export to HTML:**
+3. **Parse from local file and export to HTML:**
 
 ```bash
 go run main.go "articulate-sample.json" html "output.html"
 ```
 
-4.  **Parse from local file and export to Markdown:**
+4. **Parse from local file and export to Markdown:**
 
 ```bash
 go run main.go "articulate-sample.json" md "output.md"
@@ -225,14 +225,14 @@ docker run --rm ghcr.io/kjanat/articulate-parser:latest --help
 
 ### Available Tags
 
-| Tag | Description | Use Case |
-|-----|-------------|----------|
-| `latest` | Latest stable release from master branch | Production use |
-| `edge` | Latest development build from master branch | Testing new features |
-| `v1.x.x` | Specific version releases | Production pinning |
-| `develop` | Development branch builds | Development/testing |
-| `feature/docker-ghcr` | Feature branch builds | Feature testing |
-| `master` | Latest master branch build | Continuous integration |
+| Tag                   | Description                                 | Use Case               |
+| --------------------- | ------------------------------------------- | ---------------------- |
+| `latest`              | Latest stable release from master branch    | Production use         |
+| `edge`                | Latest development build from master branch | Testing new features   |
+| `v1.x.x`              | Specific version releases                   | Production pinning     |
+| `develop`             | Development branch builds                   | Development/testing    |
+| `feature/docker-ghcr` | Feature branch builds                       | Feature testing        |
+| `master`              | Latest master branch build                  | Continuous integration |
 
 ### Usage Examples
 
@@ -313,11 +313,11 @@ docker build --build-arg VERSION=local --build-arg BUILD_TIME=$(date -u +%Y-%m-%
 
 The Docker image supports the following build-time arguments:
 
-| Argument | Description | Default |
-|----------|-------------|---------|
-| `VERSION` | Version string embedded in the binary | `dev` |
-| `BUILD_TIME` | Build timestamp | Current time |
-| `GIT_COMMIT` | Git commit hash | Current commit |
+| Argument     | Description                           | Default        |
+| ------------ | ------------------------------------- | -------------- |
+| `VERSION`    | Version string embedded in the binary | `dev`          |
+| `BUILD_TIME` | Build timestamp                       | Current time   |
+| `GIT_COMMIT` | Git commit hash                       | Current commit |
 
 ### Docker Security
 
@@ -332,88 +332,88 @@ The Docker image supports the following build-time arguments:
 
 The project maintains high code quality standards:
 
--   Cyclomatic complexity ≤ 15 (checked with [gocyclo](https://github.com/fzipp/gocyclo))
--   Race condition detection enabled
--   Comprehensive test coverage
--   Code formatting with `gofmt`
--   Static analysis with `go vet`
+- Cyclomatic complexity ≤ 15 (checked with [gocyclo](https://github.com/fzipp/gocyclo))
+- Race condition detection enabled
+- Comprehensive test coverage
+- Code formatting with `gofmt`
+- Static analysis with `go vet`
 
 ### Contributing
 
-1.  Fork the repository
-2.  Create a feature branch
-3.  Make your changes
-4.  Run tests: `go test ./...`
-5.  Submit a pull request
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests: `go test ./...`
+5. Submit a pull request
 
 ## Output Formats
 
 ### Markdown (`.md`)
 
--   Hierarchical structure with proper heading levels
--   Clean text content with HTML tags removed
--   Lists and bullet points preserved
--   Quiz questions with correct answers marked
--   Media references included
--   Course metadata at the top
+- Hierarchical structure with proper heading levels
+- Clean text content with HTML tags removed
+- Lists and bullet points preserved
+- Quiz questions with correct answers marked
+- Media references included
+- Course metadata at the top
 
 ### HTML (`.html`)
 
--   Professional styling with embedded CSS
--   Interactive and visually appealing layout
--   Proper HTML structure with semantic elements
--   Responsive design for different screen sizes
--   All content types beautifully formatted
--   Maintains course hierarchy and organization
+- Professional styling with embedded CSS
+- Interactive and visually appealing layout
+- Proper HTML structure with semantic elements
+- Responsive design for different screen sizes
+- All content types beautifully formatted
+- Maintains course hierarchy and organization
 
 ### Word Document (`.docx`)
 
--   Professional document formatting
--   Bold headings and proper typography
--   Bulleted lists
--   Quiz questions with answers
--   Media content references
--   Maintains course structure
+- Professional document formatting
+- Bold headings and proper typography
+- Bulleted lists
+- Quiz questions with answers
+- Media content references
+- Maintains course structure
 
 ## Supported Content Types
 
 The parser handles the following Articulate Rise content types:
 
--   **Text blocks**: Headings and paragraphs
--   **Lists**: Bullet points and numbered lists
--   **Multimedia**: Videos and images (references only)
--   **Knowledge Checks**: Multiple choice, multiple response, fill-in-the-blank, matching
--   **Interactive Content**: Flashcards and interactive scenarios
--   **Dividers**: Section breaks
--   **Sections**: Course organization
+- **Text blocks**: Headings and paragraphs
+- **Lists**: Bullet points and numbered lists
+- **Multimedia**: Videos and images (references only)
+- **Knowledge Checks**: Multiple choice, multiple response, fill-in-the-blank, matching
+- **Interactive Content**: Flashcards and interactive scenarios
+- **Dividers**: Section breaks
+- **Sections**: Course organization
 
 ## Data Structure
 
 The parser works with the standard Articulate Rise JSON format which includes:
 
--   Course metadata (title, description, settings)
--   Lesson structure
--   Content items with various types
--   Media references
--   Quiz/assessment data
--   Styling and layout information
+- Course metadata (title, description, settings)
+- Lesson structure
+- Content items with various types
+- Media references
+- Quiz/assessment data
+- Styling and layout information
 
 ## URL Pattern Recognition
 
 The parser automatically extracts share IDs from Articulate Rise URLs:
 
--   Input: `https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/`
--   API URL: `https://rise.articulate.com/api/rise-runtime/boot/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO`
+- Input: `https://rise.articulate.com/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO#/`
+- API URL: `https://rise.articulate.com/api/rise-runtime/boot/share/N_APNg40Vr2CSH2xNz-ZLATM5kNviDIO`
 
 ## Error Handling
 
 The parser includes error handling for:
 
--   Invalid URLs or share IDs
--   Network connection issues
--   Malformed JSON data
--   File I/O errors
--   Unsupported content types
+- Invalid URLs or share IDs
+- Network connection issues
+- Malformed JSON data
+- File I/O errors
+- Unsupported content types
 
 <!-- ## Code coverage
 
@@ -425,28 +425,28 @@ The parser includes error handling for:
 
 ## Limitations
 
--   Media files (videos, images) are referenced but not downloaded
--   Complex interactive elements may be simplified in export
--   Styling and visual formatting is not preserved
--   Assessment logic and interactivity is lost in static exports
+- Media files (videos, images) are referenced but not downloaded
+- Complex interactive elements may be simplified in export
+- Styling and visual formatting is not preserved
+- Assessment logic and interactivity is lost in static exports
 
 ## Performance
 
--   Lightweight with minimal dependencies
--   Fast JSON parsing and export
--   Memory efficient processing
--   No external license requirements
+- Lightweight with minimal dependencies
+- Fast JSON parsing and export
+- Memory efficient processing
+- No external license requirements
 
 ## Future Enhancements
 
 Potential improvements could include:
 
--   [ ]  PDF export support
--   [ ]  Media file downloading
--   [x]  ~~HTML export with preserved styling~~
--   [ ]  SCORM package support
--   [ ]  Batch processing capabilities
--   [ ]  Custom template support
+- [ ] PDF export support
+- [ ] Media file downloading
+- [x] ~~HTML export with preserved styling~~
+- [ ] SCORM package support
+- [ ] Batch processing capabilities
+- [ ] Custom template support
 
 ## License
 
@@ -460,7 +460,9 @@ This is a utility tool for educational content conversion. Please ensure you hav
 [Go report]: https://goreportcard.com/report/github.com/kjanat/articulate-parser
 [gomod]: go.mod
 [Issues]: https://github.com/kjanat/articulate-parser/issues
+
 <!-- [Latest release]: https://github.com/kjanat/articulate-parser/releases/latest -->
+
 [MIT License]: LICENSE
 [Package documentation]: https://godoc.org/github.com/kjanat/articulate-parser
 [Tags]: https://github.com/kjanat/articulate-parser/tags

@@ -1,0 +1,75 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # File quality
+      - id: trailing-whitespace
+        exclude: '^\.github/ISSUE_TEMPLATE/.*\.yml$'
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
+      # File validation
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+
+      # Security
+      - id: detect-private-key
+
+      # Git safety
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: no-commit-to-branch
+        args: ["--branch=master", "--branch=main"]
+
+      # File structure
+      - id: check-added-large-files
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+  - repo: local
+    hooks:
+      - id: actionlint
+        name: Lint GitHub Actions workflow files
+        description: Runs actionlint to lint GitHub Actions workflow files
+        language: golang
+        types: ["yaml"]
+        files: ^\.github/workflows/
+        entry: actionlint
+        minimum_pre_commit_version: 3.0.0
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.7.2
+    hooks:
+      - id: golangci-lint
+        name: golangci-lint
+        description: Fast linters runner for Go. Note that only modified files are linted, so linters like 'unused' that need to scan all files won't work as expected.
+        entry: golangci-lint run --new-from-rev HEAD --fix
+        types: [go]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+      # - id: golangci-lint-full
+      #   name: golangci-lint-full
+      #   description: Fast linters runner for Go. Runs on all files in the module. Use this hook if you use pre-commit in CI.
+      #   entry: golangci-lint run --fix
+      #   types: [go]
+      #   language: golang
+      #   require_serial: true
+      #   pass_filenames: false
+      - id: golangci-lint-fmt
+        name: golangci-lint-fmt
+        description: Fast linters runner for Go. Formats all files in the repo.
+        entry: golangci-lint fmt
+        types: [go]
+        language: golang
+        require_serial: true
+        pass_filenames: false
+      - id: golangci-lint-config-verify
+        name: golangci-lint-config-verify
+        description: Verifies the configuration file
+        entry: golangci-lint config verify
+        files: '\.golangci\.(?:yml|yaml|toml|json)'
+        language: golang
+        pass_filenames: false

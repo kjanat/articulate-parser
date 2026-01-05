@@ -210,13 +210,13 @@ tasks:
         sh: gofmt -s -l .
     cmds:
       - |
-        {{if ne .UNFORMATTED ""}}
-        echo "❌ The following files need formatting:"
-        echo "{{.UNFORMATTED}}"
-        exit 1
-        {{else}}
-        echo "All files are properly formatted"
-        {{end}}
+          {{if ne .UNFORMATTED ""}}
+          echo "❌ The following files need formatting:"
+          echo "{{.UNFORMATTED}}"
+          exit 1
+          {{else}}
+          echo "All files are properly formatted"
+          {{end}}
 
   lint:staticcheck:
     desc: Run staticcheck (install if needed)
@@ -304,22 +304,22 @@ tasks:
     aliases: [db]
     cmds:
       - |
-        docker build \
-          --build-arg VERSION={{.VERSION}} \
-          --build-arg BUILD_TIME={{.BUILD_TIME}} \
-          --build-arg GIT_COMMIT={{.GIT_COMMIT}} \
-          -t {{.APP_NAME}}:{{.VERSION}} \
-          -t {{.APP_NAME}}:latest \
-          .
+          docker build \
+            --build-arg VERSION={{.VERSION}} \
+            --build-arg BUILD_TIME={{.BUILD_TIME}} \
+            --build-arg GIT_COMMIT={{.GIT_COMMIT}} \
+            -t {{.APP_NAME}}:{{.VERSION}} \
+            -t {{.APP_NAME}}:latest \
+            .
       - >
-        echo "Docker image built: {{.APP_NAME}}:{{.VERSION}}"
+          echo "Docker image built: {{.APP_NAME}}:{{.VERSION}}"
 
   docker:build:dev:
     desc: Build development Docker image
     cmds:
       - docker build -f Dockerfile.dev -t {{.APP_NAME}}:dev .
       - >
-        echo "Development Docker image built: {{.APP_NAME}}:dev"
+          echo "Development Docker image built: {{.APP_NAME}}:dev"
 
   docker:run:
     desc: Run Docker container
@@ -426,7 +426,7 @@ tasks:
       - git tag -a v{{.VERSION}} -m "Release v{{.VERSION}}"
       - echo "Tagged v{{.VERSION}}"
       - >
-        echo "Push with: git push origin v{{.VERSION}}"
+          echo "Push with: git push origin v{{.VERSION}}"
 
   # Documentation tasks
   docs:serve:
