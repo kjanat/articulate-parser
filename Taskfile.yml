@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 # Articulate Parser - Task Automation
 # https://taskfile.dev
-version: '3'
+version: "3"
 
 # Global output settings
 output: prefixed
@@ -47,11 +47,11 @@ vars:
 
 # Environment variables
 env:
-  CGO_ENABLED: '{{.CGO_ENABLED}}'
+  CGO_ENABLED: "{{.CGO_ENABLED}}"
   GO111MODULE: on
 
 # Load .env files if present
-dotenv: ['.env', '.env.local']
+dotenv: [".env", ".env.local"]
 
 # Task definitions
 tasks:
@@ -69,12 +69,12 @@ tasks:
     interactive: true
     watch: true
     sources:
-      - '**/*.go'
+      - "**/*.go"
       - go.mod
       - go.sum
     cmds:
       - task: build
-      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} --help'
+      - "{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} --help"
 
   # Build tasks
   build:
@@ -82,14 +82,14 @@ tasks:
     aliases: [b]
     deps: [clean-bin]
     sources:
-      - '**/*.go'
+      - "**/*.go"
       - go.mod
       - go.sum
     generates:
-      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}}'
+      - "{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}}"
     cmds:
       - task: mkdir
-        vars: { DIR: '{{.OUTPUT_DIR}}' }
+        vars: { DIR: "{{.OUTPUT_DIR}}" }
       - go build {{.GO_FLAGS}} -ldflags="{{.LDFLAGS}}" -o {{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} {{.MAIN_FILE}}
     method: checksum
 
@@ -99,25 +99,25 @@ tasks:
     deps: [clean-bin]
     cmds:
       - task: mkdir
-        vars: { DIR: '{{.OUTPUT_DIR}}' }
+        vars: { DIR: "{{.OUTPUT_DIR}}" }
       - for:
           matrix:
             GOOS: [linux, darwin, windows]
             GOARCH: [amd64, arm64]
         task: build:platform
         vars:
-          TARGET_GOOS: '{{.ITEM.GOOS}}'
-          TARGET_GOARCH: '{{.ITEM.GOARCH}}'
+          TARGET_GOOS: "{{.ITEM.GOOS}}"
+          TARGET_GOARCH: "{{.ITEM.GOARCH}}"
       - echo "Built binaries for all platforms in {{.OUTPUT_DIR}}/"
 
   build:platform:
     internal: true
     vars:
       TARGET_EXT: '{{if eq .TARGET_GOOS "windows"}}.exe{{end}}'
-      OUTPUT_FILE: '{{.OUTPUT_DIR}}/{{.APP_NAME}}-{{.TARGET_GOOS}}-{{.TARGET_GOARCH}}{{.TARGET_EXT}}'
+      OUTPUT_FILE: "{{.OUTPUT_DIR}}/{{.APP_NAME}}-{{.TARGET_GOOS}}-{{.TARGET_GOARCH}}{{.TARGET_EXT}}"
     env:
-      GOOS: '{{.TARGET_GOOS}}'
-      GOARCH: '{{.TARGET_GOARCH}}'
+      GOOS: "{{.TARGET_GOOS}}"
+      GOARCH: "{{.TARGET_GOARCH}}"
     cmds:
       - echo "Building {{.OUTPUT_FILE}}..."
       - go build {{.GO_FLAGS}} -ldflags="{{.LDFLAGS}}" -o "{{.OUTPUT_FILE}}" {{.MAIN_FILE}}
@@ -134,6 +134,8 @@ tasks:
   test:
     desc: Run all tests
     aliases: [t]
+    env:
+      CGO_ENABLED: 1
     cmds:
       - go test {{.GO_FLAGS}} -race -timeout {{.TEST_TIMEOUT}} ./...
 
@@ -141,9 +143,11 @@ tasks:
     desc: Run tests with coverage report
     aliases: [cover, cov]
     deps: [clean-coverage]
+    env:
+      CGO_ENABLED: 1
     cmds:
       - task: mkdir
-        vars: { DIR: '{{.COVERAGE_DIR}}' }
+        vars: { DIR: "{{.COVERAGE_DIR}}" }
       - go test {{.GO_FLAGS}} -race -coverprofile={{.COVERAGE_DIR}}/coverage.out -covermode=atomic -timeout {{.TEST_TIMEOUT}} ./...
       - go tool cover -html={{.COVERAGE_DIR}}/coverage.out -o {{.COVERAGE_DIR}}/coverage.html
       - go tool cover -func={{.COVERAGE_DIR}}/coverage.out
@@ -152,6 +156,8 @@ tasks:
   test:verbose:
     desc: Run tests with verbose output
     aliases: [tv]
+    env:
+      CGO_ENABLED: 1
     cmds:
       - go test -v -race -timeout {{.TEST_TIMEOUT}} ./...
 
@@ -160,7 +166,7 @@ tasks:
     aliases: [tw]
     watch: true
     sources:
-      - '**/*.go'
+      - "**/*.go"
     cmds:
       - task: test
 
@@ -172,6 +178,8 @@ tasks:
 
   test:integration:
     desc: Run integration tests
+    env:
+      CGO_ENABLED: 1
     status:
       - '{{if eq OS "windows"}}if not exist "main_test.go" exit 1{{else}}test ! -f "main_test.go"{{end}}'
     cmds:
@@ -352,14 +360,14 @@ tasks:
     internal: true
     cmds:
       - task: rmdir
-        vars: { DIR: '{{.OUTPUT_DIR}}' }
+        vars: { DIR: "{{.OUTPUT_DIR}}" }
 
   clean-coverage:
     desc: Remove coverage files
     internal: true
     cmds:
       - task: rmdir
-        vars: { DIR: '{{.COVERAGE_DIR}}' }
+        vars: { DIR: "{{.COVERAGE_DIR}}" }
 
   clean-cache:
     desc: Clean Go build and test cache
@@ -410,10 +418,10 @@ tasks:
     requires:
       vars: [VERSION]
     preconditions:
-      - sh: 'git diff --exit-code'
-        msg: 'Working directory is not clean'
-      - sh: 'git diff --cached --exit-code'
-        msg: 'Staging area is not clean'
+      - sh: "git diff --exit-code"
+        msg: "Working directory is not clean"
+      - sh: "git diff --cached --exit-code"
+        msg: "Staging area is not clean"
     cmds:
       - git tag -a v{{.VERSION}} -m "Release v{{.VERSION}}"
       - echo "Tagged v{{.VERSION}}"
@@ -498,11 +506,11 @@ tasks:
       - '{{if eq OS "windows"}}if not exist "articulate-sample.json" exit 1{{else}}test ! -f "articulate-sample.json"{{end}}'
     deps: [build]
     cmds:
-      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json md output-demo.md'
+      - "{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json md output-demo.md"
       - echo "Demo Markdown created{{:}} output-demo.md"
       - defer:
           task: rmfile
-          vars: { FILE: 'output-demo.md' }
+          vars: { FILE: "output-demo.md" }
 
   demo:html:
     desc: Demo - Convert sample to HTML
@@ -510,11 +518,11 @@ tasks:
       - '{{if eq OS "windows"}}if not exist "articulate-sample.json" exit 1{{else}}test ! -f "articulate-sample.json"{{end}}'
     deps: [build]
     cmds:
-      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json html output-demo.html'
+      - "{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json html output-demo.html"
       - echo "Demo HTML created{{:}} output-demo.html"
       - defer:
           task: rmfile
-          vars: { FILE: 'output-demo.html' }
+          vars: { FILE: "output-demo.html" }
 
   demo:docx:
     desc: Demo - Convert sample to DOCX
@@ -522,11 +530,11 @@ tasks:
       - '{{if eq OS "windows"}}if not exist "articulate-sample.json" exit 1{{else}}test ! -f "articulate-sample.json"{{end}}'
     deps: [build]
     cmds:
-      - '{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json docx output-demo.docx'
+      - "{{.OUTPUT_DIR}}/{{.APP_NAME}}{{.EXE_EXT}} articulate-sample.json docx output-demo.docx"
       - echo "Demo DOCX created{{:}} output-demo.docx"
       - defer:
           task: rmfile
-          vars: { FILE: 'output-demo.docx' }
+          vars: { FILE: "output-demo.docx" }
 
   # Performance profiling
   profile:cpu:
@@ -536,7 +544,7 @@ tasks:
       - go tool pprof -http=:8080 cpu.prof
       - defer:
           task: rmfile
-          vars: { FILE: 'cpu.prof' }
+          vars: { FILE: "cpu.prof" }
 
   profile:mem:
     desc: Run memory profiling
@@ -545,14 +553,14 @@ tasks:
       - go tool pprof -http=:8080 mem.prof
       - defer:
           task: rmfile
-          vars: { FILE: 'mem.prof' }
+          vars: { FILE: "mem.prof" }
 
   # Git hooks
   hooks:install:
     desc: Install git hooks
     cmds:
       - task: mkdir
-        vars: { DIR: '.git/hooks' }
+        vars: { DIR: ".git/hooks" }
       - '{{if eq OS "windows"}}echo "#!/bin/sh" > .git/hooks/pre-commit && echo "task lint:fmt" >> .git/hooks/pre-commit{{else}}cat > .git/hooks/pre-commit << ''EOF''{{printf "\n"}}#!/bin/sh{{printf "\n"}}task lint:fmt{{printf "\n"}}EOF{{printf "\n"}}chmod +x .git/hooks/pre-commit{{end}}'
       - echo "Git hooks installed"
 
