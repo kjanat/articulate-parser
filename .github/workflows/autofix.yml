@@ -2,7 +2,7 @@ name: autofix.ci
 on:
   pull_request:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
 permissions:
   contents: read
 
@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install Task
         uses: go-task/setup-task@v1
 
       - uses: actions/setup-go@v6
-        with: { go-version-file: 'go.mod' }
+        with: { go-version-file: "go.mod" }
 
       - name: Setup go deps
         run: |
@@ -34,7 +34,7 @@ jobs:
         run: golangci-lint run --fix
 
       - name: Run golangci-lint format
-        run: golangci-lint format
+        run: golangci-lint fmt
 
       - name: Run go mod tidy
         run: go mod tidy
