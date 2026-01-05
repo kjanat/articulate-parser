@@ -16,6 +16,13 @@ import (
 	"github.com/kjanat/articulate-parser/internal/services"
 )
 
+// Font sizes for DOCX document headings (in half-points, so "32" = 16pt).
+const (
+	docxTitleSize  = "32" // Course title (16pt)
+	docxLessonSize = "28" // Lesson heading (14pt)
+	docxItemSize   = "24" // Item heading (12pt)
+)
+
 // DocxExporter implements the Exporter interface for DOCX format.
 // It converts Articulate Rise course data into a Microsoft Word document
 // using the go-docx package.
@@ -53,7 +60,7 @@ func (e *DocxExporter) Export(course *models.Course, outputPath string) error {
 
 	// Add title
 	titlePara := doc.AddParagraph()
-	titlePara.AddText(course.Course.Title).Size("32").Bold()
+	titlePara.AddText(course.Course.Title).Size(docxTitleSize).Bold()
 
 	// Add description if available
 	if course.Course.Description != "" {
@@ -106,7 +113,7 @@ func (e *DocxExporter) Export(course *models.Course, outputPath string) error {
 func (e *DocxExporter) exportLesson(doc *docx.Docx, lesson *models.Lesson) {
 	// Add lesson title
 	lessonPara := doc.AddParagraph()
-	lessonPara.AddText(fmt.Sprintf("Lesson: %s", lesson.Title)).Size("28").Bold()
+	lessonPara.AddText(fmt.Sprintf("Lesson: %s", lesson.Title)).Size(docxLessonSize).Bold()
 
 	// Add lesson description if available
 	if lesson.Description != "" {
@@ -132,7 +139,7 @@ func (e *DocxExporter) exportItem(doc *docx.Docx, item *models.Item) {
 	if item.Type != "" {
 		itemPara := doc.AddParagraph()
 		caser := cases.Title(language.English)
-		itemPara.AddText(caser.String(item.Type)).Size("24").Bold()
+		itemPara.AddText(caser.String(item.Type)).Size(docxItemSize).Bold()
 	}
 
 	// Add sub-items

@@ -92,7 +92,7 @@ func run(args []string) int {
 // Returns:
 //   - true if the string appears to be a URI, false otherwise
 func isURI(str string) bool {
-	return len(str) > 7 && (str[:7] == "http://" || str[:8] == "https://")
+	return strings.HasPrefix(str, "http://") || strings.HasPrefix(str, "https://")
 }
 
 // printUsage prints the command-line usage information.

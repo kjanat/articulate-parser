@@ -15,6 +15,9 @@ import (
 	"github.com/kjanat/articulate-parser/internal/models"
 )
 
+// shareIDRegex is compiled once at package init for extracting share IDs from URIs.
+var shareIDRegex = regexp.MustCompile(`/share/([a-zA-Z0-9_-]+)`)
+
 // ArticulateParser implements the CourseParser interface specifically for Articulate Rise courses.
 // It can fetch courses from the Articulate Rise API or load them from local JSON files.
 type ArticulateParser struct {
@@ -78,13 +81,13 @@ func (p *ArticulateParser) FetchCourse(ctx context.Context, uri string) (*models
 		}
 	}()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned status %d", resp.StatusCode)
-	}
-
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API returned status %d: %s", resp.StatusCode, string(body))
 	}
 
 	var course models.Course
@@ -133,8 +136,7 @@ func (p *ArticulateParser) extractShareID(uri string) (string, error) {
 		return "", fmt.Errorf("invalid domain for Articulate Rise URI: %s", parsedURL.Host)
 	}
 
-	re := regexp.MustCompile(`/share/([a-zA-Z0-9_-]+)`)
-	matches := re.FindStringSubmatch(uri)
+	matches := shareIDRegex.FindStringSubmatch(uri)
 	if len(matches) < 2 {
 		return "", fmt.Errorf("could not extract share ID from URI: %s", uri)
 	}

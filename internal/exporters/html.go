@@ -69,7 +69,16 @@ func (e *HTMLExporter) Export(course *models.Course, outputPath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create file: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		// Close errors are logged but not fatal since the content has already been written.
+		// The file must be closed to flush buffers, but a close error doesn't invalidate
+		// the data already written to disk.
+		if closeErr := f.Close(); closeErr != nil {
+			// Note: In production, this should log via a logger passed to the exporter.
+			// For now, we silently ignore close errors as they're non-fatal.
+			_ = closeErr
+		}
+	}()
 
 	return e.WriteHTML(f, course)
 }

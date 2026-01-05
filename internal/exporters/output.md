@@ -4,8 +4,9 @@ Course description
 
 ## Course Information
 
-- **Course ID**:
+- **Course ID**: 
 - **Share ID**: example-id
-- **Navigation Mode**:
+- **Navigation Mode**: 
 
 ---
+

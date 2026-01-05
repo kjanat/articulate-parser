@@ -96,7 +96,10 @@ func (e *MarkdownExporter) SupportedFormat() string {
 func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.Item, level int) {
 	headingPrefix := strings.Repeat("#", level)
 
-	switch item.Type {
+	// Normalize item type to lowercase for consistent matching
+	itemType := strings.ToLower(item.Type)
+
+	switch itemType {
 	case "text":
 		e.processTextItem(buf, item, headingPrefix)
 	case "list":
@@ -105,7 +108,7 @@ func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.
 		e.processMultimediaItem(buf, item, headingPrefix)
 	case "image":
 		e.processImageItem(buf, item, headingPrefix)
-	case "knowledgeCheck":
+	case "knowledgecheck":
 		e.processKnowledgeCheckItem(buf, item, headingPrefix)
 	case "interactive":
 		e.processInteractiveItem(buf, item, headingPrefix)
