@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/kjanat/articulate-parser/internal/interfaces"
-	"github.com/kjanat/articulate-parser/internal/services"
 )
 
 // Format constants for supported export formats.
@@ -24,7 +23,7 @@ const (
 // It creates appropriate exporter instances based on the requested format.
 type Factory struct {
 	// htmlCleaner is used by exporters to convert HTML content to plain text
-	htmlCleaner *services.HTMLCleaner
+	htmlCleaner interfaces.HTMLCleaner
 	// logger is used by exporters for logging
 	logger interfaces.Logger
 }
@@ -39,7 +38,7 @@ type Factory struct {
 //
 // Returns:
 //   - An implementation of the ExporterFactory interface
-func NewFactory(htmlCleaner *services.HTMLCleaner, logger interfaces.Logger) interfaces.ExporterFactory {
+func NewFactory(htmlCleaner interfaces.HTMLCleaner, logger interfaces.Logger) interfaces.ExporterFactory {
 	return &Factory{
 		htmlCleaner: htmlCleaner,
 		logger:      logger,

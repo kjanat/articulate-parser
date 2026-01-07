@@ -9,7 +9,6 @@ import (
 
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
-	"github.com/kjanat/articulate-parser/internal/services"
 )
 
 //go:embed html_styles.css
@@ -22,7 +21,7 @@ var htmlTemplate string
 // It converts Articulate Rise course data into a structured HTML document using templates.
 type HTMLExporter struct {
 	// htmlCleaner is used to convert HTML content to plain text when needed
-	htmlCleaner *services.HTMLCleaner
+	htmlCleaner interfaces.HTMLCleaner
 	// tmpl holds the parsed HTML template
 	tmpl *template.Template
 	// logger is used for logging warnings and errors
@@ -39,7 +38,7 @@ type HTMLExporter struct {
 //
 // Returns:
 //   - An implementation of the Exporter interface for HTML format
-func NewHTMLExporter(htmlCleaner *services.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
+func NewHTMLExporter(htmlCleaner interfaces.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
 	// Parse the template with custom functions
 	funcMap := template.FuncMap{
 		"safeHTML": func(s string) template.HTML {

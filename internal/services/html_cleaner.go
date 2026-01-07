@@ -7,12 +7,18 @@ import (
 	"strings"
 
 	"golang.org/x/net/html"
+
+	"github.com/kjanat/articulate-parser/internal/interfaces"
 )
 
 // HTMLCleaner provides utilities for converting HTML content to plain text.
 // It removes HTML tags while preserving their content and converts HTML entities
 // to their plain text equivalents using proper HTML parsing instead of regex.
+// Implements interfaces.HTMLCleaner.
 type HTMLCleaner struct{}
+
+// Compile-time check that HTMLCleaner implements interfaces.HTMLCleaner.
+var _ interfaces.HTMLCleaner = (*HTMLCleaner)(nil)
 
 // NewHTMLCleaner creates a new HTML cleaner instance.
 // This service is typically injected into exporters that need to handle
@@ -44,6 +50,13 @@ func (h *HTMLCleaner) CleanHTML(htmlStr string) string {
 	// Normalize whitespace: replace multiple spaces, tabs, and newlines with a single space
 	cleaned := strings.Join(strings.Fields(unescaped), " ")
 	return strings.TrimSpace(cleaned)
+}
+
+// CleanAndTrim removes HTML tags, decodes entities, and trims whitespace.
+// Convenience method that combines CleanHTML with strings.TrimSpace.
+// Returns empty string if input is empty or contains only whitespace/tags.
+func (h *HTMLCleaner) CleanAndTrim(htmlStr string) string {
+	return strings.TrimSpace(h.CleanHTML(htmlStr))
 }
 
 // extractText recursively traverses the HTML node tree and extracts text content.

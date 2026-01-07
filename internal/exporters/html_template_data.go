@@ -6,23 +6,9 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
+	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
-	"github.com/kjanat/articulate-parser/internal/services"
 )
-
-// Item type constants.
-const (
-	itemTypeText           = "text"
-	itemTypeList           = "list"
-	itemTypeKnowledgeCheck = "knowledgecheck"
-	itemTypeMultimedia     = "multimedia"
-	itemTypeImage          = "image"
-	itemTypeInteractive    = "interactive"
-	itemTypeDivider        = "divider"
-)
-
-// lessonTypeSection identifies a lesson that acts as a section header.
-const lessonTypeSection = "section"
 
 // templateData represents the data structure passed to the HTML template.
 type templateData struct {
@@ -61,7 +47,7 @@ type templateSubItem struct {
 }
 
 // prepareTemplateData converts a Course model into template-friendly data.
-func prepareTemplateData(course *models.Course, htmlCleaner *services.HTMLCleaner) *templateData {
+func prepareTemplateData(course *models.Course, htmlCleaner interfaces.HTMLCleaner) *templateData {
 	data := &templateData{
 		Course:   course.Course,
 		ShareID:  course.ShareID,
@@ -77,7 +63,7 @@ func prepareTemplateData(course *models.Course, htmlCleaner *services.HTMLCleane
 			Description: lesson.Description,
 		}
 
-		if lesson.Type != lessonTypeSection {
+		if lesson.Type != models.LessonTypeSection {
 			lessonCounter++
 			section.Number = lessonCounter
 			section.Items = prepareItems(lesson.Items, htmlCleaner)
@@ -90,7 +76,7 @@ func prepareTemplateData(course *models.Course, htmlCleaner *services.HTMLCleane
 }
 
 // prepareItems converts model Items to template Items.
-func prepareItems(items []models.Item, htmlCleaner *services.HTMLCleaner) []templateItem {
+func prepareItems(items []models.Item, htmlCleaner interfaces.HTMLCleaner) []templateItem {
 	result := make([]templateItem, 0, len(items))
 
 	for _, item := range items {
@@ -100,9 +86,9 @@ func prepareItems(items []models.Item, htmlCleaner *services.HTMLCleaner) []temp
 		}
 
 		// Set type title for unknown items
-		if tItem.Type != itemTypeText && tItem.Type != itemTypeList && tItem.Type != itemTypeKnowledgeCheck &&
-			tItem.Type != itemTypeMultimedia && tItem.Type != itemTypeImage && tItem.Type != itemTypeInteractive &&
-			tItem.Type != itemTypeDivider {
+		if tItem.Type != models.ItemTypeText && tItem.Type != models.ItemTypeList && tItem.Type != models.ItemTypeKnowledgeCheck &&
+			tItem.Type != models.ItemTypeMultimedia && tItem.Type != models.ItemTypeImage && tItem.Type != models.ItemTypeInteractive &&
+			tItem.Type != models.ItemTypeDivider {
 			caser := cases.Title(language.English)
 			tItem.TypeTitle = caser.String(item.Type)
 		}
@@ -120,7 +106,7 @@ func prepareItems(items []models.Item, htmlCleaner *services.HTMLCleaner) []temp
 			}
 
 			// Clean HTML for list items
-			if tItem.Type == itemTypeList && subItem.Paragraph != "" {
+			if tItem.Type == models.ItemTypeList && subItem.Paragraph != "" {
 				tSubItem.CleanText = htmlCleaner.CleanHTML(subItem.Paragraph)
 			}
 

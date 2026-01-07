@@ -11,14 +11,13 @@ import (
 
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
-	"github.com/kjanat/articulate-parser/internal/services"
 )
 
 // MarkdownExporter implements the Exporter interface for Markdown format.
 // It converts Articulate Rise course data into a structured Markdown document.
 type MarkdownExporter struct {
 	// htmlCleaner is used to convert HTML content to plain text
-	htmlCleaner *services.HTMLCleaner
+	htmlCleaner interfaces.HTMLCleaner
 	// logger is used for logging warnings and errors
 	logger interfaces.Logger
 }
@@ -32,7 +31,7 @@ type MarkdownExporter struct {
 //
 // Returns:
 //   - An implementation of the Exporter interface for Markdown format
-func NewMarkdownExporter(htmlCleaner *services.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
+func NewMarkdownExporter(htmlCleaner interfaces.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
 	return &MarkdownExporter{
 		htmlCleaner: htmlCleaner,
 		logger:      logger,
@@ -47,8 +46,7 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	fmt.Fprintf(&buf, "# %s\n\n", strings.TrimSpace(course.Course.Title))
 
 	if course.Course.Description != "" {
-		desc := strings.TrimSpace(e.htmlCleaner.CleanHTML(course.Course.Description))
-		if desc != "" {
+		if desc := e.htmlCleaner.CleanAndTrim(course.Course.Description); desc != "" {
 			fmt.Fprintf(&buf, "%s\n\n", desc)
 		}
 	}
@@ -66,7 +64,7 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	// Process lessons
 	lessonCounter := 0
 	for _, lesson := range course.Course.Lessons {
-		if lesson.Type == lessonTypeSection {
+		if lesson.Type == models.LessonTypeSection {
 			fmt.Fprintf(&buf, "# %s\n\n", strings.TrimSpace(lesson.Title))
 			continue
 		}
@@ -75,8 +73,7 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 		fmt.Fprintf(&buf, "## Lesson %d: %s\n\n", lessonCounter, strings.TrimSpace(lesson.Title))
 
 		if lesson.Description != "" {
-			desc := strings.TrimSpace(e.htmlCleaner.CleanHTML(lesson.Description))
-			if desc != "" {
+			if desc := e.htmlCleaner.CleanAndTrim(lesson.Description); desc != "" {
 				fmt.Fprintf(&buf, "%s\n\n", desc)
 			}
 		}
@@ -143,19 +140,19 @@ func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.
 	itemType := strings.ToLower(item.Type)
 
 	switch itemType {
-	case itemTypeText:
+	case models.ItemTypeText:
 		e.processTextItem(buf, item, headingPrefix)
-	case itemTypeList:
+	case models.ItemTypeList:
 		e.processListItem(buf, item)
-	case itemTypeMultimedia:
+	case models.ItemTypeMultimedia:
 		e.processMultimediaItem(buf, item, headingPrefix)
-	case itemTypeImage:
+	case models.ItemTypeImage:
 		e.processImageItem(buf, item, headingPrefix)
-	case itemTypeKnowledgeCheck:
+	case models.ItemTypeKnowledgeCheck:
 		e.processKnowledgeCheckItem(buf, item, headingPrefix)
-	case itemTypeInteractive:
+	case models.ItemTypeInteractive:
 		e.processInteractiveItem(buf, item, headingPrefix)
-	case itemTypeDivider:
+	case models.ItemTypeDivider:
 		e.processDividerItem(buf)
 	default:
 		e.processUnknownItem(buf, item, headingPrefix)
@@ -166,14 +163,12 @@ func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.
 func (e *MarkdownExporter) processTextItem(buf *bytes.Buffer, item models.Item, headingPrefix string) {
 	for _, subItem := range item.Items {
 		if subItem.Heading != "" {
-			heading := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Heading))
-			if heading != "" {
+			if heading := e.htmlCleaner.CleanAndTrim(subItem.Heading); heading != "" {
 				fmt.Fprintf(buf, "%s %s\n\n", headingPrefix, heading)
 			}
 		}
 		if subItem.Paragraph != "" {
-			paragraph := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Paragraph))
-			if paragraph != "" {
+			if paragraph := e.htmlCleaner.CleanAndTrim(subItem.Paragraph); paragraph != "" {
 				fmt.Fprintf(buf, "%s\n\n", paragraph)
 			}
 		}
@@ -184,8 +179,7 @@ func (e *MarkdownExporter) processTextItem(buf *bytes.Buffer, item models.Item, 
 func (e *MarkdownExporter) processListItem(buf *bytes.Buffer, item models.Item) {
 	for _, subItem := range item.Items {
 		if subItem.Paragraph != "" {
-			paragraph := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Paragraph))
-			if paragraph != "" {
+			if paragraph := e.htmlCleaner.CleanAndTrim(subItem.Paragraph); paragraph != "" {
 				fmt.Fprintf(buf, "- %s\n", paragraph)
 			}
 		}
@@ -209,8 +203,7 @@ func (e *MarkdownExporter) processMediaSubItem(buf *bytes.Buffer, subItem models
 		e.processImageMedia(buf, subItem.Media)
 	}
 	if subItem.Caption != "" {
-		caption := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Caption))
-		if caption != "" {
+		if caption := e.htmlCleaner.CleanAndTrim(subItem.Caption); caption != "" {
 			fmt.Fprintf(buf, "*%s*\n", caption)
 		}
 	}
@@ -241,8 +234,7 @@ func (e *MarkdownExporter) processImageItem(buf *bytes.Buffer, item models.Item,
 			fmt.Fprintf(buf, "**Image**: %s\n", subItem.Media.Image.OriginalURL)
 		}
 		if subItem.Caption != "" {
-			caption := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Caption))
-			if caption != "" {
+			if caption := e.htmlCleaner.CleanAndTrim(subItem.Caption); caption != "" {
 				fmt.Fprintf(buf, "*%s*\n", caption)
 			}
 		}
@@ -262,8 +254,7 @@ func (e *MarkdownExporter) processKnowledgeCheckItem(buf *bytes.Buffer, item mod
 // processQuestionSubItem processes individual question items.
 func (e *MarkdownExporter) processQuestionSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Title != "" {
-		title := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Title))
-		if title != "" {
+		if title := e.htmlCleaner.CleanAndTrim(subItem.Title); title != "" {
 			fmt.Fprintf(buf, "**Question**: %s\n\n", title)
 		}
 	}
@@ -271,8 +262,7 @@ func (e *MarkdownExporter) processQuestionSubItem(buf *bytes.Buffer, subItem mod
 	e.processAnswers(buf, subItem.Answers)
 
 	if subItem.Feedback != "" {
-		feedback := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Feedback))
-		if feedback != "" {
+		if feedback := e.htmlCleaner.CleanAndTrim(subItem.Feedback); feedback != "" {
 			fmt.Fprintf(buf, "\n**Feedback**: %s\n", feedback)
 		}
 	}
@@ -299,8 +289,7 @@ func (e *MarkdownExporter) processInteractiveItem(buf *bytes.Buffer, item models
 	fmt.Fprintf(buf, "%s Interactive Content\n\n", headingPrefix)
 	for _, subItem := range item.Items {
 		if subItem.Title != "" {
-			title := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Title))
-			if title != "" {
+			if title := e.htmlCleaner.CleanAndTrim(subItem.Title); title != "" {
 				fmt.Fprintf(buf, "**%s**\n\n", title)
 			}
 		}
@@ -326,14 +315,12 @@ func (e *MarkdownExporter) processUnknownItem(buf *bytes.Buffer, item models.Ite
 // processGenericSubItem processes sub-items for unknown types.
 func (e *MarkdownExporter) processGenericSubItem(buf *bytes.Buffer, subItem models.SubItem) {
 	if subItem.Title != "" {
-		title := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Title))
-		if title != "" {
+		if title := e.htmlCleaner.CleanAndTrim(subItem.Title); title != "" {
 			fmt.Fprintf(buf, "**%s**\n\n", title)
 		}
 	}
 	if subItem.Paragraph != "" {
-		paragraph := strings.TrimSpace(e.htmlCleaner.CleanHTML(subItem.Paragraph))
-		if paragraph != "" {
+		if paragraph := e.htmlCleaner.CleanAndTrim(subItem.Paragraph); paragraph != "" {
 			fmt.Fprintf(buf, "%s\n\n", paragraph)
 		}
 	}
