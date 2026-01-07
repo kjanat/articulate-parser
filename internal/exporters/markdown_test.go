@@ -124,7 +124,7 @@ func TestMarkdownExporter_Export_InvalidPath(t *testing.T) {
 // TestMarkdownExporter_ProcessTextItem tests the processTextItem method.
 func TestMarkdownExporter_ProcessTextItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -153,7 +153,7 @@ func TestMarkdownExporter_ProcessTextItem(t *testing.T) {
 // TestMarkdownExporter_ProcessListItem tests the processListItem method.
 func TestMarkdownExporter_ProcessListItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -178,7 +178,7 @@ func TestMarkdownExporter_ProcessListItem(t *testing.T) {
 // TestMarkdownExporter_ProcessMultimediaItem tests the processMultimediaItem method.
 func TestMarkdownExporter_ProcessMultimediaItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -217,7 +217,7 @@ func TestMarkdownExporter_ProcessMultimediaItem(t *testing.T) {
 // TestMarkdownExporter_ProcessImageItem tests the processImageItem method.
 func TestMarkdownExporter_ProcessImageItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -252,7 +252,7 @@ func TestMarkdownExporter_ProcessImageItem(t *testing.T) {
 // TestMarkdownExporter_ProcessKnowledgeCheckItem tests the processKnowledgeCheckItem method.
 func TestMarkdownExporter_ProcessKnowledgeCheckItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -294,7 +294,7 @@ func TestMarkdownExporter_ProcessKnowledgeCheckItem(t *testing.T) {
 // TestMarkdownExporter_ProcessInteractiveItem tests the processInteractiveItem method.
 func TestMarkdownExporter_ProcessInteractiveItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -319,7 +319,7 @@ func TestMarkdownExporter_ProcessInteractiveItem(t *testing.T) {
 // TestMarkdownExporter_ProcessDividerItem tests the processDividerItem method.
 func TestMarkdownExporter_ProcessDividerItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	exporter.processDividerItem(&buf)
@@ -335,7 +335,7 @@ func TestMarkdownExporter_ProcessDividerItem(t *testing.T) {
 // TestMarkdownExporter_ProcessUnknownItem tests the processUnknownItem method.
 func TestMarkdownExporter_ProcessUnknownItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	item := models.Item{
@@ -366,7 +366,7 @@ func TestMarkdownExporter_ProcessUnknownItem(t *testing.T) {
 // TestMarkdownExporter_ProcessVideoMedia tests the processVideoMedia method.
 func TestMarkdownExporter_ProcessVideoMedia(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	media := &models.Media{
@@ -391,7 +391,7 @@ func TestMarkdownExporter_ProcessVideoMedia(t *testing.T) {
 // TestMarkdownExporter_ProcessImageMedia tests the processImageMedia method.
 func TestMarkdownExporter_ProcessImageMedia(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	media := &models.Media{
@@ -413,7 +413,7 @@ func TestMarkdownExporter_ProcessImageMedia(t *testing.T) {
 // TestMarkdownExporter_ProcessAnswers tests the processAnswers method.
 func TestMarkdownExporter_ProcessAnswers(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	var buf bytes.Buffer
 	answers := []models.Answer{
@@ -443,7 +443,7 @@ func TestMarkdownExporter_ProcessAnswers(t *testing.T) {
 // TestMarkdownExporter_ProcessItemToMarkdown_AllTypes tests all item types.
 func TestMarkdownExporter_ProcessItemToMarkdown_AllTypes(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	tests := []struct {
 		name         string
@@ -673,7 +673,7 @@ func BenchmarkMarkdownExporter_Export(b *testing.B) {
 // BenchmarkMarkdownExporter_ProcessTextItem benchmarks the processTextItem method.
 func BenchmarkMarkdownExporter_ProcessTextItem(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := &MarkdownExporter{htmlCleaner: htmlCleaner}
+	exporter := &MarkdownExporter{baseExporter: baseExporter{htmlCleaner: htmlCleaner}}
 
 	item := models.Item{
 		Type: "text",

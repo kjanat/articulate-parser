@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/kjanat/articulate-parser/internal/apperrors"
 	"github.com/kjanat/articulate-parser/internal/config"
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
@@ -127,17 +128,17 @@ func (p *ArticulateParser) extractShareID(uri string) (string, error) {
 	// Parse the URL to validate the domain
 	parsedURL, err := url.Parse(uri)
 	if err != nil {
-		return "", fmt.Errorf("invalid URI: %s", uri)
+		return "", fmt.Errorf("%w: %s", apperrors.ErrInvalidURI, uri)
 	}
 
 	// Validate that it's an Articulate Rise domain
 	if parsedURL.Host != riseHost {
-		return "", fmt.Errorf("invalid domain for Articulate Rise URI: %s", parsedURL.Host)
+		return "", fmt.Errorf("%w: %s", apperrors.ErrInvalidDomain, parsedURL.Host)
 	}
 
 	matches := shareIDRegex.FindStringSubmatch(uri)
 	if len(matches) < 2 {
-		return "", fmt.Errorf("could not extract share ID from URI: %s", uri)
+		return "", fmt.Errorf("%w: %s", apperrors.ErrNoShareID, uri)
 	}
 	return matches[1], nil
 }

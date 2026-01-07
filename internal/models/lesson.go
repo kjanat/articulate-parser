@@ -15,7 +15,8 @@ type Lesson struct {
 	Icon string `json:"icon"`
 	// Items is an ordered array of content items within the lesson
 	Items []Item `json:"items"`
-	// Position stores the ordering information for the lesson
+	// Position stores the ordering information for the lesson.
+	// NOTE: Currently parsed but not used in export logic.
 	Position any `json:"position"`
 	// Ready indicates whether the lesson is marked as complete
 	Ready bool `json:"ready"`
@@ -38,9 +39,11 @@ type Item struct {
 	Variant string `json:"variant"`
 	// Items contains the actual content elements (sub-items) of this item
 	Items []SubItem `json:"items"`
-	// Settings contains configuration options specific to this item type
+	// Settings contains configuration options specific to this item type.
+	// NOTE: Currently parsed but not used in export logic.
 	Settings any `json:"settings"`
-	// Data contains additional structured data for the item
+	// Data contains additional structured data for the item.
+	// NOTE: Currently parsed but not used in export logic.
 	Data any `json:"data"`
 	// Media contains any associated media for the item
 	Media *Media `json:"media,omitempty"`

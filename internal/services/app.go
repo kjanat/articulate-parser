@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kjanat/articulate-parser/internal/apperrors"
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 )
@@ -37,7 +38,7 @@ func NewApp(parser interfaces.CourseParser, exporterFactory interfaces.ExporterF
 func (a *App) ProcessCourseFromFile(ctx context.Context, filePath, format, outputPath string) error {
 	// Check for cancellation before loading
 	if err := ctx.Err(); err != nil {
-		return fmt.Errorf("operation canceled: %w", err)
+		return fmt.Errorf("%w: %w", apperrors.ErrOperationCanceled, err)
 	}
 
 	course, err := a.parser.LoadCourseFromFile(filePath)
@@ -68,7 +69,7 @@ func (a *App) ProcessCourseFromURI(ctx context.Context, uri, format, outputPath 
 func (a *App) exportCourse(ctx context.Context, course *models.Course, format, outputPath string) error {
 	// Check for cancellation before export
 	if err := ctx.Err(); err != nil {
-		return fmt.Errorf("operation canceled: %w", err)
+		return fmt.Errorf("%w: %w", apperrors.ErrOperationCanceled, err)
 	}
 
 	exporter, err := a.exporterFactory.CreateExporter(format)

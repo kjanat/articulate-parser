@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kjanat/articulate-parser/internal/apperrors"
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 )
 
@@ -56,7 +57,7 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	case FormatHTML, formatAliasHTML:
 		return NewHTMLExporter(f.htmlCleaner, f.logger), nil
 	default:
-		return nil, fmt.Errorf("unsupported export format: %s", format)
+		return nil, fmt.Errorf("%w: %s", apperrors.ErrUnsupportedFormat, format)
 	}
 }
 

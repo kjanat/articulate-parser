@@ -26,10 +26,7 @@ const (
 // It converts Articulate Rise course data into a Microsoft Word document
 // using the go-docx package.
 type DocxExporter struct {
-	// htmlCleaner is used to convert HTML content to plain text
-	htmlCleaner interfaces.HTMLCleaner
-	// logger is used for logging warnings and errors
-	logger interfaces.Logger
+	baseExporter
 }
 
 // NewDocxExporter creates a new DocxExporter instance.
@@ -43,8 +40,7 @@ type DocxExporter struct {
 //   - An implementation of the Exporter interface for DOCX format
 func NewDocxExporter(htmlCleaner interfaces.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
 	return &DocxExporter{
-		htmlCleaner: htmlCleaner,
-		logger:      logger,
+		baseExporter: newBaseExporter(htmlCleaner, logger),
 	}
 }
 

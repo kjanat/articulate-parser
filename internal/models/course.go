@@ -47,6 +47,8 @@ type ExportSettings struct {
 
 // LabelSet contains customized labels used throughout the course.
 // This allows course creators to modify standard terminology.
+//
+// NOTE: Currently parsed but not used in export logic.
 type LabelSet struct {
 	// ID is the unique identifier for this label set
 	ID string `json:"id"`

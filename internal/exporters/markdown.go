@@ -16,10 +16,7 @@ import (
 // MarkdownExporter implements the Exporter interface for Markdown format.
 // It converts Articulate Rise course data into a structured Markdown document.
 type MarkdownExporter struct {
-	// htmlCleaner is used to convert HTML content to plain text
-	htmlCleaner interfaces.HTMLCleaner
-	// logger is used for logging warnings and errors
-	logger interfaces.Logger
+	baseExporter
 }
 
 // NewMarkdownExporter creates a new MarkdownExporter instance.
@@ -33,8 +30,7 @@ type MarkdownExporter struct {
 //   - An implementation of the Exporter interface for Markdown format
 func NewMarkdownExporter(htmlCleaner interfaces.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
 	return &MarkdownExporter{
-		htmlCleaner: htmlCleaner,
-		logger:      logger,
+		baseExporter: newBaseExporter(htmlCleaner, logger),
 	}
 }
 

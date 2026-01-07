@@ -20,12 +20,9 @@ var htmlTemplate string
 // HTMLExporter implements the Exporter interface for HTML format.
 // It converts Articulate Rise course data into a structured HTML document using templates.
 type HTMLExporter struct {
-	// htmlCleaner is used to convert HTML content to plain text when needed
-	htmlCleaner interfaces.HTMLCleaner
-	// tmpl holds the parsed HTML template
+	baseExporter
+	// tmpl holds the parsed HTML template.
 	tmpl *template.Template
-	// logger is used for logging warnings and errors
-	logger interfaces.Logger
 }
 
 // NewHTMLExporter creates a new HTMLExporter instance.
@@ -52,9 +49,8 @@ func NewHTMLExporter(htmlCleaner interfaces.HTMLCleaner, logger interfaces.Logge
 	tmpl := template.Must(template.New("html").Funcs(funcMap).Parse(htmlTemplate))
 
 	return &HTMLExporter{
-		htmlCleaner: htmlCleaner,
-		tmpl:        tmpl,
-		logger:      logger,
+		baseExporter: newBaseExporter(htmlCleaner, logger),
+		tmpl:         tmpl,
 	}
 }
 
