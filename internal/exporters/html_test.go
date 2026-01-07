@@ -13,7 +13,7 @@ import (
 // TestNewHTMLExporter tests the NewHTMLExporter constructor.
 func TestNewHTMLExporter(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	if exporter == nil {
 		t.Fatal("NewHTMLExporter() returned nil")
@@ -37,7 +37,7 @@ func TestNewHTMLExporter(t *testing.T) {
 // TestHTMLExporter_SupportedFormat tests the SupportedFormat method.
 func TestHTMLExporter_SupportedFormat(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	expected := "html"
 	result := exporter.SupportedFormat()
@@ -50,7 +50,7 @@ func TestHTMLExporter_SupportedFormat(t *testing.T) {
 // TestHTMLExporter_Export tests the Export method.
 func TestHTMLExporter_Export(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	// Create test course
 	testCourse := createTestCourseForHTML()
@@ -129,7 +129,7 @@ func TestHTMLExporter_Export(t *testing.T) {
 // TestHTMLExporter_Export_InvalidPath tests export with invalid output path.
 func TestHTMLExporter_Export_InvalidPath(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	testCourse := createTestCourseForHTML()
 
@@ -145,7 +145,7 @@ func TestHTMLExporter_Export_InvalidPath(t *testing.T) {
 // TestHTMLExporter_ComplexCourse tests export of a course with complex content.
 func TestHTMLExporter_ComplexCourse(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	// Create complex test course
 	course := &models.Course{
@@ -276,7 +276,7 @@ func TestHTMLExporter_ComplexCourse(t *testing.T) {
 // TestHTMLExporter_EmptyCourse tests export of an empty course.
 func TestHTMLExporter_EmptyCourse(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	// Create minimal course
 	course := &models.Course{
@@ -324,7 +324,7 @@ func TestHTMLExporter_EmptyCourse(t *testing.T) {
 // TestHTMLExporter_HTMLCleaning tests that HTML content is properly handled.
 func TestHTMLExporter_HTMLCleaning(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	// Create course with HTML content that needs cleaning in some places
 	course := &models.Course{
@@ -392,6 +392,227 @@ func TestHTMLExporter_HTMLCleaning(t *testing.T) {
 	}
 }
 
+// TestHTMLExporter_Export_ErrorPaths tests various error conditions for the HTML exporter.
+func TestHTMLExporter_Export_ErrorPaths(t *testing.T) {
+	htmlCleaner := services.NewHTMLCleaner()
+	exporter := NewHTMLExporter(htmlCleaner, nil)
+
+	tests := []struct {
+		name        string
+		course      *models.Course
+		outputPath  string
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name:        "non-existent directory",
+			course:      createTestCourseForHTML(),
+			outputPath:  "/nonexistent/deeply/nested/path/output.html",
+			wantErr:     true,
+			errContains: "failed to create file",
+		},
+		{
+			name:        "empty output path",
+			course:      createTestCourseForHTML(),
+			outputPath:  "",
+			wantErr:     true,
+			errContains: "failed to create file",
+		},
+		{
+			name:        "output path is directory",
+			course:      createTestCourseForHTML(),
+			outputPath:  t.TempDir(), // directory, not a file
+			wantErr:     true,
+			errContains: "failed to create file",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := exporter.Export(tt.course, tt.outputPath)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("Export() expected error containing %q, got nil", tt.errContains)
+					return
+				}
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
+					t.Errorf("Export() error = %v, want error containing %q", err, tt.errContains)
+				}
+			} else if err != nil {
+				t.Errorf("Export() unexpected error = %v", err)
+			}
+		})
+	}
+}
+
+// TestHTMLExporter_WriteHTML_ErrorPaths tests WriteHTML error conditions.
+func TestHTMLExporter_WriteHTML_ErrorPaths(t *testing.T) {
+	htmlCleaner := services.NewHTMLCleaner()
+	exporter := NewHTMLExporter(htmlCleaner, nil)
+	htmlExporter := exporter.(*HTMLExporter)
+
+	tests := []struct {
+		name        string
+		course      *models.Course
+		writer      *failingWriter
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name:        "writer fails immediately",
+			course:      createTestCourseForHTML(),
+			writer:      &failingWriter{failAfter: 0},
+			wantErr:     true,
+			errContains: "failed to execute template",
+		},
+		{
+			name:        "writer fails mid-write",
+			course:      createTestCourseForHTML(),
+			writer:      &failingWriter{failAfter: 100},
+			wantErr:     true,
+			errContains: "failed to execute template",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := htmlExporter.WriteHTML(tt.writer, tt.course)
+
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("WriteHTML() expected error containing %q, got nil", tt.errContains)
+					return
+				}
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
+					t.Errorf("WriteHTML() error = %v, want error containing %q", err, tt.errContains)
+				}
+			} else if err != nil {
+				t.Errorf("WriteHTML() unexpected error = %v", err)
+			}
+		})
+	}
+}
+
+// TestHTMLExporter_Export_NilCourse verifies that exporting a nil course panics.
+// This documents the current behavior - nil course is not a supported input.
+func TestHTMLExporter_Export_NilCourse(t *testing.T) {
+	htmlCleaner := services.NewHTMLCleaner()
+	exporter := NewHTMLExporter(htmlCleaner, nil)
+
+	tempDir := t.TempDir()
+	outputPath := filepath.Join(tempDir, "nil-course.html")
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Export(nil) expected panic, got none")
+		}
+	}()
+
+	// Export nil course - should panic
+	_ = exporter.Export(nil, outputPath)
+}
+
+// TestHTMLExporter_WriteHTML_NilCourse verifies that WriteHTML with nil course panics.
+func TestHTMLExporter_WriteHTML_NilCourse(t *testing.T) {
+	htmlCleaner := services.NewHTMLCleaner()
+	exporter := NewHTMLExporter(htmlCleaner, nil)
+	htmlExporter := exporter.(*HTMLExporter)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("WriteHTML(nil) expected panic, got none")
+		}
+	}()
+
+	var buf strings.Builder
+	_ = htmlExporter.WriteHTML(&buf, nil)
+}
+
+// TestHTMLExporter_WriteHTML_SuccessWithBuffer tests WriteHTML with a buffer.
+func TestHTMLExporter_WriteHTML_SuccessWithBuffer(t *testing.T) {
+	htmlCleaner := services.NewHTMLCleaner()
+	exporter := NewHTMLExporter(htmlCleaner, nil)
+	htmlExporter := exporter.(*HTMLExporter)
+
+	tests := []struct {
+		name     string
+		course   *models.Course
+		contains []string
+	}{
+		{
+			name:   "basic course",
+			course: createTestCourseForHTML(),
+			contains: []string{
+				"<!DOCTYPE html>",
+				"<html lang=\"en\">",
+				"Test Course",
+			},
+		},
+		{
+			name: "course with special characters",
+			course: &models.Course{
+				ShareID: "special-chars-id",
+				Course: models.CourseInfo{
+					ID:          "special-course",
+					Title:       "Course with <special> & \"characters\"",
+					Description: "<p>Description with &amp; entities</p>",
+					Lessons:     []models.Lesson{},
+				},
+			},
+			contains: []string{
+				"<!DOCTYPE html>",
+				"Course with",
+				"special",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var buf strings.Builder
+			err := htmlExporter.WriteHTML(&buf, tt.course)
+			if err != nil {
+				t.Fatalf("WriteHTML() unexpected error: %v", err)
+			}
+
+			output := buf.String()
+			for _, want := range tt.contains {
+				if !strings.Contains(output, want) {
+					t.Errorf("WriteHTML() output missing %q", want)
+				}
+			}
+		})
+	}
+}
+
+// failingWriter is a test helper that fails after writing a certain number of bytes.
+type failingWriter struct {
+	written   int
+	failAfter int
+}
+
+func (w *failingWriter) Write(p []byte) (n int, err error) {
+	if w.written >= w.failAfter {
+		return 0, errWriteFailed
+	}
+	w.written += len(p)
+	if w.written > w.failAfter {
+		return 0, errWriteFailed
+	}
+	return len(p), nil
+}
+
+var errWriteFailed = &writeError{msg: "simulated write failure"}
+
+type writeError struct {
+	msg string
+}
+
+func (e *writeError) Error() string {
+	return e.msg
+}
+
 // createTestCourseForHTML creates a test course for HTML export tests.
 func createTestCourseForHTML() *models.Course {
 	return &models.Course{
@@ -439,7 +660,7 @@ func createTestCourseForHTML() *models.Course {
 // BenchmarkHTMLExporter_Export benchmarks the Export method.
 func BenchmarkHTMLExporter_Export(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 	course := createTestCourseForHTML()
 
 	tempDir := b.TempDir()
@@ -455,7 +676,7 @@ func BenchmarkHTMLExporter_Export(b *testing.B) {
 // BenchmarkHTMLExporter_ComplexCourse benchmarks export of a complex course.
 func BenchmarkHTMLExporter_ComplexCourse(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewHTMLExporter(htmlCleaner)
+	exporter := NewHTMLExporter(htmlCleaner, nil)
 
 	// Create complex course for benchmarking
 	course := &models.Course{

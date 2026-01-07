@@ -1,0 +1,40 @@
+{
+	"tab_size": 2,
+	"hard_tabs": true,
+	"prettier": { "allowed": false },
+	"formatter": [
+		{ "language_server": { "name": "dprint" } }
+	],
+	"languages": {
+		"Go": {
+			"language_servers": ["gopls", "golangci-lint-langserver", "..."]
+		}
+	},
+	"lsp": {
+		"gopls": {
+			"enable_lsp_tasks": true,
+			"initialization_options": {
+				"workspaceFiles": ["go.mod", "go.work", "*.go"]
+			}
+		},
+		"golangci-lint": {
+			"enable_lsp_tasks": false
+		},
+		"golangci-lint-langserver": {
+			"binary": {
+				"path": "golangci-lint-langserver",
+				"arguments": ["-debug"]
+			},
+			"initialization_options": {
+				"command": [
+					"golangci-lint",
+					"run",
+					"--output.json.path",
+					"stdout",
+					"--show-stats=false",
+					"--issues-exit-code=1"
+				]
+			}
+		}
+	}
+}

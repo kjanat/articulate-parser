@@ -29,19 +29,23 @@ const (
 type DocxExporter struct {
 	// htmlCleaner is used to convert HTML content to plain text
 	htmlCleaner *services.HTMLCleaner
+	// logger is used for logging warnings and errors
+	logger interfaces.Logger
 }
 
 // NewDocxExporter creates a new DocxExporter instance.
-// It takes an HTMLCleaner to handle HTML content conversion.
+// It takes an HTMLCleaner to handle HTML content conversion and a logger for logging.
 //
 // Parameters:
 //   - htmlCleaner: Service for cleaning HTML content in course data
+//   - logger: Logger instance for warnings and errors
 //
 // Returns:
 //   - An implementation of the Exporter interface for DOCX format
-func NewDocxExporter(htmlCleaner *services.HTMLCleaner) interfaces.Exporter {
+func NewDocxExporter(htmlCleaner *services.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
 	return &DocxExporter{
 		htmlCleaner: htmlCleaner,
+		logger:      logger,
 	}
 }
 
@@ -91,7 +95,7 @@ func (e *DocxExporter) Export(course *models.Course, outputPath string) error {
 	// affect the validity of the exported file.
 	defer func() {
 		if err := file.Close(); err != nil {
-			fmt.Fprintf(os.Stderr, "warning: failed to close output file: %v\n", err)
+			e.logger.Warn("failed to close output file", "error", err)
 		}
 	}()
 

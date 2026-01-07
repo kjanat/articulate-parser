@@ -207,7 +207,7 @@ func TestApp_ProcessCourseFromFile(t *testing.T) {
 			tt.setupMocks(parser, factory, exporter)
 
 			app := NewApp(parser, factory)
-			err := app.ProcessCourseFromFile(tt.filePath, tt.format, tt.outputPath)
+			err := app.ProcessCourseFromFile(context.Background(), tt.filePath, tt.format, tt.outputPath)
 
 			if tt.expectedError != "" {
 				if err == nil {

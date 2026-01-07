@@ -8,7 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/kjanat/articulate-parser/internal/config"
 	"github.com/kjanat/articulate-parser/internal/models"
 )
 
@@ -133,7 +135,11 @@ func BenchmarkArticulateParser_LoadCourseFromFile(b *testing.B) {
 		b.Fatalf("Failed to write file: %v", err)
 	}
 
-	parser := NewArticulateParser(nil, "", 0)
+	cfg := &config.Config{
+		BaseURL:        "https://rise.articulate.com",
+		RequestTimeout: 30 * time.Second,
+	}
+	parser := NewArticulateParser(nil, cfg)
 
 	b.ResetTimer()
 	for b.Loop() {
@@ -180,7 +186,11 @@ func BenchmarkArticulateParser_LoadCourseFromFile_Large(b *testing.B) {
 		b.Fatalf("Failed to write file: %v", err)
 	}
 
-	parser := NewArticulateParser(nil, "", 0)
+	cfg := &config.Config{
+		BaseURL:        "https://rise.articulate.com",
+		RequestTimeout: 30 * time.Second,
+	}
+	parser := NewArticulateParser(nil, cfg)
 
 	b.ResetTimer()
 	for b.Loop() {

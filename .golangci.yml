@@ -1,6 +1,7 @@
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
 # golangci-lint configuration for articulate-parser
 # https://golangci-lint.run/usage/configuration/
-
+---
 version: "2"
 
 # Options for analysis running
@@ -51,6 +52,7 @@ formatters:
     - gofmt
     - goimports
     - gofumpt
+  exclusions: { paths: [".zed"] }
   settings:
     # gofmt settings
     gofmt:

@@ -12,7 +12,7 @@ import (
 // TestNewDocxExporter tests the NewDocxExporter constructor.
 func TestNewDocxExporter(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	if exporter == nil {
 		t.Fatal("NewDocxExporter() returned nil")
@@ -32,7 +32,7 @@ func TestNewDocxExporter(t *testing.T) {
 // TestDocxExporter_SupportedFormat tests the SupportedFormat method.
 func TestDocxExporter_SupportedFormat(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	expected := "docx"
 	result := exporter.SupportedFormat()
@@ -45,7 +45,7 @@ func TestDocxExporter_SupportedFormat(t *testing.T) {
 // TestDocxExporter_Export tests the Export method.
 func TestDocxExporter_Export(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create test course
 	testCourse := createTestCourseForDocx()
@@ -79,7 +79,7 @@ func TestDocxExporter_Export(t *testing.T) {
 // TestDocxExporter_Export_AddDocxExtension tests that the .docx extension is added automatically.
 func TestDocxExporter_Export_AddDocxExtension(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	testCourse := createTestCourseForDocx()
 
@@ -102,7 +102,7 @@ func TestDocxExporter_Export_AddDocxExtension(t *testing.T) {
 // TestDocxExporter_Export_InvalidPath tests export with invalid output path.
 func TestDocxExporter_Export_InvalidPath(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	testCourse := createTestCourseForDocx()
 
@@ -118,7 +118,7 @@ func TestDocxExporter_Export_InvalidPath(t *testing.T) {
 // TestDocxExporter_ExportLesson tests the exportLesson method indirectly through Export.
 func TestDocxExporter_ExportLesson(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create course with specific lesson content
 	course := &models.Course{
@@ -165,7 +165,7 @@ func TestDocxExporter_ExportLesson(t *testing.T) {
 // TestDocxExporter_ExportItem tests the exportItem method indirectly through Export.
 func TestDocxExporter_ExportItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create course with different item types
 	course := &models.Course{
@@ -231,7 +231,7 @@ func TestDocxExporter_ExportItem(t *testing.T) {
 // TestDocxExporter_ExportSubItem tests the exportSubItem method indirectly through Export.
 func TestDocxExporter_ExportSubItem(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create course with sub-item containing all possible fields
 	course := &models.Course{
@@ -284,7 +284,7 @@ func TestDocxExporter_ExportSubItem(t *testing.T) {
 // TestDocxExporter_ComplexCourse tests export of a complex course structure.
 func TestDocxExporter_ComplexCourse(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create complex test course
 	course := &models.Course{
@@ -421,7 +421,7 @@ func TestDocxExporter_ComplexCourse(t *testing.T) {
 // TestDocxExporter_EmptyCourse tests export of an empty course.
 func TestDocxExporter_EmptyCourse(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create minimal course
 	course := &models.Course{
@@ -450,7 +450,7 @@ func TestDocxExporter_EmptyCourse(t *testing.T) {
 // TestDocxExporter_HTMLCleaning tests that HTML content is properly cleaned.
 func TestDocxExporter_HTMLCleaning(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create course with HTML content that needs cleaning
 	course := &models.Course{
@@ -498,7 +498,7 @@ func TestDocxExporter_HTMLCleaning(t *testing.T) {
 // TestDocxExporter_ExistingDocxExtension tests that existing .docx extension is preserved.
 func TestDocxExporter_ExistingDocxExtension(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	testCourse := createTestCourseForDocx()
 
@@ -526,7 +526,7 @@ func TestDocxExporter_ExistingDocxExtension(t *testing.T) {
 // TestDocxExporter_CaseInsensitiveExtension tests that extension checking is case-insensitive.
 func TestDocxExporter_CaseInsensitiveExtension(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	testCourse := createTestCourseForDocx()
 
@@ -599,7 +599,7 @@ func createTestCourseForDocx() *models.Course {
 // BenchmarkDocxExporter_Export benchmarks the Export method.
 func BenchmarkDocxExporter_Export(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 	course := createTestCourseForDocx()
 
 	// Create temporary directory
@@ -618,7 +618,7 @@ func BenchmarkDocxExporter_Export(b *testing.B) {
 // BenchmarkDocxExporter_ComplexCourse benchmarks export of a complex course.
 func BenchmarkDocxExporter_ComplexCourse(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewDocxExporter(htmlCleaner)
+	exporter := NewDocxExporter(htmlCleaner, nil)
 
 	// Create complex course for benchmarking
 	course := &models.Course{

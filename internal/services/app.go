@@ -31,33 +31,46 @@ func NewApp(parser interfaces.CourseParser, exporterFactory interfaces.ExporterF
 }
 
 // ProcessCourseFromFile loads a course from a local file and exports it to the specified format.
-// It takes the path to the course file, the desired export format, and the output file path.
-// Returns an error if loading or exporting fails.
-func (a *App) ProcessCourseFromFile(filePath, format, outputPath string) error {
+// It takes a context for cancellation, the path to the course file, the desired export format,
+// and the output file path. Returns an error if loading or exporting fails, or if the context
+// is canceled.
+func (a *App) ProcessCourseFromFile(ctx context.Context, filePath, format, outputPath string) error {
+	// Check for cancellation before loading
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("operation canceled: %w", err)
+	}
+
 	course, err := a.parser.LoadCourseFromFile(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to load course from file: %w", err)
 	}
 
-	return a.exportCourse(course, format, outputPath)
+	return a.exportCourse(ctx, course, format, outputPath)
 }
 
 // ProcessCourseFromURI fetches a course from the provided URI and exports it to the specified format.
-// It takes the URI to fetch the course from, the desired export format, and the output file path.
-// Returns an error if fetching or exporting fails.
+// It takes a context for cancellation, the URI to fetch the course from, the desired export format,
+// and the output file path. Returns an error if fetching or exporting fails, or if the context
+// is canceled.
 func (a *App) ProcessCourseFromURI(ctx context.Context, uri, format, outputPath string) error {
 	course, err := a.parser.FetchCourse(ctx, uri)
 	if err != nil {
 		return fmt.Errorf("failed to fetch course: %w", err)
 	}
 
-	return a.exportCourse(course, format, outputPath)
+	return a.exportCourse(ctx, course, format, outputPath)
 }
 
 // exportCourse exports a course to the specified format and output path.
 // It's a helper method that creates the appropriate exporter and performs the export.
-// Returns an error if creating the exporter or exporting the course fails.
-func (a *App) exportCourse(course *models.Course, format, outputPath string) error {
+// Returns an error if creating the exporter or exporting the course fails, or if the
+// context is canceled.
+func (a *App) exportCourse(ctx context.Context, course *models.Course, format, outputPath string) error {
+	// Check for cancellation before export
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("operation canceled: %w", err)
+	}
+
 	exporter, err := a.exporterFactory.CreateExporter(format)
 	if err != nil {
 		return fmt.Errorf("failed to create exporter: %w", err)

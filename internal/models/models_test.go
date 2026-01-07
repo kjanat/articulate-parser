@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 	"testing"
 )
@@ -661,6 +662,161 @@ func BenchmarkCourse_JSONUnmarshal(b *testing.B) {
 	for b.Loop() {
 		var result Course
 		_ = json.Unmarshal(jsonData, &result)
+	}
+}
+
+// TestCourse_Validate tests the Course.Validate method.
+func TestCourse_Validate(t *testing.T) {
+	tests := []struct {
+		name      string
+		course    Course
+		wantErr   bool
+		errField  string
+		errSubstr string
+	}{
+		{
+			name: "valid course",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					ID:    "course-123",
+					Title: "Test Course",
+					Lessons: []Lesson{
+						{ID: "lesson-1", Title: "First Lesson"},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "valid course with no lessons",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					ID:      "course-123",
+					Title:   "Test Course",
+					Lessons: []Lesson{},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing share ID",
+			course: Course{
+				Course: CourseInfo{
+					ID:    "course-123",
+					Title: "Test Course",
+				},
+			},
+			wantErr:   true,
+			errField:  "ShareID",
+			errSubstr: "share ID is required",
+		},
+		{
+			name: "missing course ID",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					Title: "Test Course",
+				},
+			},
+			wantErr:   true,
+			errField:  "Course.ID",
+			errSubstr: "course ID is required",
+		},
+		{
+			name: "missing course title",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					ID: "course-123",
+				},
+			},
+			wantErr:   true,
+			errField:  "Course.Title",
+			errSubstr: "course title is required",
+		},
+		{
+			name: "lesson with empty ID",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					ID:    "course-123",
+					Title: "Test Course",
+					Lessons: []Lesson{
+						{ID: "", Title: "First Lesson"},
+					},
+				},
+			},
+			wantErr:   true,
+			errField:  "Course.Lessons",
+			errSubstr: "lesson at index 0 has empty ID",
+		},
+		{
+			name: "lesson with empty title",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					ID:    "course-123",
+					Title: "Test Course",
+					Lessons: []Lesson{
+						{ID: "lesson-1", Title: ""},
+					},
+				},
+			},
+			wantErr:   true,
+			errField:  "Course.Lessons",
+			errSubstr: "lesson at index 0 has empty title",
+		},
+		{
+			name: "second lesson invalid",
+			course: Course{
+				ShareID: "test-share-id",
+				Course: CourseInfo{
+					ID:    "course-123",
+					Title: "Test Course",
+					Lessons: []Lesson{
+						{ID: "lesson-1", Title: "First Lesson"},
+						{ID: "lesson-2", Title: ""},
+					},
+				},
+			},
+			wantErr:   true,
+			errField:  "Course.Lessons",
+			errSubstr: "lesson at index 1 has empty title",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.course.Validate()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Course.Validate() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr {
+				var valErr *ValidationError
+				if ok := errors.As(err, &valErr); !ok {
+					t.Errorf("Expected ValidationError, got %T", err)
+					return
+				}
+				if valErr.Field != tt.errField {
+					t.Errorf("ValidationError.Field = %q, want %q", valErr.Field, tt.errField)
+				}
+				if valErr.Message != tt.errSubstr {
+					t.Errorf("ValidationError.Message = %q, want %q", valErr.Message, tt.errSubstr)
+				}
+			}
+		})
+	}
+}
+
+// TestValidationError_Error tests the ValidationError.Error method.
+func TestValidationError_Error(t *testing.T) {
+	err := &ValidationError{Field: "TestField", Message: "test message"}
+	expected := "validation error on TestField: test message"
+	if err.Error() != expected {
+		t.Errorf("ValidationError.Error() = %q, want %q", err.Error(), expected)
 	}
 }
 

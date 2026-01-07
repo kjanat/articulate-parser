@@ -13,7 +13,7 @@ import (
 // ExampleNewFactory demonstrates creating an exporter factory.
 func ExampleNewFactory() {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := exporters.NewFactory(htmlCleaner)
+	factory := exporters.NewFactory(htmlCleaner, nil)
 
 	// Get supported formats
 	formats := factory.SupportedFormats()
@@ -24,7 +24,7 @@ func ExampleNewFactory() {
 // ExampleFactory_CreateExporter demonstrates creating exporters.
 func ExampleFactory_CreateExporter() {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := exporters.NewFactory(htmlCleaner)
+	factory := exporters.NewFactory(htmlCleaner, nil)
 
 	// Create a markdown exporter
 	exporter, err := factory.CreateExporter("markdown")
@@ -39,7 +39,7 @@ func ExampleFactory_CreateExporter() {
 // ExampleFactory_CreateExporter_caseInsensitive demonstrates case-insensitive format names.
 func ExampleFactory_CreateExporter_caseInsensitive() {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := exporters.NewFactory(htmlCleaner)
+	factory := exporters.NewFactory(htmlCleaner, nil)
 
 	// All these work (case-insensitive)
 	formats := []string{"MARKDOWN", "Markdown", "markdown", "MD"}
@@ -58,7 +58,7 @@ func ExampleFactory_CreateExporter_caseInsensitive() {
 // ExampleMarkdownExporter_Export demonstrates exporting to Markdown.
 func ExampleMarkdownExporter_Export() {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := exporters.NewMarkdownExporter(htmlCleaner)
+	exporter := exporters.NewMarkdownExporter(htmlCleaner, nil)
 
 	course := &models.Course{
 		ShareID: "example-id",
@@ -81,7 +81,7 @@ func ExampleMarkdownExporter_Export() {
 // ExampleDocxExporter_Export demonstrates exporting to DOCX.
 func ExampleDocxExporter_Export() {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := exporters.NewDocxExporter(htmlCleaner)
+	exporter := exporters.NewDocxExporter(htmlCleaner, nil)
 
 	course := &models.Course{
 		ShareID: "example-id",
@@ -98,4 +98,34 @@ func ExampleDocxExporter_Export() {
 
 	fmt.Println("DOCX export complete")
 	// Output: DOCX export complete
+}
+
+// ExampleHTMLExporter_Export demonstrates exporting to HTML.
+func ExampleHTMLExporter_Export() {
+	htmlCleaner := services.NewHTMLCleaner()
+	exporter := exporters.NewHTMLExporter(htmlCleaner, nil)
+
+	course := &models.Course{
+		ShareID: "example-id",
+		Course: models.CourseInfo{
+			Title:       "Example Course",
+			Description: "<p>A sample course</p>",
+			Lessons: []models.Lesson{
+				{
+					ID:    "lesson-1",
+					Title: "Introduction",
+					Type:  "lesson",
+				},
+			},
+		},
+	}
+
+	// Export to HTML file
+	err := exporter.Export(course, "output.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("HTML export complete")
+	// Output: HTML export complete
 }

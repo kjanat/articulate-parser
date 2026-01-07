@@ -1,0 +1,25 @@
+{
+	"$schema": "https://opencode.ai/config.json",
+	"lsp": {
+		"golangci-lint": {
+			"command": ["golangci-lint-langserver"],
+			"extensions": [".go"],
+			"initialization": {
+				"command": [
+					"golangci-lint",
+					"run",
+					"--output.json.path",
+					"stdout",
+					"--show-stats=false",
+					"--issues-exit-code=1",
+				],
+			},
+		},
+	},
+	"formatter": {
+		"dprint": {
+			"command": ["dprint", "fmt", "$FILE"],
+			"extensions": [".go", ".md", ".Dockerfile", ".Dockerfile.dev", ".md"],
+		},
+	},
+}

@@ -25,20 +25,24 @@ const (
 type Factory struct {
 	// htmlCleaner is used by exporters to convert HTML content to plain text
 	htmlCleaner *services.HTMLCleaner
+	// logger is used by exporters for logging
+	logger interfaces.Logger
 }
 
 // NewFactory creates a new exporter factory.
-// It takes an HTMLCleaner instance that will be passed to the exporters
+// It takes an HTMLCleaner instance and a logger that will be passed to the exporters
 // created by this factory.
 //
 // Parameters:
 //   - htmlCleaner: Service for cleaning HTML content in course data
+//   - logger: Logger instance for exporter logging
 //
 // Returns:
 //   - An implementation of the ExporterFactory interface
-func NewFactory(htmlCleaner *services.HTMLCleaner) interfaces.ExporterFactory {
+func NewFactory(htmlCleaner *services.HTMLCleaner, logger interfaces.Logger) interfaces.ExporterFactory {
 	return &Factory{
 		htmlCleaner: htmlCleaner,
+		logger:      logger,
 	}
 }
 
@@ -47,11 +51,11 @@ func NewFactory(htmlCleaner *services.HTMLCleaner) interfaces.ExporterFactory {
 func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	switch strings.ToLower(format) {
 	case FormatMarkdown, formatAliasMarkdown:
-		return NewMarkdownExporter(f.htmlCleaner), nil
+		return NewMarkdownExporter(f.htmlCleaner, f.logger), nil
 	case FormatDocx, formatAliasDocx:
-		return NewDocxExporter(f.htmlCleaner), nil
+		return NewDocxExporter(f.htmlCleaner, f.logger), nil
 	case FormatHTML, formatAliasHTML:
-		return NewHTMLExporter(f.htmlCleaner), nil
+		return NewHTMLExporter(f.htmlCleaner, f.logger), nil
 	default:
 		return nil, fmt.Errorf("unsupported export format: %s", format)
 	}

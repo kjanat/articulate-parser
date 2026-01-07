@@ -14,7 +14,7 @@ import (
 // TestNewMarkdownExporter tests the NewMarkdownExporter constructor.
 func TestNewMarkdownExporter(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewMarkdownExporter(htmlCleaner)
+	exporter := NewMarkdownExporter(htmlCleaner, nil)
 
 	if exporter == nil {
 		t.Fatal("NewMarkdownExporter() returned nil")
@@ -34,7 +34,7 @@ func TestNewMarkdownExporter(t *testing.T) {
 // TestMarkdownExporter_SupportedFormat tests the SupportedFormat method.
 func TestMarkdownExporter_SupportedFormat(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewMarkdownExporter(htmlCleaner)
+	exporter := NewMarkdownExporter(htmlCleaner, nil)
 
 	expected := "markdown"
 	result := exporter.SupportedFormat()
@@ -47,7 +47,7 @@ func TestMarkdownExporter_SupportedFormat(t *testing.T) {
 // TestMarkdownExporter_Export tests the Export method.
 func TestMarkdownExporter_Export(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewMarkdownExporter(htmlCleaner)
+	exporter := NewMarkdownExporter(htmlCleaner, nil)
 
 	// Create test course
 	testCourse := createTestCourseForMarkdown()
@@ -108,7 +108,7 @@ func TestMarkdownExporter_Export(t *testing.T) {
 // TestMarkdownExporter_Export_InvalidPath tests export with invalid output path.
 func TestMarkdownExporter_Export_InvalidPath(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewMarkdownExporter(htmlCleaner)
+	exporter := NewMarkdownExporter(htmlCleaner, nil)
 
 	testCourse := createTestCourseForMarkdown()
 
@@ -283,7 +283,7 @@ func TestMarkdownExporter_ProcessKnowledgeCheckItem(t *testing.T) {
 	if !strings.Contains(result, "**Answers**:") {
 		t.Error("Should contain answers heading")
 	}
-	if !strings.Contains(result, "2. Paris ✓") {
+	if !strings.Contains(result, "2. Paris [correct]") {
 		t.Error("Should mark correct answer")
 	}
 	if !strings.Contains(result, "**Feedback**: Paris is the capital of France.") {
@@ -432,7 +432,7 @@ func TestMarkdownExporter_ProcessAnswers(t *testing.T) {
 	if !strings.Contains(result, "1. Answer 1") {
 		t.Error("Should contain first answer")
 	}
-	if !strings.Contains(result, "2. Answer 2 ✓") {
+	if !strings.Contains(result, "2. Answer 2 [correct]") {
 		t.Error("Should mark correct answer")
 	}
 	if !strings.Contains(result, "3. Answer 3") {
@@ -510,7 +510,7 @@ func TestMarkdownExporter_ProcessItemToMarkdown_AllTypes(t *testing.T) {
 // TestMarkdownExporter_ComplexCourse tests export of a complex course structure.
 func TestMarkdownExporter_ComplexCourse(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewMarkdownExporter(htmlCleaner)
+	exporter := NewMarkdownExporter(htmlCleaner, nil)
 
 	// Create complex test course
 	course := &models.Course{
@@ -603,7 +603,7 @@ func TestMarkdownExporter_ComplexCourse(t *testing.T) {
 		"- Second objective",
 		"### Knowledge Check",
 		"**Question**: What will you learn?",
-		"2. Everything ✓",
+		"2. Everything [correct]",
 		"**Feedback**: Great choice!",
 	}
 
@@ -654,7 +654,7 @@ func createTestCourseForMarkdown() *models.Course {
 // BenchmarkMarkdownExporter_Export benchmarks the Export method.
 func BenchmarkMarkdownExporter_Export(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	exporter := NewMarkdownExporter(htmlCleaner)
+	exporter := NewMarkdownExporter(htmlCleaner, nil)
 	course := createTestCourseForMarkdown()
 
 	// Create temporary directory

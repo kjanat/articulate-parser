@@ -12,7 +12,7 @@ import (
 // TestNewFactory tests the NewFactory constructor.
 func TestNewFactory(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	if factory == nil {
 		t.Fatal("NewFactory() returned nil")
@@ -32,7 +32,7 @@ func TestNewFactory(t *testing.T) {
 // TestFactory_CreateExporter tests the CreateExporter method for all supported formats.
 func TestFactory_CreateExporter(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	testCases := []struct {
 		name           string
@@ -135,7 +135,7 @@ func TestFactory_CreateExporter(t *testing.T) {
 // TestFactory_CreateExporter_CaseInsensitive tests that format strings are case-insensitive.
 func TestFactory_CreateExporter_CaseInsensitive(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	testCases := []struct {
 		format         string
@@ -182,7 +182,7 @@ func TestFactory_CreateExporter_CaseInsensitive(t *testing.T) {
 // TestFactory_CreateExporter_ErrorMessages tests error messages for unsupported formats.
 func TestFactory_CreateExporter_ErrorMessages(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	testCases := []string{
 		"pdf",
@@ -222,7 +222,7 @@ func TestFactory_CreateExporter_ErrorMessages(t *testing.T) {
 // TestFactory_SupportedFormats tests the SupportedFormats method.
 func TestFactory_SupportedFormats(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	formats := factory.SupportedFormats()
 
@@ -255,7 +255,7 @@ func TestFactory_SupportedFormats(t *testing.T) {
 // TestFactory_SupportedFormats_Immutable tests that the returned slice is safe to modify.
 func TestFactory_SupportedFormats_Immutable(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	// Get formats twice
 	formats1 := factory.SupportedFormats()
@@ -281,7 +281,7 @@ func TestFactory_SupportedFormats_Immutable(t *testing.T) {
 // TestFactory_ExporterTypes tests that created exporters are of correct types.
 func TestFactory_ExporterTypes(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	// Test markdown exporter
 	markdownExporter, err := factory.CreateExporter("markdown")
@@ -307,7 +307,7 @@ func TestFactory_ExporterTypes(t *testing.T) {
 // TestFactory_HTMLCleanerPropagation tests that HTMLCleaner is properly passed to exporters.
 func TestFactory_HTMLCleanerPropagation(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	// Test with markdown exporter
 	markdownExporter, err := factory.CreateExporter("markdown")
@@ -358,7 +358,7 @@ func TestFactory_HTMLCleanerPropagation(t *testing.T) {
 // TestFactory_MultipleExporterCreation tests creating multiple exporters of same type.
 func TestFactory_MultipleExporterCreation(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	// Create multiple markdown exporters
 	exporter1, err := factory.CreateExporter("markdown")
@@ -395,7 +395,7 @@ func TestFactory_WithNilHTMLCleaner(t *testing.T) {
 		}
 	}()
 
-	factory := NewFactory(nil)
+	factory := NewFactory(nil, nil)
 
 	if factory == nil {
 		t.Fatal("NewFactory(nil) returned nil")
@@ -412,7 +412,7 @@ func TestFactory_WithNilHTMLCleaner(t *testing.T) {
 // TestFactory_FormatNormalization tests that format strings are properly normalized.
 func TestFactory_FormatNormalization(t *testing.T) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	// Test formats with extra whitespace
 	testCases := []struct {
@@ -445,7 +445,7 @@ func TestFactory_FormatNormalization(t *testing.T) {
 // BenchmarkFactory_CreateExporter benchmarks the CreateExporter method.
 func BenchmarkFactory_CreateExporter(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	for b.Loop() {
 		_, _ = factory.CreateExporter("markdown")
@@ -455,7 +455,7 @@ func BenchmarkFactory_CreateExporter(b *testing.B) {
 // BenchmarkFactory_CreateExporter_Docx benchmarks creating DOCX exporters.
 func BenchmarkFactory_CreateExporter_Docx(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	for b.Loop() {
 		_, _ = factory.CreateExporter("docx")
@@ -465,7 +465,7 @@ func BenchmarkFactory_CreateExporter_Docx(b *testing.B) {
 // BenchmarkFactory_SupportedFormats benchmarks the SupportedFormats method.
 func BenchmarkFactory_SupportedFormats(b *testing.B) {
 	htmlCleaner := services.NewHTMLCleaner()
-	factory := NewFactory(htmlCleaner)
+	factory := NewFactory(htmlCleaner, nil)
 
 	for b.Loop() {
 		_ = factory.SupportedFormats()

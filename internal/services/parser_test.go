@@ -11,12 +11,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kjanat/articulate-parser/internal/config"
 	"github.com/kjanat/articulate-parser/internal/models"
 )
 
 // TestNewArticulateParser tests the NewArticulateParser constructor.
 func TestNewArticulateParser(t *testing.T) {
-	parser := NewArticulateParser(nil, "", 0)
+	// Test with nil config (should use defaults)
+	parser := NewArticulateParser(nil, nil)
 
 	if parser == nil {
 		t.Fatal("NewArticulateParser() returned nil")
@@ -212,7 +214,11 @@ func TestArticulateParser_LoadCourseFromFile(t *testing.T) {
 		t.Fatalf("Failed to write test file: %v", err)
 	}
 
-	parser := NewArticulateParser(nil, "", 0)
+	cfg := &config.Config{
+		BaseURL:        "https://rise.articulate.com",
+		RequestTimeout: 30 * time.Second,
+	}
+	parser := NewArticulateParser(nil, cfg)
 
 	tests := []struct {
 		name          string
@@ -271,7 +277,11 @@ func TestArticulateParser_LoadCourseFromFile_InvalidJSON(t *testing.T) {
 		t.Fatalf("Failed to write test file: %v", err)
 	}
 
-	parser := NewArticulateParser(nil, "", 0)
+	cfg := &config.Config{
+		BaseURL:        "https://rise.articulate.com",
+		RequestTimeout: 30 * time.Second,
+	}
+	parser := NewArticulateParser(nil, cfg)
 	_, err := parser.LoadCourseFromFile(tempFile)
 
 	if err == nil {

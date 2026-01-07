@@ -2,6 +2,8 @@
 // These structures closely match the JSON format used by Articulate Rise.
 package models
 
+import "fmt"
+
 // Course represents the top-level structure of an Articulate Rise course.
 // It contains metadata and the actual course content.
 type Course struct {
@@ -52,4 +54,47 @@ type LabelSet struct {
 	Name string `json:"name"`
 	// Labels is a mapping of label keys to their customized values
 	Labels map[string]string `json:"labels"`
+}
+
+// Validate checks whether the Course structure contains valid data.
+// It returns an error describing the first validation failure found,
+// or nil if the course is valid.
+//
+// Validation rules:
+//   - ShareID must not be empty
+//   - Course.ID must not be empty
+//   - Course.Title must not be empty
+//   - Each Lesson must have a non-empty ID and Title
+func (c *Course) Validate() error {
+	if c.ShareID == "" {
+		return &ValidationError{Field: "ShareID", Message: "share ID is required"}
+	}
+	if c.Course.ID == "" {
+		return &ValidationError{Field: "Course.ID", Message: "course ID is required"}
+	}
+	if c.Course.Title == "" {
+		return &ValidationError{Field: "Course.Title", Message: "course title is required"}
+	}
+	for i, lesson := range c.Course.Lessons {
+		if lesson.ID == "" {
+			return &ValidationError{Field: "Course.Lessons", Message: fmt.Sprintf("lesson at index %d has empty ID", i)}
+		}
+		if lesson.Title == "" {
+			return &ValidationError{Field: "Course.Lessons", Message: fmt.Sprintf("lesson at index %d has empty title", i)}
+		}
+	}
+	return nil
+}
+
+// ValidationError represents a validation failure for a specific field.
+type ValidationError struct {
+	// Field is the name of the field that failed validation
+	Field string
+	// Message describes the validation failure
+	Message string
+}
+
+// Error implements the error interface for ValidationError.
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("validation error on %s: %s", e.Field, e.Message)
 }

@@ -25,17 +25,21 @@ type HTMLExporter struct {
 	htmlCleaner *services.HTMLCleaner
 	// tmpl holds the parsed HTML template
 	tmpl *template.Template
+	// logger is used for logging warnings and errors
+	logger interfaces.Logger
 }
 
 // NewHTMLExporter creates a new HTMLExporter instance.
-// It takes an HTMLCleaner to handle HTML content conversion when plain text is needed.
+// It takes an HTMLCleaner to handle HTML content conversion when plain text is needed
+// and a logger for logging.
 //
 // Parameters:
 //   - htmlCleaner: Service for cleaning HTML content in course data
+//   - logger: Logger instance for warnings and errors
 //
 // Returns:
 //   - An implementation of the Exporter interface for HTML format
-func NewHTMLExporter(htmlCleaner *services.HTMLCleaner) interfaces.Exporter {
+func NewHTMLExporter(htmlCleaner *services.HTMLCleaner, logger interfaces.Logger) interfaces.Exporter {
 	// Parse the template with custom functions
 	funcMap := template.FuncMap{
 		"safeHTML": func(s string) template.HTML {
@@ -51,6 +55,7 @@ func NewHTMLExporter(htmlCleaner *services.HTMLCleaner) interfaces.Exporter {
 	return &HTMLExporter{
 		htmlCleaner: htmlCleaner,
 		tmpl:        tmpl,
+		logger:      logger,
 	}
 }
 

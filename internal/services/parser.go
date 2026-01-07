@@ -9,17 +9,14 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"time"
 
+	"github.com/kjanat/articulate-parser/internal/config"
 	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/models"
 )
 
-// Default endpoint configuration for the Articulate Rise API.
-const (
-	riseHost       = "rise.articulate.com"
-	defaultBaseURL = "https://" + riseHost
-)
+// riseHost is the only host accepted in Articulate Rise share URIs.
+const riseHost = "rise.articulate.com"
 
 // shareIDRegex is compiled once at package init for extracting share IDs from URIs.
 var shareIDRegex = regexp.MustCompile(`/share/([a-zA-Z0-9_-]+)`)
@@ -35,23 +32,19 @@ type ArticulateParser struct {
 	Logger interfaces.Logger
 }
 
-// NewArticulateParser creates a new ArticulateParser instance.
-// If baseURL is empty, uses the default Articulate Rise API URL.
-// If timeout is zero, uses a 30-second timeout.
-func NewArticulateParser(logger interfaces.Logger, baseURL string, timeout time.Duration) interfaces.CourseParser {
+// NewArticulateParser creates a new ArticulateParser instance using the provided configuration.
+// If cfg is nil, a default configuration will be used.
+func NewArticulateParser(logger interfaces.Logger, cfg *config.Config) interfaces.CourseParser {
 	if logger == nil {
 		logger = NewNoOpLogger()
 	}
-	if baseURL == "" {
-		baseURL = defaultBaseURL
-	}
-	if timeout == 0 {
-		timeout = 30 * time.Second
+	if cfg == nil {
+		cfg = config.Load()
 	}
 	return &ArticulateParser{
-		BaseURL: baseURL,
+		BaseURL: cfg.BaseURL,
 		Client: &http.Client{
-			Timeout: timeout,
+			Timeout: cfg.RequestTimeout,
 		},
 		Logger: logger,
 	}

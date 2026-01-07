@@ -7,11 +7,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/kjanat/articulate-parser/internal/config"
 	"github.com/kjanat/articulate-parser/internal/exporters"
-	"github.com/kjanat/articulate-parser/internal/interfaces"
 	"github.com/kjanat/articulate-parser/internal/services"
 	"github.com/kjanat/articulate-parser/internal/version"
 )
@@ -26,20 +27,19 @@ func main() {
 // run contains the main application logic and returns an exit code.
 // This function is testable as it doesn't call os.Exit directly.
 func run(args []string) int {
+	// Create context that cancels on interrupt signals (SIGINT, SIGTERM)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
 	// Load configuration
 	cfg := config.Load()
 
 	// Dependency injection setup with configuration
-	var logger interfaces.Logger
-	if cfg.LogFormat == "json" {
-		logger = services.NewSlogLogger(cfg.LogLevel)
-	} else {
-		logger = services.NewTextLogger(cfg.LogLevel)
-	}
+	logger := services.NewLoggerFromConfig(cfg)
 
 	htmlCleaner := services.NewHTMLCleaner()
-	parser := services.NewArticulateParser(logger, cfg.BaseURL, cfg.RequestTimeout)
-	exporterFactory := exporters.NewFactory(htmlCleaner)
+	parser := services.NewArticulateParser(logger, cfg)
+	exporterFactory := exporters.NewFactory(htmlCleaner, logger)
 	app := services.NewApp(parser, exporterFactory)
 
 	// Check for version flag
@@ -70,9 +70,9 @@ func run(args []string) int {
 
 	// Determine if source is a URI or file path
 	if isURI(source) {
-		err = app.ProcessCourseFromURI(context.Background(), source, format, output)
+		err = app.ProcessCourseFromURI(ctx, source, format, output)
 	} else {
-		err = app.ProcessCourseFromFile(source, format, output)
+		err = app.ProcessCourseFromFile(ctx, source, format, output)
 	}
 
 	if err != nil {
