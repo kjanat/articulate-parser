@@ -2,7 +2,7 @@
 # Uses Alpine instead of scratch for debugging
 
 # Build stage - same as production
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # Install git and ca-certificates (needed for fetching dependencies and HTTPS)
 RUN apk add --no-cache git ca-certificates tzdata file
