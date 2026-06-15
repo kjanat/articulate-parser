@@ -266,7 +266,9 @@ tasks:
     silent: true
     aliases: [modern]
     cmds:
-      - go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
+      # Pinned to the v0.21.x line: newer gopls (v0.22+) requires Go 1.26, but
+      # this project targets Go 1.25 (see go.mod).
+      - go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@v0.21.0 -fix -test ./...
       - echo "Code modernized"
 
   # Dependency management
