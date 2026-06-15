@@ -8,11 +8,6 @@ run:
   # Timeout for total work
   timeout: 5m
 
-  # Skip directories (not allowed in config v2, will use issues exclude instead)
-
-  # Go version
-  go: "1.24"
-
   # Include test files
   tests: true
 

@@ -13,6 +13,11 @@ const (
 	FormatMarkdown = "markdown"
 	FormatDocx     = "docx"
 	FormatHTML     = "html"
+
+	// Format aliases accepted by CreateExporter.
+	formatAliasMarkdown = "md"
+	formatAliasDocx     = "word"
+	formatAliasHTML     = "htm"
 )
 
 // Factory implements the ExporterFactory interface.
@@ -41,11 +46,11 @@ func NewFactory(htmlCleaner *services.HTMLCleaner) interfaces.ExporterFactory {
 // Format strings are case-insensitive (e.g., "markdown", "DOCX").
 func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 	switch strings.ToLower(format) {
-	case FormatMarkdown, "md":
+	case FormatMarkdown, formatAliasMarkdown:
 		return NewMarkdownExporter(f.htmlCleaner), nil
-	case FormatDocx, "word":
+	case FormatDocx, formatAliasDocx:
 		return NewDocxExporter(f.htmlCleaner), nil
-	case FormatHTML, "htm":
+	case FormatHTML, formatAliasHTML:
 		return NewHTMLExporter(f.htmlCleaner), nil
 	default:
 		return nil, fmt.Errorf("unsupported export format: %s", format)
@@ -55,5 +60,9 @@ func (f *Factory) CreateExporter(format string) (interfaces.Exporter, error) {
 // SupportedFormats returns a list of all supported export formats,
 // including both primary format names and their aliases.
 func (f *Factory) SupportedFormats() []string {
-	return []string{FormatMarkdown, "md", FormatDocx, "word", FormatHTML, "htm"}
+	return []string{
+		FormatMarkdown, formatAliasMarkdown,
+		FormatDocx, formatAliasDocx,
+		FormatHTML, formatAliasHTML,
+	}
 }

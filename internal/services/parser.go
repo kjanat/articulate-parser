@@ -15,6 +15,12 @@ import (
 	"github.com/kjanat/articulate-parser/internal/models"
 )
 
+// Default endpoint configuration for the Articulate Rise API.
+const (
+	riseHost       = "rise.articulate.com"
+	defaultBaseURL = "https://" + riseHost
+)
+
 // shareIDRegex is compiled once at package init for extracting share IDs from URIs.
 var shareIDRegex = regexp.MustCompile(`/share/([a-zA-Z0-9_-]+)`)
 
@@ -37,7 +43,7 @@ func NewArticulateParser(logger interfaces.Logger, baseURL string, timeout time.
 		logger = NewNoOpLogger()
 	}
 	if baseURL == "" {
-		baseURL = "https://rise.articulate.com"
+		baseURL = defaultBaseURL
 	}
 	if timeout == 0 {
 		timeout = 30 * time.Second
@@ -132,7 +138,7 @@ func (p *ArticulateParser) extractShareID(uri string) (string, error) {
 	}
 
 	// Validate that it's an Articulate Rise domain
-	if parsedURL.Host != "rise.articulate.com" {
+	if parsedURL.Host != riseHost {
 		return "", fmt.Errorf("invalid domain for Articulate Rise URI: %s", parsedURL.Host)
 	}
 

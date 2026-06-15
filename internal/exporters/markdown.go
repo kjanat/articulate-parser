@@ -40,35 +40,35 @@ func (e *MarkdownExporter) Export(course *models.Course, outputPath string) erro
 	var buf bytes.Buffer
 
 	// Write course header
-	buf.WriteString(fmt.Sprintf("# %s\n\n", course.Course.Title))
+	fmt.Fprintf(&buf, "# %s\n\n", course.Course.Title)
 
 	if course.Course.Description != "" {
-		buf.WriteString(fmt.Sprintf("%s\n\n", e.htmlCleaner.CleanHTML(course.Course.Description)))
+		fmt.Fprintf(&buf, "%s\n\n", e.htmlCleaner.CleanHTML(course.Course.Description))
 	}
 
 	// Add metadata
 	buf.WriteString("## Course Information\n\n")
-	buf.WriteString(fmt.Sprintf("- **Course ID**: %s\n", course.Course.ID))
-	buf.WriteString(fmt.Sprintf("- **Share ID**: %s\n", course.ShareID))
-	buf.WriteString(fmt.Sprintf("- **Navigation Mode**: %s\n", course.Course.NavigationMode))
+	fmt.Fprintf(&buf, "- **Course ID**: %s\n", course.Course.ID)
+	fmt.Fprintf(&buf, "- **Share ID**: %s\n", course.ShareID)
+	fmt.Fprintf(&buf, "- **Navigation Mode**: %s\n", course.Course.NavigationMode)
 	if course.Course.ExportSettings != nil {
-		buf.WriteString(fmt.Sprintf("- **Export Format**: %s\n", course.Course.ExportSettings.Format))
+		fmt.Fprintf(&buf, "- **Export Format**: %s\n", course.Course.ExportSettings.Format)
 	}
 	buf.WriteString("\n---\n\n")
 
 	// Process lessons
 	lessonCounter := 0
 	for _, lesson := range course.Course.Lessons {
-		if lesson.Type == "section" {
-			buf.WriteString(fmt.Sprintf("# %s\n\n", lesson.Title))
+		if lesson.Type == lessonTypeSection {
+			fmt.Fprintf(&buf, "# %s\n\n", lesson.Title)
 			continue
 		}
 
 		lessonCounter++
-		buf.WriteString(fmt.Sprintf("## Lesson %d: %s\n\n", lessonCounter, lesson.Title))
+		fmt.Fprintf(&buf, "## Lesson %d: %s\n\n", lessonCounter, lesson.Title)
 
 		if lesson.Description != "" {
-			buf.WriteString(fmt.Sprintf("%s\n\n", e.htmlCleaner.CleanHTML(lesson.Description)))
+			fmt.Fprintf(&buf, "%s\n\n", e.htmlCleaner.CleanHTML(lesson.Description))
 		}
 
 		// Process lesson items
@@ -100,19 +100,19 @@ func (e *MarkdownExporter) processItemToMarkdown(buf *bytes.Buffer, item models.
 	itemType := strings.ToLower(item.Type)
 
 	switch itemType {
-	case "text":
+	case itemTypeText:
 		e.processTextItem(buf, item, headingPrefix)
-	case "list":
+	case itemTypeList:
 		e.processListItem(buf, item)
-	case "multimedia":
+	case itemTypeMultimedia:
 		e.processMultimediaItem(buf, item, headingPrefix)
-	case "image":
+	case itemTypeImage:
 		e.processImageItem(buf, item, headingPrefix)
-	case "knowledgecheck":
+	case itemTypeKnowledgeCheck:
 		e.processKnowledgeCheckItem(buf, item, headingPrefix)
-	case "interactive":
+	case itemTypeInteractive:
 		e.processInteractiveItem(buf, item, headingPrefix)
-	case "divider":
+	case itemTypeDivider:
 		e.processDividerItem(buf)
 	default:
 		e.processUnknownItem(buf, item, headingPrefix)

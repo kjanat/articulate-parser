@@ -21,6 +21,9 @@ const (
 	itemTypeDivider        = "divider"
 )
 
+// lessonTypeSection identifies a lesson that acts as a section header.
+const lessonTypeSection = "section"
+
 // templateData represents the data structure passed to the HTML template.
 type templateData struct {
 	Course   models.CourseInfo
@@ -74,7 +77,7 @@ func prepareTemplateData(course *models.Course, htmlCleaner *services.HTMLCleane
 			Description: lesson.Description,
 		}
 
-		if lesson.Type != "section" {
+		if lesson.Type != lessonTypeSection {
 			lessonCounter++
 			section.Number = lessonCounter
 			section.Items = prepareItems(lesson.Items, htmlCleaner)
