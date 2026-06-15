@@ -17,10 +17,8 @@ import (
 
 // Default endpoint configuration for the Articulate Rise API.
 const (
-	// Root URL for the Articulate Rise API.
-	defaultBaseURL = "https://rise.articulate.com"
-	// Expected host for Articulate Rise share URLs.
-	riseHost = "rise.articulate.com"
+	riseHost       = "rise.articulate.com"
+	defaultBaseURL = "https://" + riseHost
 )
 
 // shareIDRegex is compiled once at package init for extracting share IDs from URIs.

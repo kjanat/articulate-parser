@@ -266,10 +266,7 @@ tasks:
     silent: true
     aliases: [modern]
     cmds:
-      # The modernize analyzer (shipped with gopls) may require a newer Go
-      # toolchain than this project targets, so it is run with GOTOOLCHAIN=auto
-      # to let Go fetch the toolchain it needs on demand.
-      - GOTOOLCHAIN=auto go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
+      - go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
       - echo "Code modernized"
 
   # Dependency management

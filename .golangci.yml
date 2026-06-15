@@ -8,10 +8,6 @@ run:
   # Timeout for total work
   timeout: 5m
 
-  # Skip directories (not allowed in config v2, will use issues exclude instead)
-
-  # Go version is autodetected from go.mod
-
   # Include test files
   tests: true
 

@@ -46,6 +46,13 @@ jobs:
           go-version-file: go.mod
           check-latest: true
 
+      # Expose the resolved Go version as an env var so it is never
+      # interpolated directly into a shell script (avoids script injection).
+      - name: Export Go version
+        env:
+          GO_VERSION: ${{ steps.setup-go.outputs.go-version }}
+        run: echo "GO_VERSION=$GO_VERSION" >> "$GITHUB_ENV"
+
       - name: Install Task
         uses: go-task/setup-task@v1
 
@@ -66,7 +73,7 @@ jobs:
           {
             cat << EOF
           ## 🔧 Test Environment
-          - **Go Version:** ${{ steps.setup-go.outputs.go-version }}
+          - **Go Version:** $GO_VERSION
           - **OS:** ubuntu-latest
           - **Timestamp:** $(date -u)
 
@@ -86,7 +93,7 @@ jobs:
           # Generate test summary
           {
             cat << EOF
-          ## 🧪 Test Results (Go ${{ steps.setup-go.outputs.go-version }})
+          ## 🧪 Test Results (Go $GO_VERSION)
 
           | Metric      | Value                                                         |
           | ----------- | ------------------------------------------------------------- |
@@ -148,7 +155,7 @@ jobs:
 
             {
               cat << EOF
-          ## 📊 Code Coverage (Go ${{ steps.setup-go.outputs.go-version }})
+          ## 📊 Code Coverage (Go $GO_VERSION)
 
           **Total Coverage: $COVERAGE**
 
@@ -209,7 +216,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: test-results-go-${{ steps.setup-go.outputs.go-version }}
+          name: test-results-go-${{ env.GO_VERSION }}
           path: |
             test-output.log
             coverage/
@@ -219,7 +226,7 @@ jobs:
         run: |
           {
             cat << EOF
-          ## 🔍 Static Analysis (Go ${{ steps.setup-go.outputs.go-version }})
+          ## 🔍 Static Analysis (Go $GO_VERSION)
 
           EOF
 
@@ -263,9 +270,10 @@ jobs:
       - name: Job Summary
         if: always()
         run: |
-          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
-          ## 📋 Job Summary (Go ${{ steps.setup-go.outputs.go-version }})
-
+          {
+            echo "## 📋 Job Summary (Go $GO_VERSION)"
+            echo ""
+            cat << 'EOF'
           | Step            | Status                                                          |
           | --------------- | --------------------------------------------------------------- |
           | Dependencies    | Success                                                         |
@@ -275,12 +283,13 @@ jobs:
           | Static Analysis | ${{ job.status == 'success' && 'Clean' || 'Issues' }}           |
           | Code Formatting | ${{ job.status == 'success' && 'Clean' || 'Issues' }}           |
           EOF
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage/coverage.out
-          flags: Go ${{ steps.setup-go.outputs.go-version }}
+          flags: Go ${{ env.GO_VERSION }}
           slug: kjanat/articulate-parser
           token: ${{ secrets.CODECOV_TOKEN }}
 
@@ -288,7 +297,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: codecov/test-results-action@v1
         with:
-          flags: Go ${{ steps.setup-go.outputs.go-version }}
+          flags: Go ${{ env.GO_VERSION }}
           token: ${{ secrets.CODECOV_TOKEN }}
 
   docker-test:
@@ -344,6 +353,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: write
     if: github.event_name == 'pull_request'
     steps:
       - name: "Checkout Repository"
