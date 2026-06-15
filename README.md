@@ -78,12 +78,12 @@ flowchart TD
 
 The system follows **Clean Architecture** principles with clear separation of concerns:
 
-- **🎯 Entry Point**: Command-line interface handles user input and coordinates operations
-- **🏗️ Application Layer**: Core business logic with dependency injection
-- **📋 Interface Layer**: Contracts defining behavior without implementation details
-- **🔧 Service Layer**: Concrete implementations of parsing and utility services
-- **📤 Export Layer**: Factory pattern for format-specific exporters
-- **📊 Data Layer**: Domain models representing course structure
+- **Entry Point**: Command-line interface handles user input and coordinates operations
+- **Application Layer**: Core business logic with dependency injection
+- **Interface Layer**: Contracts defining behavior without implementation details
+- **Service Layer**: Concrete implementations of parsing and utility services
+- **Export Layer**: Factory pattern for format-specific exporters
+- **Data Layer**: Domain models representing course structure
 
 ## Features
 
@@ -206,7 +206,7 @@ Then run:
 
 The application is available as a Docker image from GitHub Container Registry.
 
-### 🐳 Docker Image Information
+### Docker Image Information
 
 - **Registry**: `ghcr.io/kjanat/articulate-parser`
 - **Platforms**: linux/amd64, linux/arm64
