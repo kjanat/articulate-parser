@@ -10,8 +10,7 @@ run:
 
   # Skip directories (not allowed in config v2, will use issues exclude instead)
 
-  # Go version
-  go: "1.24"
+  # Go version is autodetected from go.mod
 
   # Include test files
   tests: true
