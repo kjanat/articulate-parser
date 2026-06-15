@@ -265,13 +265,11 @@ tasks:
     desc: Modernize Go code to use modern idioms
     silent: true
     aliases: [modern]
-    env:
-      # The modernize analyzer (shipped with gopls) may require a newer Go
-      # toolchain than this project targets. Allow Go to fetch it on demand
-      # instead of failing under GOTOOLCHAIN=local, which setup-go sets in CI.
-      GOTOOLCHAIN: auto
     cmds:
-      - go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
+      # The modernize analyzer (shipped with gopls) may require a newer Go
+      # toolchain than this project targets, so it is run with GOTOOLCHAIN=auto
+      # to let Go fetch the toolchain it needs on demand.
+      - GOTOOLCHAIN=auto go run golang.org/x/tools/gopls/internal/analysis/modernize/cmd/modernize@latest -fix -test ./...
       - echo "Code modernized"
 
   # Dependency management
