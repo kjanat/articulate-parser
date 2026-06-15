@@ -12,5 +12,5 @@ require (
 
 require (
 	github.com/fumiama/imgsz v0.0.4 // indirect
-	golang.org/x/image v0.34.0 // indirect
+	golang.org/x/image v0.42.0 // indirect
 )
