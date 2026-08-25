@@ -422,7 +422,7 @@ jobs:
             org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/master/DOCKER.md
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           # Multi-architecture build - Docker automatically provides TARGETOS, TARGETARCH, etc.
