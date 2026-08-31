@@ -16,7 +16,7 @@ jobs:
       - name: Install Task
         uses: go-task/setup-task@v1
 
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
         with: { go-version-file: "go.mod" }
 
       - name: Setup go deps
