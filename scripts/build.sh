@@ -20,7 +20,7 @@ DEFAULT_LDFLAGS="-s -w"
 
 # Function to show help
 show_help() {
-    cat <<'EOF'
+	cat <<'EOF'
 articulate-parser Build Script (Bash)
 =====================================
 
@@ -106,129 +106,129 @@ EOF
 
 # Function to show available Go build targets
 show_targets() {
-    echo "Available Go Build Targets:"
-    echo "=========================="
-    echo
-    if command -v go >/dev/null 2>&1; then
-        echo "Getting targets from 'go tool dist list'..."
-        echo
+	echo "Available Go Build Targets:"
+	echo "=========================="
+	echo
+	if command -v go >/dev/null 2>&1; then
+		echo "Getting targets from 'go tool dist list'..."
+		echo
 
-        # Get all targets and format them nicely
-        local targets
-        targets=$(go tool dist list 2>/dev/null)
+		# Get all targets and format them nicely
+		local targets
+		targets=$(go tool dist list 2>/dev/null)
 
-        if [ $? -eq 0 ] && [ -n "$targets" ]; then
-            # Show formatted output
-            printf "%-15s %-10s %s\n" "OS" "ARCH" "STATUS"
-            printf "%-15s %-10s %s\n" "---------------" "----------" "------"
+		if [ $? -eq 0 ] && [ -n "$targets" ]; then
+			# Show formatted output
+			printf "%-15s %-10s %s\n" "OS" "ARCH" "STATUS"
+			printf "%-15s %-10s %s\n" "---------------" "----------" "------"
 
-            # Track our default targets
-            local default_targets=()
-            for os in "${OS[@]}"; do
-                for arch in "${ARCH[@]}"; do
-                    default_targets+=("$os/$arch")
-                done
-            done
+			# Track our default targets
+			local default_targets=()
+			for os in "${OS[@]}"; do
+				for arch in "${ARCH[@]}"; do
+					default_targets+=("$os/$arch")
+				done
+			done
 
-            # Display all targets with status
-            echo "$targets" | sort | while IFS='/' read -r os arch; do
-                local status="available"
-                if printf '%s\n' "${default_targets[@]}" | grep -q "^$os/$arch$"; then
-                    status="default"
-                fi
-                printf "%-15s %-10s %s\n" "$os" "$arch" "$status"
-            done
+			# Display all targets with status
+			echo "$targets" | sort | while IFS='/' read -r os arch; do
+				local status="available"
+				if printf '%s\n' "${default_targets[@]}" | grep -q "^$os/$arch$"; then
+					status="default"
+				fi
+				printf "%-15s %-10s %s\n" "$os" "$arch" "$status"
+			done
 
-            echo
-            echo "Summary:"
-            echo "  Total available targets: $(echo "$targets" | wc -l)"
-            echo "  Default targets used by this script: ${#default_targets[@]}"
-            echo
-            echo "Default script targets:"
-            for target in "${default_targets[@]}"; do
-                echo "  - $target"
-            done
-        else
-            echo "Error: Failed to get target list from 'go tool dist list'"
-            exit 1
-        fi
-    else
-        echo "Error: Go is not installed or not in PATH"
-        exit 1
-    fi
+			echo
+			echo "Summary:"
+			echo "  Total available targets: $(echo "$targets" | wc -l)"
+			echo "  Default targets used by this script: ${#default_targets[@]}"
+			echo
+			echo "Default script targets:"
+			for target in "${default_targets[@]}"; do
+				echo "  - $target"
+			done
+		else
+			echo "Error: Failed to get target list from 'go tool dist list'"
+			exit 1
+		fi
+	else
+		echo "Error: Go is not installed or not in PATH"
+		exit 1
+	fi
 }
 
 # Parse parameters
 while (("$#")); do
-    case $1 in
-    -h | --help)
-        SHOW_HELP=true
-        shift
-        ;;
-    --show-targets)
-        SHOW_TARGETS=true
-        shift
-        ;;
-    -v | --verbose)
-        VERBOSE=true
-        shift
-        ;;
-    -j)
-        if [[ ${2-} =~ ^[0-9]+$ ]]; then
-            JOBS=$2
-            shift 2
-        else
-            echo "Error: Missing number of jobs after -j"
-            exit 1
-        fi
-        ;;
-    -o)
-        if [ -n "${2-}" ]; then
-            OUTDIR=$2
-            shift 2
-        else
-            echo "Error: Missing output directory after -o"
-            exit 1
-        fi
-        ;;
-    -e)
-        if [ -n "${2-}" ]; then
-            ENTRYPOINT=$2
-            shift 2
-        else
-            echo "Error: Missing entry point file after -e"
-            exit 1
-        fi
-        ;;
-    *)
-        break
-        ;;
-    esac
+	case $1 in
+		-h | --help)
+			SHOW_HELP=true
+			shift
+			;;
+		--show-targets)
+			SHOW_TARGETS=true
+			shift
+			;;
+		-v | --verbose)
+			VERBOSE=true
+			shift
+			;;
+		-j)
+			if [[ ${2-} =~ ^[0-9]+$ ]]; then
+				JOBS=$2
+				shift 2
+			else
+				echo "Error: Missing number of jobs after -j"
+				exit 1
+			fi
+			;;
+		-o)
+			if [ -n "${2-}" ]; then
+				OUTDIR=$2
+				shift 2
+			else
+				echo "Error: Missing output directory after -o"
+				exit 1
+			fi
+			;;
+		-e)
+			if [ -n "${2-}" ]; then
+				ENTRYPOINT=$2
+				shift 2
+			else
+				echo "Error: Missing entry point file after -e"
+				exit 1
+			fi
+			;;
+		*)
+			break
+			;;
+	esac
 done
 
 # Handle help and show-targets early
 if [ "$SHOW_HELP" = true ]; then
-    show_help
-    exit 0
+	show_help
+	exit 0
 fi
 
 if [ "$SHOW_TARGETS" = true ]; then
-    show_targets
-    exit 0
+	show_targets
+	exit 0
 fi
 
 # Validate Go installation
 if ! command -v go >/dev/null 2>&1; then
-    echo "Error: Go is not installed or not in PATH"
-    echo "Please install Go from https://golang.org/dl/"
-    echo "Or if running on Windows, use the PowerShell script: scripts\\build.ps1"
-    exit 1
+	echo "Error: Go is not installed or not in PATH"
+	echo "Please install Go from https://golang.org/dl/"
+	echo "Or if running on Windows, use the PowerShell script: scripts\\build.ps1"
+	exit 1
 fi
 
 # Validate entry point exists
 if [ ! -f "$ENTRYPOINT" ]; then
-    echo "Error: Entry point file '$ENTRYPOINT' does not exist"
-    exit 1
+	echo "Error: Entry point file '$ENTRYPOINT' does not exist"
+	exit 1
 fi
 
 # Store remaining arguments as an array to preserve argument boundaries
@@ -237,30 +237,30 @@ GO_BUILD_FLAGS_ARRAY=("$@")
 # Apply default ldflags if no custom ldflags were provided
 HAS_CUSTOM_LDFLAGS=false
 for arg in "${GO_BUILD_FLAGS_ARRAY[@]}"; do
-    if [[ "$arg" == "-ldflags" ]]; then
-        HAS_CUSTOM_LDFLAGS=true
-        break
-    fi
+	if [[ "$arg" == "-ldflags" ]]; then
+		HAS_CUSTOM_LDFLAGS=true
+		break
+	fi
 done
 
 if [[ "$HAS_CUSTOM_LDFLAGS" == false ]] && [[ -n "$DEFAULT_LDFLAGS" ]]; then
-    # Add default ldflags at the beginning
-    GO_BUILD_FLAGS_ARRAY=("-ldflags" "$DEFAULT_LDFLAGS" "${GO_BUILD_FLAGS_ARRAY[@]}")
+	# Add default ldflags at the beginning
+	GO_BUILD_FLAGS_ARRAY=("-ldflags" "$DEFAULT_LDFLAGS" "${GO_BUILD_FLAGS_ARRAY[@]}")
 fi
 
 # Verbose output
 if [ "$VERBOSE" = true ]; then
-    echo "Build Configuration:"
-    echo "  Entry Point: $ENTRYPOINT"
-    echo "  Output Dir:  $OUTDIR"
-    echo "  Parallel Jobs: $JOBS"
-    if [ ${#GO_BUILD_FLAGS_ARRAY[@]} -gt 0 ]; then
-        echo "  Go Build Flags: ${GO_BUILD_FLAGS_ARRAY[*]}"
-    else
-        echo "  Go Build Flags: none"
-    fi
-    echo "  Targets: ${#OS[@]}×${#ARCH[@]} = $((${#OS[@]} * ${#ARCH[@]})) total"
-    echo
+	echo "Build Configuration:"
+	echo "  Entry Point: $ENTRYPOINT"
+	echo "  Output Dir:  $OUTDIR"
+	echo "  Parallel Jobs: $JOBS"
+	if [ ${#GO_BUILD_FLAGS_ARRAY[@]} -gt 0 ]; then
+		echo "  Go Build Flags: ${GO_BUILD_FLAGS_ARRAY[*]}"
+	else
+		echo "  Go Build Flags: none"
+	fi
+	echo "  Targets: ${#OS[@]}×${#ARCH[@]} = $((${#OS[@]} * ${#ARCH[@]})) total"
+	echo
 fi
 
 rm -rf "$OUTDIR"
@@ -272,27 +272,27 @@ BUILD_START=$(date +%s)
 # Compose all targets in an array
 TARGETS=()
 for os in "${OS[@]}"; do
-    for arch in "${ARCH[@]}"; do
-        BIN="articulate-parser-$os-$arch"
-        [[ "$os" == "windows" ]] && BIN="$BIN.exe"
-        TARGETS+=("$BIN|$os|$arch")
-    done
+	for arch in "${ARCH[@]}"; do
+		BIN="articulate-parser-$os-$arch"
+		[[ "$os" == "windows" ]] && BIN="$BIN.exe"
+		TARGETS+=("$BIN|$os|$arch")
+	done
 done
 
 # Show targets info if verbose
 if [ "$VERBOSE" = true ]; then
-    echo "Building targets:"
-    for target in "${TARGETS[@]}"; do
-        BIN="${target%%|*}"
-        echo "  - $BIN"
-    done
-    echo
+	echo "Building targets:"
+	for target in "${TARGETS[@]}"; do
+		BIN="${target%%|*}"
+		echo "  - $BIN"
+	done
+	echo
 fi
 
 # Print pending statuses and save line numbers
 for idx in "${!TARGETS[@]}"; do
-    BIN="${TARGETS[$idx]%%|*}"
-    printf "[ ] %-35s ... pending\n" "$BIN"
+	BIN="${TARGETS[$idx]%%|*}"
+	printf "[ ] %-35s ... pending\n" "$BIN"
 done
 
 # Make sure output isn't buffered
@@ -300,36 +300,36 @@ export PYTHONUNBUFFERED=1
 
 # Function to update a line in-place (1-based index)
 update_status() {
-    local idx=$1
-    local symbol=$2
-    local msg=$3
-    # Move cursor up to the correct line
-    printf "\0337"                                  # Save cursor position
-    printf "\033[%dA" $((${#TARGETS[@]} - idx + 1)) # Move up
-    printf "\r\033[K[%s] %-35s\n" "$symbol" "$msg"  # Clear & update line
-    printf "\0338"                                  # Restore cursor position
+	local idx=$1
+	local symbol=$2
+	local msg=$3
+	# Move cursor up to the correct line
+	printf "\0337"                                  # Save cursor position
+	printf "\033[%dA" $((${#TARGETS[@]} - idx + 1)) # Move up
+	printf "\r\033[K[%s] %-35s\n" "$symbol" "$msg"  # Clear & update line
+	printf "\0338"                                  # Restore cursor position
 }
 
 for idx in "${!TARGETS[@]}"; do
-    while (($(jobs -rp | wc -l) >= JOBS)); do sleep 0.2; done
-    (
-        IFS='|' read -r BIN os arch <<<"${TARGETS[$idx]}"
-        update_status $((idx + 1)) '>' "$BIN ... building"
+	while (($(jobs -rp | wc -l) >= JOBS)); do sleep 0.2; done
+	(
+		IFS='|' read -r BIN os arch <<<"${TARGETS[$idx]}"
+		update_status $((idx + 1)) '>' "$BIN ... building"
 
-        # Prepare build command as an array to properly handle arguments with spaces
-        build_cmd=(go build)
-        if [ "$VERBOSE" = true ]; then
-            build_cmd+=(-v)
-        fi
-        build_cmd+=("${GO_BUILD_FLAGS_ARRAY[@]}" -o "$OUTDIR/$BIN" "$ENTRYPOINT")
+		# Prepare build command as an array to properly handle arguments with spaces
+		build_cmd=(go build)
+		if [ "$VERBOSE" = true ]; then
+			build_cmd+=(-v)
+		fi
+		build_cmd+=("${GO_BUILD_FLAGS_ARRAY[@]}" -o "$OUTDIR/$BIN" "$ENTRYPOINT")
 
-        if CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" "${build_cmd[@]}" 2>"$OUTDIR/$BIN.log"; then
-            update_status $((idx + 1)) '✔' "$BIN done"
-            rm -f "$OUTDIR/$BIN.log"
-        else
-            update_status $((idx + 1)) '✖' "$BIN FAILED (see $OUTDIR/$BIN.log)"
-        fi
-    ) &
+		if CGO_ENABLED=0 GOOS="$os" GOARCH="$arch" "${build_cmd[@]}" 2>"$OUTDIR/$BIN.log"; then
+			update_status $((idx + 1)) '✔' "$BIN done"
+			rm -f "$OUTDIR/$BIN.log"
+		else
+			update_status $((idx + 1)) '✖' "$BIN FAILED (see $OUTDIR/$BIN.log)"
+		fi
+	) &
 done
 
 wait
@@ -342,27 +342,27 @@ echo -e "\nAll builds completed in ${BUILD_DURATION}s. Find them in $OUTDIR/"
 
 # Show build summary if verbose
 if [ "$VERBOSE" = true ]; then
-    echo
-    echo "Build Summary:"
-    echo "=============="
-    success_count=0
-    total_size=0
+	echo
+	echo "Build Summary:"
+	echo "=============="
+	success_count=0
+	total_size=0
 
-    for target in "${TARGETS[@]}"; do
-        BIN="${target%%|*}"
-        if [ -f "$OUTDIR/$BIN" ]; then
-            success_count=$((success_count + 1))
-            size=$(stat -f%z "$OUTDIR/$BIN" 2>/dev/null || stat -c%s "$OUTDIR/$BIN" 2>/dev/null || echo "0")
-            total_size=$((total_size + size))
-            rm -f "$OUTDIR/$BIN.log"
-            printf "  ✔ %-42s %s\n" "$OUTDIR/$BIN" "$(numfmt --to=iec-i --suffix=B $size 2>/dev/null || echo "${size} bytes")"
-        else
-            printf "  ✖ %-42s %s\n" "$OUTDIR/$BIN" "FAILED"
-        fi
-    done
+	for target in "${TARGETS[@]}"; do
+		BIN="${target%%|*}"
+		if [ -f "$OUTDIR/$BIN" ]; then
+			success_count=$((success_count + 1))
+			size=$(stat -f%z "$OUTDIR/$BIN" 2>/dev/null || stat -c%s "$OUTDIR/$BIN" 2>/dev/null || echo "0")
+			total_size=$((total_size + size))
+			rm -f "$OUTDIR/$BIN.log"
+			printf "  ✔ %-42s %s\n" "$OUTDIR/$BIN" "$(numfmt --to=iec-i --suffix=B $size 2>/dev/null || echo "${size} bytes")"
+		else
+			printf "  ✖ %-42s %s\n" "$OUTDIR/$BIN" "FAILED"
+		fi
+	done
 
-    echo "  ────────────────────────────────────────────────"
-    printf "  Total: %d/%d successful, %s total size\n" "$success_count" "${#TARGETS[@]}" "$(numfmt --to=iec-i --suffix=B $total_size 2>/dev/null || echo "${total_size} bytes")"
+	echo "  ────────────────────────────────────────────────"
+	printf "  Total: %d/%d successful, %s total size\n" "$success_count" "${#TARGETS[@]}" "$(numfmt --to=iec-i --suffix=B $total_size 2>/dev/null || echo "${total_size} bytes")"
 fi
 
 # Clean up environment variables to avoid contaminating future builds

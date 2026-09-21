@@ -34,6 +34,8 @@ output/
 outputs/
 articulate-sample.json
 test-output.*
+# Example test exports (defensive; tests now write to a temp dir)
+internal/exporters/output.*
 go-os-arch-matrix.csv
 test_godocx.go
 test_input.json

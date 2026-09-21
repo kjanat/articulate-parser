@@ -4,11 +4,24 @@ package exporters_test
 import (
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/kjanat/articulate-parser/internal/exporters"
 	"github.com/kjanat/articulate-parser/internal/models"
 	"github.com/kjanat/articulate-parser/internal/services"
 )
+
+// tempOutput returns a path inside a fresh temp dir plus a cleanup func, so
+// example exports don't pollute the package source tree. Example functions
+// can't take *testing.T, so t.TempDir is unavailable here.
+func tempOutput(name string) (path string, cleanup func()) {
+	dir, err := os.MkdirTemp("", "exporters-example-*")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return filepath.Join(dir, name), func() { _ = os.RemoveAll(dir) }
+}
 
 // ExampleNewFactory demonstrates creating an exporter factory.
 func ExampleNewFactory() {
@@ -69,7 +82,9 @@ func ExampleMarkdownExporter_Export() {
 	}
 
 	// Export to markdown file
-	err := exporter.Export(course, "output.md")
+	out, cleanup := tempOutput("output.md")
+	defer cleanup()
+	err := exporter.Export(course, out)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -91,7 +106,9 @@ func ExampleDocxExporter_Export() {
 	}
 
 	// Export to Word document
-	err := exporter.Export(course, "output.docx")
+	out, cleanup := tempOutput("output.docx")
+	defer cleanup()
+	err := exporter.Export(course, out)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,7 +138,9 @@ func ExampleHTMLExporter_Export() {
 	}
 
 	// Export to HTML file
-	err := exporter.Export(course, "output.html")
+	out, cleanup := tempOutput("output.html")
+	defer cleanup()
+	err := exporter.Export(course, out)
 	if err != nil {
 		log.Fatal(err)
 	}
