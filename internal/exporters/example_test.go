@@ -12,15 +12,19 @@ import (
 	"github.com/kjanat/articulate-parser/internal/services"
 )
 
-// tempOutput returns a path inside a fresh temp dir plus a cleanup func, so
-// example exports don't pollute the package source tree. Example functions
-// can't take *testing.T, so t.TempDir is unavailable here.
-func tempOutput(name string) (path string, cleanup func()) {
+// exportToTemp runs export against a path in a fresh temp dir and removes the
+// dir afterwards. Example functions can't take *testing.T, so t.TempDir is
+// unavailable here.
+func exportToTemp(name string, export func(path string) error) {
 	dir, err := os.MkdirTemp("", "exporters-example-*")
 	if err != nil {
 		log.Fatal(err)
 	}
-	return filepath.Join(dir, name), func() { _ = os.RemoveAll(dir) }
+	err = export(filepath.Join(dir, name))
+	_ = os.RemoveAll(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // ExampleNewFactory demonstrates creating an exporter factory.
@@ -82,12 +86,9 @@ func ExampleMarkdownExporter_Export() {
 	}
 
 	// Export to markdown file
-	out, cleanup := tempOutput("output.md")
-	defer cleanup()
-	err := exporter.Export(course, out)
-	if err != nil {
-		log.Fatal(err)
-	}
+	exportToTemp("output.md", func(path string) error {
+		return exporter.Export(course, path)
+	})
 
 	fmt.Println("Export complete")
 	// Output: Export complete
@@ -106,12 +107,9 @@ func ExampleDocxExporter_Export() {
 	}
 
 	// Export to Word document
-	out, cleanup := tempOutput("output.docx")
-	defer cleanup()
-	err := exporter.Export(course, out)
-	if err != nil {
-		log.Fatal(err)
-	}
+	exportToTemp("output.docx", func(path string) error {
+		return exporter.Export(course, path)
+	})
 
 	fmt.Println("DOCX export complete")
 	// Output: DOCX export complete
@@ -138,12 +136,9 @@ func ExampleHTMLExporter_Export() {
 	}
 
 	// Export to HTML file
-	out, cleanup := tempOutput("output.html")
-	defer cleanup()
-	err := exporter.Export(course, out)
-	if err != nil {
-		log.Fatal(err)
-	}
+	exportToTemp("output.html", func(path string) error {
+		return exporter.Export(course, path)
+	})
 
 	fmt.Println("HTML export complete")
 	// Output: HTML export complete
