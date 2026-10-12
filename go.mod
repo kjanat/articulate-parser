@@ -4,7 +4,7 @@ go 1.26.0
 
 require (
 	github.com/fumiama/go-docx v0.0.0-20250506085032-0c30fd09304b
-	golang.org/x/net v0.59.0
+	golang.org/x/net v0.60.0
 	golang.org/x/text v0.42.0
 )
 
